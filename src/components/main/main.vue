@@ -28,7 +28,7 @@
     <Layout>
       <Header class="header-con">
         <header-bar :collapsed="collapsed" @on-coll-change="handleCollapsedChange">
-          <user :message-unread-count="unreadCount" :user-avatar="userAvatar"/>
+          <user :message-unread-count="unreadCount" :user-name="userName"/>
           <!-- <language
             v-if="$config.useI18n"
             @on-lang-change="setLocal"
@@ -89,8 +89,8 @@ export default {
     tagRouter () {
       return this.$store.state.app.tagRouter
     },
-    userAvatar () {
-      return this.$store.state.user.avatarImgPath
+    userName () {
+      return this.$store.state.user.userName
     },
     menuList () {
       return this.$store.getters.menuList
@@ -113,7 +113,7 @@ export default {
       'setHomeRoute',
       'closeTag'
     ]),
-    ...mapActions(['handleLogin', 'getUnreadMessageCount']),
+    ...mapActions(['handleLogin']),
     turnToPage (route) {
       let { name, params, query } = {}
       if (typeof route === 'string') name = route
@@ -161,7 +161,6 @@ export default {
     })
     this.setBreadCrumb(this.$route)
     // 获取未读消息条数
-    this.getUnreadMessageCount()
   }
 }
 </script>

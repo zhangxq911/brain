@@ -1,40 +1,43 @@
 import axios from 'axios'
 import store from '@/store'
 // import { Spin } from 'iview'
-// const addErrorLog = errorInfo => {
-//   const { statusText, status, request: { responseURL } } = errorInfo
-//   let info = {
-//     type: 'ajax',
-//     code: status,
-//     mes: statusText,
-//     url: responseURL
-//   }
-//   if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
-// }
+const addErrorLog = errorInfo => {
+  const { statusText, status, request: { responseURL } } = errorInfo
+  let info = {
+    type: 'ajax',
+    code: status,
+    mes: statusText,
+    url: responseURL
+  }
+  if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
+}
 
 class HttpRequest {
   constructor(baseUrl = baseURL) {
     this.baseUrl = baseUrl
     this.queue = {}
   }
-  getInsideConfig () {
+  getInsideConfig() {
     const config = {
       baseURL: this.baseUrl,
       headers: {
-        // 默认请求头设置
+        //
       }
     }
     return config
   }
-  destroy (url) {
+  destroy(url) {
     delete this.queue[url]
     if (!Object.keys(this.queue).length) {
       // Spin.hide()
     }
   }
-  interceptors (instance, url) {
+  interceptors(instance, url) {
     // 请求拦截
     instance.interceptors.request.use(config => {
+      if(store.state.user.token) {
+        config.headers.token = store.state.user.token
+      }
       if (config.method === 'post') {
         const formData = new FormData()
         Object.keys(config.data).forEach(key => formData.append(key, config.data[key]))
@@ -51,6 +54,11 @@ class HttpRequest {
     })
     // 响应拦截
     instance.interceptors.response.use(res => {
+      // token 失效拦截
+      if(res.data.code === -10086) {
+        store.commit('setToken', '')
+        window.location.href = '/login'
+      }
       this.destroy(url)
       const { data, status } = res
       return { data, status }
@@ -69,7 +77,7 @@ class HttpRequest {
       return Promise.reject(error)
     })
   }
-  request (options) {
+  request(options) {
     const instance = axios.create()
     options = Object.assign(this.getInsideConfig(), options)
     this.interceptors(instance, options.url)

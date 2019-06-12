@@ -36,18 +36,23 @@ router.beforeEach((to, from, next) => {
       name: homeName // 跳转到homeName页
     })
   } else {
-    if (store.state.user.hasGetInfo) {
+    if (!store.state.user.hasGetInfo) {
       turnTo(to, store.state.user.access, next)
     } else {
-      store.dispatch('getUserInfo').then(user => {
-        // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，如：['super_admin'] ['super_admin', 'admin']
-        turnTo(to, user.access, next)
-      }).catch(() => {
-        setToken('')
-        next({
-          name: 'login'
+      console.log('获取用户信息，正常来说这里是不进的')
+      if (store.state.user.access != '') {
+        turnTo(to, store.state.user.access, next)
+      } else {
+        store.dispatch('getUserInfo').then(user => {
+          // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，如：['super_admin'] ['super_admin', 'admin']
+          turnTo(to, user.access, next)
+        }).catch(() => {
+          setToken('')
+          next({
+            name: 'login'
+          })
         })
-      })
+      }
     }
   }
 })

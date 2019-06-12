@@ -19,7 +19,7 @@ import Main from '@/components/main'
 
 export default [
   {
-    path: '/login',
+    path: '/',
     name: 'login',
     meta: {
       title: 'Login - 登录',
@@ -32,15 +32,11 @@ export default [
     name: '_home',
     redirect: '/home',
     component: Main,
-    meta: {
-      hideInMenu: false
-    },
     children: [
       {
         path: '/home',
         name: 'home',
         meta: {
-          hideInMenu: false,
           title: '概述',
           notCache: true,
           icon: 'ios-stats'
@@ -54,6 +50,7 @@ export default [
     name: 'account',
     component: Main,
     meta: {
+      access: ['super_admin'],
       hideInBread: true
     },
     children: [
@@ -65,6 +62,18 @@ export default [
           title: '账户'
         },
         component: () => import('@/view/account/account')
+      },
+      {
+        path: 'info',
+        name: 'edit_account',
+        props: true,
+        meta: {
+          icon: 'ios-paper',
+          title: '账户',
+          hideInMenu: true,
+          hideInBread: false
+        },
+        component: () => import('@/view/account/editAccount')
       }
     ]
   },
@@ -87,6 +96,18 @@ export default [
           title: '实例列表'
         },
         component: () => import('@/view/example/example')
+      },
+      {
+        path: 'info',
+        name: 'edit_example',
+        props: true,
+        meta: {
+          icon: 'ios-menu',
+          title: '实例',
+          hideInMenu: true,
+          hideInBread: false
+        },
+        component: () => import('@/view/example/editExample')
       },
       {
         path: 'users_page',
@@ -153,6 +174,7 @@ export default [
     name: 'app',
     component: Main,
     meta: {
+      access: ['super_admin'],
       hideInBread: true
     },
     children: [

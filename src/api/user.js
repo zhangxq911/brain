@@ -3,31 +3,24 @@ import { Base64 } from 'js-base64'
 import md5 from 'crypto-js/md5'
 import hmacsha1 from 'crypto-js/hmac-sha1'
 
+// sign 设置
+let date = new Date().getTime()
+const stringToString = `POST\n${date}\n/access/console/account/login`
+
 export const login = ({ userName, password }) => {
   // ZjMxMTM2MTdiYWQyYTQxNTcyODk2NmQwNDM2ZWUwMDgxYmU1ZTVhZg==
   const data = {
     account: userName
   }
-  let date = new Date().getTime()
-  const stringToString = `POST\n${date}\n/access/console/account/login`
+  let sign = Base64.encode(hmacsha1(stringToString, md5(password).toString()).toString())
   return axios.request({
     url: '/access/console/account/login',
     data,
     method: 'post',
     headers: {
-      'Authorization': Base64.encode(hmacsha1(stringToString, md5(password).toString()).toString()),
+      'Authorization': sign,
       "Time": date
     }
-  })
-}
-
-export const getUserInfo = (token) => {
-  return axios.request({
-    url: 'get_info',
-    params: {
-      token
-    },
-    method: 'get'
   })
 }
 

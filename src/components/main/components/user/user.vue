@@ -1,15 +1,14 @@
 <template>
   <div class="user-avatar-dropdown">
     <Dropdown @on-click="handleClick">
-      <Badge :dot="!!messageUnreadCount">
-        <Avatar :src="userAvatar"/>
-      </Badge>
+      <!-- <Avatar/></Avatar> -->
+      {{userName}}
+      <!-- <Badge :dot="!!messageUnreadCount">
+      </Badge> -->
       <Icon :size="18" type="md-arrow-dropdown"></Icon>
       <DropdownMenu slot="list">
-        <DropdownItem name="message">
-          消息中心<Badge style="margin-left: 10px" :count="messageUnreadCount"></Badge>
-        </DropdownItem>
-        <DropdownItem name="logout">退出登录</DropdownItem>
+        <DropdownItem name="message">账户信息</DropdownItem>
+        <DropdownItem name="logout">退出管理</DropdownItem>
       </DropdownMenu>
     </Dropdown>
   </div>
@@ -21,7 +20,7 @@ import { mapActions } from 'vuex'
 export default {
   name: 'User',
   props: {
-    userAvatar: {
+    userName: {
       type: String,
       default: ''
     },
@@ -31,26 +30,31 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
-      'handleLogOut'
-    ]),
-    logout () {
+    ...mapActions(['handleLogOut']),
+    logout() {
       this.handleLogOut().then(() => {
         this.$router.push({
           name: 'login'
         })
       })
     },
-    message () {
+    message() {
+      console.log(this.$store.state.user.userId)
       this.$router.push({
-        name: 'message_page'
+        name: 'edit_account',
+        params: {
+          id: this.$store.state.user.userId,
+          mode: 'view'
+        }
       })
     },
-    handleClick (name) {
+    handleClick(name) {
       switch (name) {
-        case 'logout': this.logout()
+        case 'logout':
+          this.logout()
           break
-        case 'message': this.message()
+        case 'message':
+          this.message()
           break
       }
     }
