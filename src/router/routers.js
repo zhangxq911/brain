@@ -69,9 +69,9 @@ export default [
         props: true,
         meta: {
           icon: 'ios-paper',
-          title: '账户',
+          title: '新增账户',
           hideInMenu: true,
-          hideInBread: false
+          to: 'account_page'
         },
         component: () => import('@/view/account/editAccount')
       }
@@ -92,7 +92,6 @@ export default [
         path: 'example_page',
         name: 'example_page',
         meta: {
-          icon: 'md-menu',
           title: '实例列表'
         },
         component: () => import('@/view/example/example')
@@ -102,10 +101,9 @@ export default [
         name: 'edit_example',
         props: true,
         meta: {
-          icon: 'ios-menu',
-          title: '实例',
+          title: '新增实例',
           hideInMenu: true,
-          hideInBread: false
+          to: 'example_page'
         },
         component: () => import('@/view/example/editExample')
       },
@@ -113,7 +111,6 @@ export default [
         path: 'users_page',
         name: 'users_page',
         meta: {
-          icon: 'md-menu',
           title: '用户'
         },
         component: () => import('@/view/users/users')

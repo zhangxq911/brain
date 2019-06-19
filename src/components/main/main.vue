@@ -142,10 +142,10 @@ export default {
   watch: {
     $route (newRoute) {
       const { name, query, params, meta } = newRoute
-      this.addTag({
-        route: { name, query, params, meta },
-        type: 'push'
-      })
+      // this.addTag({
+      //   route: { name, query, params, meta },
+      //   type: 'push'
+      // })
       this.setBreadCrumb(newRoute)
       this.$refs.sideMenu.updateOpenName(newRoute.name)
     }
@@ -156,9 +156,9 @@ export default {
      */
     this.setHomeRoute(routers)
     const { name, params, query, meta } = this.$route
-    this.addTag({
-      route: { name, params, query, meta }
-    })
+    // this.addTag({
+    //   route: { name, params, query, meta }
+    // })
     this.setBreadCrumb(this.$route)
     // 获取未读消息条数
   }

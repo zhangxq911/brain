@@ -95,6 +95,18 @@ export const getExampleInfo = params => {
 }
 
 /**
+ * 用户
+ */
+export const getUserList = params => {
+  return axios.request({
+    url: '/access/console/user',
+    params: params,
+    method: 'get'
+  })
+}
+
+
+/**
  * -------------------
  */
 export const getTableData = () => {

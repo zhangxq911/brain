@@ -143,7 +143,7 @@
 import {
   getExampleInfo,
   getIdentityCode,
-  putAccount,
+  putExample,
   addExample,
   getAccountList
 } from '@/api/data'
@@ -231,7 +231,6 @@ export default {
       addForm: {
         port: 1
       },
-      editForm: {},
       remoteType: '',
       remoteStatus: '',
       curMode: this.mode,
@@ -343,12 +342,12 @@ export default {
         this.showGps = false
       }
     },
-    // 账户列表获取
+    // 列表获取
     getAccount() {
       this.modalAccount = true
       this.getAccountPage()
     },
-    // 获取账户列表
+    // 获取列表
     getAccountPage() {
       getAccountList({ page: 1 }).then(res => {
         if (res.status === 200 && res.data.data.data !== '') {
@@ -381,7 +380,7 @@ export default {
         }
       })
     },
-    // 修改账户信息
+    // 修改信息
     update() {
       // 判断手机号是否填写
       // if (this.editForm.mobile) {
@@ -390,31 +389,24 @@ export default {
       // } else {
       //   this.rulesValidate.mobile[0].required = false
       // }
+      console.log(this.editForm)
       let data = {
         id: this.editForm.id,
         instName: this.editForm.instName,
-        accountPsw: '',
         instType: this.editForm.instType,
-        companyName: this.editForm.companyName,
         description: this.editForm.description,
-        imageUrl: '',
-        email: this.editForm.email,
-        mobile: this.editForm.mobile
+        host: this.editForm.host,
+        port: this.editForm.port,
+        gpsHost: '',
+        gpsPort: ''
       }
-      if (this.editForm.mobile === this.defMobile) {
-        data.mobile = null
-        this.rulesValidate.mobile[0].required = false
-      } else {
-        this.rulesValidate.identityCode[0].required = true
-      }
-      // console.log(data)
-      // return
       this.$refs['editForm'].validate(valid => {
         if (valid) {
-          putAccount(data).then(res => {
+          putExample(data).then(res => {
+            console.log(res)
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
-              this.$router.push({ name: 'account_page' })
+              this.$router.push({ name: 'example_page' })
             } else {
               this.$Message.error(res.data.msg)
             }

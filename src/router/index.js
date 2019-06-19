@@ -20,6 +20,10 @@ const turnTo = (to, access, next) => {
 }
 
 router.beforeEach((to, from, next) => {
+  // 如果传参有title 值，则替换原本的值
+  if(to.params.title) {
+    to.meta.title = to.params.title
+  }
   iView.LoadingBar.start()
   const token = getToken()
   if (!token && to.name !== LOGIN_PAGE_NAME) {

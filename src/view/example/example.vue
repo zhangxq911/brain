@@ -117,7 +117,8 @@ export default {
                         name: 'edit_example',
                         params: {
                           id: params.row.id,
-                          mode: 'view'
+                          mode: 'view',
+                          title: '查看实例',
                         }
                       })
                     }
@@ -303,7 +304,8 @@ export default {
         name: 'edit_example',
         params: {
           id: id,
-          mode: 'edit'
+          mode: 'edit',
+          title: '编辑实例'
         }
       })
     },
@@ -354,7 +356,8 @@ export default {
         name: 'edit_example',
         params: {
           id: '',
-          mode: 'add'
+          mode: 'add',
+          title: '新增实例'
         }
       })
     }

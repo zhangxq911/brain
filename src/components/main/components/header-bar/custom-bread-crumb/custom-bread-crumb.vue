@@ -1,16 +1,22 @@
 <template>
   <div class="custom-bread-crumb">
     <Breadcrumb :style="{fontSize: `${fontSize}px`}">
-      <!-- <BreadcrumbItem></BreadcrumbItem> -->
-      <BreadcrumbItem v-for="item in list" :to="item.to" :key="`bread-crumb-${item.name}`">
-        <common-icon style="margin-right: 4px;" :type="item.icon || ''"/>
-        {{ showTitle(item) }}
+      <BreadcrumbItem>
+        <Icon
+          class="backBtn"
+          type="ios-arrow-back"
+          v-if="list[list.length-1].meta.to"
+          @click="to(list[list.length-1].meta.to)"
+        ></Icon>
+        {{showTitle(list[list.length-1])}}
       </BreadcrumbItem>
     </Breadcrumb>
+
+    <!-- {{ list }} -->
   </div>
 </template>
 <script>
-import { showTitle } from '@/libs/util'
+import { showTitle } from '@/libs/util' // showtitle 是为了走i18
 import CommonIcon from '_c/common-icon'
 import './custom-bread-crumb.less'
 export default {
@@ -33,18 +39,34 @@ export default {
     }
   },
   methods: {
-    showTitle (item) {
+    // 返回路由跳转
+    to(route) {
+      this.$router.push({
+        name: route
+      })
+    },
+    showTitle(item) {
       return showTitle(item, this)
     },
-    isCustomIcon (iconName) {
+    isCustomIcon(iconName) {
       return iconName.indexOf('_') === 0
     },
-    getCustomIconName (iconName) {
+    getCustomIconName(iconName) {
       return iconName.slice(1)
     }
   },
-  mounted () {
+  mounted() {
     // 处理顶部条，如果是二级及以上的话，显示返回按钮
   }
 }
 </script>
+
+<style>
+.backBtn {
+  padding: 10px;
+}
+.backBtn:hover {
+  cursor: pointer;
+  color: #5fa1ee;
+}
+</style>

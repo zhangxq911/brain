@@ -12,7 +12,7 @@ import { directive as clickOutside } from 'v-click-outside-x'
 import installPlugin from '@/plugin'
 import './index.less'
 import '@/assets/icons/iconfont.css'
-import TreeTable from 'tree-table-vue'
+// import TreeTable from 'tree-table-vue'
 import VOrgTree from 'v-org-tree'
 import 'v-org-tree/dist/v-org-tree.css'
 // 实际打包时应该不引入mock
@@ -20,7 +20,7 @@ import 'v-org-tree/dist/v-org-tree.css'
 // if (process.env.NODE_ENV !== 'production') require('@/mock')
 
 Vue.use(iView)
-Vue.use(TreeTable)
+// Vue.use(TreeTable)
 Vue.use(VOrgTree)
 /**
  * @description 注册admin内置插件

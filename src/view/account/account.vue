@@ -251,7 +251,8 @@ export default {
         name: 'edit_account',
         params: {
           id: curAccount.id,
-          mode: 'edit'
+          mode: 'edit',
+          title: '编辑账户'
         }
       })
     },
@@ -298,7 +299,8 @@ export default {
         name: 'edit_account',
         params: {
           id: '',
-          mode: 'add'
+          mode: 'add',
+          title: '新增账户'
         }
       })
     }
