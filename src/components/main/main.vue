@@ -12,7 +12,7 @@
       <side-menu
         accordion
         ref="sideMenu"
-        :active-name="$route.name"
+        :active-name="$route.meta.to ? $route.meta.to : $route.name"
         :collapsed="collapsed"
         @on-select="turnToPage"
         :menu-list="menuList"

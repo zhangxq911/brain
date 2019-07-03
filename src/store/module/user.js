@@ -13,6 +13,7 @@ export default {
   state: {
     userName: '',
     userId: '',
+    source: '',
     avatarImgPath: '',
     token: getToken(),
     access: '',
@@ -35,6 +36,9 @@ export default {
     },
     setAccess (state, access) {
       state.access = access
+    },
+    setSource (state, source) {
+      state.source = source
     },
     setToken (state, token) {
       state.token = token
@@ -84,6 +88,7 @@ export default {
             commit('setToken', data.data.token)
             commit('setUserName', data.data.accountName)
             commit('setUserId', data.data.accountId)
+            commit('setSource', data.data.accountSource)
             // 根据 accountType 判断权限
             switch (data.data.accountType) {
               case 0:

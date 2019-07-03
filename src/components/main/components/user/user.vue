@@ -4,11 +4,11 @@
       <!-- <Avatar/></Avatar> -->
       {{userName}}
       <!-- <Badge :dot="!!messageUnreadCount">
-      </Badge> -->
+      </Badge>-->
       <Icon :size="18" type="md-arrow-dropdown"></Icon>
       <DropdownMenu slot="list">
         <DropdownItem name="message">账户信息</DropdownItem>
-        <DropdownItem name="logout">退出管理</DropdownItem>
+        <DropdownItem v-if="source === 0" name="logout">退出管理</DropdownItem>
       </DropdownMenu>
     </Dropdown>
   </div>
@@ -29,6 +29,14 @@ export default {
       default: 0
     }
   },
+  data() {
+    return {
+      source: -1
+    }
+  },
+  created() {
+    this.source = this.$store.state.user.source
+  },
   methods: {
     ...mapActions(['handleLogOut']),
     logout() {
@@ -39,13 +47,19 @@ export default {
       })
     },
     message() {
-      console.log(this.$store.state.user.userId)
+      let params = {
+        id: this.$store.state.user.userId,
+        mode: 'view',
+        title: '账户详情'
+      }
+      // 判断是否显示返回按钮，这里的要判断权限是否是管理员，管理员才能显示返回
+      let access = this.$store.state.user.access
+      if (!access.includes('super_admin')) {
+        params.disBack = true
+      }
       this.$router.push({
         name: 'edit_account',
-        params: {
-          id: this.$store.state.user.userId,
-          mode: 'view'
-        }
+        params: params
       })
     },
     handleClick(name) {

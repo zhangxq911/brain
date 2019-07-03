@@ -19,18 +19,37 @@ import Main from '@/components/main'
 
 export default [
   {
-    path: '/',
+    path: '/login',
     name: 'login',
     meta: {
-      title: 'Login - 登录',
+      title: '登录',
       hideInMenu: true
     },
-    component: () => import('@/view/login/login.vue')
+    component: () => import('@/view/login/login')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    meta: {
+      title: '注册',
+      hideInMenu: true
+    },
+    component: () => import('@/view/register/register')
+  },
+  {
+    path: '/forget',
+    name: 'forget',
+    meta: {
+      title: '忘记密码',
+      hideInMenu: true
+    },
+    component: () => import('@/view/forget/forget')
   },
   {
     path: '/main',
     name: '_home',
     redirect: '/home',
+    meta: {},
     component: Main,
     children: [
       {
@@ -42,6 +61,40 @@ export default [
           icon: 'ios-stats'
         },
         component: () => import('@/view/home/home')
+      }
+    ]
+  },
+  {
+    path: '/service',
+    name: 'service',
+    component: Main,
+    meta: {
+      access: ['super_admin'],
+      hideInBread: true
+    },
+    children: [
+      {
+        path: 'service_page',
+        name: 'service_page',
+        meta: {
+          icon: 'ios-paper',
+          title: '服务管理',
+          access: ['super_admin']
+        },
+        component: () => import('@/view/service/service')
+      },
+      {
+        path: 'service',
+        name: 'edit_service',
+        props: true,
+        meta: {
+          icon: 'ios-paper',
+          title: '新增服务',
+          hideInMenu: true,
+          access: ['super_admin'],
+          to: 'service_page'
+        },
+        component: () => import('@/view/service/editService')
       }
     ]
   },
@@ -59,7 +112,7 @@ export default [
         name: 'account_page',
         meta: {
           icon: 'ios-paper',
-          title: '账户'
+          title: '账户管理'
         },
         component: () => import('@/view/account/account')
       },
@@ -83,7 +136,7 @@ export default [
     component: Main,
     meta: {
       hideInBread: true,
-      title: '实例',
+      title: '实例管理',
       notCache: true,
       icon: 'md-albums'
     },
@@ -97,7 +150,7 @@ export default [
         component: () => import('@/view/example/example')
       },
       {
-        path: 'info',
+        path: 'example',
         name: 'edit_example',
         props: true,
         meta: {
@@ -114,56 +167,18 @@ export default [
           title: '用户'
         },
         component: () => import('@/view/users/users')
-      }
-    ]
-  },
-  {
-    path: '/log',
-    name: 'log',
-    component: Main,
-    meta: {
-      hideInBread: true
-    },
-    children: [
-      {
-        path: 'log_page',
-        name: 'log_page',
-        meta: {
-          icon: 'ios-bug',
-          title: '日志管理'
-        },
-        component: () => import('@/view/log/log')
-      }
-    ]
-  },
-  {
-    path: '/analyze',
-    name: 'analyze',
-    component: Main,
-    meta: {
-      hideInBread: true,
-      icon: 'md-trending-up',
-      title: '统计分析'
-    },
-    children: [
-      {
-        path: 'call_page',
-        name: 'call_page',
-        meta: {
-          icon: 'md-menu',
-          title: '通话查询'
-        },
-        component: () => import('@/view/call/call')
       },
       {
-        path: 'data_page',
-        name: 'data_page',
+        path: 'users',
+        name: 'edit_users',
+        props: true,
         meta: {
-          icon: 'md-menu',
-          title: '统计数据'
+          title: '新增用户',
+          hideInMenu: true,
+          to: 'users_page'
         },
-        component: () => import('@/view/data/data')
-      }
+        component: () => import('@/view/users/editUsers')
+      },
     ]
   },
   {
@@ -183,9 +198,104 @@ export default [
           title: '应用管理'
         },
         component: () => import('@/view/app/app')
+      },
+      {
+        path: 'app',
+        name: 'edit_app',
+        props: true,
+        meta: {
+          title: '新增应用',
+          hideInMenu: true,
+          to: 'app_page'
+        },
+        component: () => import('@/view/app/editApp')
       }
     ]
-  }
+  },
+  {
+    path: '/analyze',
+    name: 'analyze',
+    component: Main,
+    meta: {
+      hideInBread: true,
+      icon: 'md-trending-up',
+      title: '统计分析'
+    },
+    children: [
+      {
+        path: 'call_page',
+        name: 'call_page',
+        meta: {
+          title: '通话查询'
+        },
+        component: () => import('@/view/call/call')
+      }, {
+        path: 'call',
+        name: 'edit_call',
+        meta: {
+          title: '通话详情',
+          hideInMenu: true,
+          to: 'call_page'
+        },
+        component: () => import('@/view/call/editCall')
+      },
+      {
+        path: 'data_page',
+        name: 'data_page',
+        meta: {
+          title: '统计数据',
+        },
+        component: () => import('@/view/data/data')
+      }
+    ]
+  },
+  {
+    path: '/log',
+    name: 'log',
+    component: Main,
+    meta: {
+      hideInBread: true
+    },
+    children: [
+      {
+        path: 'log_page',
+        name: 'log_page',
+        meta: {
+          icon: 'ios-bug',
+          title: '操作日志'
+        },
+        component: () => import('@/view/log/log')
+      }
+    ]
+  },
+  {
+    path: '/msg',
+    name: 'msg',
+    component: Main,
+    meta: {
+      hideInBread: true,
+      access: ['super_admin'],
+    },
+    children: [
+      {
+        path: 'msg_page',
+        name: 'msg_page',
+        meta: {
+          icon: 'ios-bug',
+          title: '消息管理'
+        },
+        component: () => import('@/view/message/message')
+      }
+    ]
+  },
+  // {
+  //   path: '/401',
+  //   name: 'error_401',
+  //   meta: {
+  //     hideInMenu: true
+  //   },
+  //   component: () => import('@/view/error-page/401.vue')
+  // }
   // {
   //   path: '',
   //   name: 'doc',
@@ -580,14 +690,7 @@ export default [
   //     }
   //   ]
   // },
-  // {
-  //   path: '/401',
-  //   name: 'error_401',
-  //   meta: {
-  //     hideInMenu: true
-  //   },
-  //   component: () => import('@/view/error-page/401.vue')
-  // },
+  // 
   // {
   //   path: '/500',
   //   name: 'error_500',

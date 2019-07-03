@@ -1,24 +1,33 @@
 <template>
   <div>
     <div class="card-box">
-      <Row style="padding-bottom: 10px;">
+      <Row style="">
         <Button type="primary" @click="add()">新增</Button>
-        <div style="float: right;">
-          <Select v-model="searchForm.filter" style="width: 100px;">
-            <Option
-              v-for="(item, index) in filterList"
-              :value="item.value"
-              :key="index"
-            >{{ item.name }}</Option>
-          </Select>
-          <Input
-            search
-            v-model="searchForm.content"
-            placeholder="请输入搜索内容"
-            style="width: 200px; margin-left: 10px;"
-            @on-search="search"
-          ></Input>
-          <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/>
+        <div style="float: right; margin-bottom: -10px;">
+          <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
+            <FormItem prop="filter">
+              <Select @on-change="clearSearch" v-model="searchForm.filter" style="width: 100px;">
+                <Option
+                  v-for="(item, index) in filterList"
+                  :value="item.value"
+                  :key="index"
+                >{{ item.name }}</Option>
+              </Select>
+            </FormItem>
+            <FormItem prop="content">
+              <Input
+                search
+                v-model="searchForm.content"
+                placeholder="请输入搜索内容"
+                style="width: 200px; margin-left: 10px;"
+                @on-search="search"
+              ></Input>
+            </FormItem>
+            <FormItem>
+              <Button @click="reset">清空</Button>
+              <!-- <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/> -->
+            </FormItem>
+          </Form>
         </div>
       </Row>
       <Table
@@ -37,52 +46,43 @@
         />
       </div>
     </div>
+    <MaskUsers @sendModal="getModal" :exampleModal="exampleModal" :editForm="openForm" :width="width"></MaskUsers>
   </div>
 </template>
 
 <script>
-import { getExampleList, delExample } from '@/api/data'
+import { getExampleList, delUser, getUserList } from '@/api/data'
 import { parse } from 'path'
 import { callbackify } from 'util'
 import { loadavg } from 'os'
+import MaskUsers from './maskUsers'
+
 export default {
+  components: { MaskUsers },
   data() {
     return {
+      width: '',
       loading: true,
+      exampleModal: false,
+      openForm: {},
       searchForm: {
-        accountId: null,
-        order: null,
         page: 1,
-        instName: null,
-        description: null,
-        instType: null,
-        host: null,
-        status: null
+        description: '',
+        userName: '',
+        nickName: ''
       },
       filterList: [
         {
-          name: '账户ID',
-          value: 'accountId'
+          name: '用户名称',
+          value: 'userName'
         },
         {
-          name: '实例名称',
-          value: 'instName'
+          name: '昵称',
+          value: 'nickName'
         },
         {
-          name: '实例描述',
+          name: '描述',
           value: 'description'
-        },
-        {
-          name: '实例类型',
-          value: 'instType'
-        },
-        {
-          name: '实例连接地址',
-          value: 'host'
-        },
-        {
-          name: '实例状态',
-          value: 'status'
         }
       ],
       modal: false,
@@ -99,7 +99,8 @@ export default {
       dataList: {},
       columns: [
         {
-          title: '实例ID/实例名称',
+          title: '用户ID/用户名称',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -114,10 +115,11 @@ export default {
                   on: {
                     click: () => {
                       this.$router.push({
-                        name: 'edit_example',
+                        name: 'edit_users',
                         params: {
                           id: params.row.id,
-                          mode: 'view'
+                          mode: 'view',
+                          title: '用户详情'
                         }
                       })
                     }
@@ -125,37 +127,23 @@ export default {
                 },
                 params.row.id
               ),
-              h('div', {}, params.row.instName)
+              h('div', params.row.userName)
             ])
           }
         },
         {
-          title: '实例类型',
-          render: (h, params) => {
-            let curinstType = params.row.instType
-            switch (curinstType) {
-              case 'call':
-                curinstType = '远程会议'
-                break
-              case 'gis':
-                curinstType = '联情指挥'
-                break
-              case 'live':
-                curinstType = '网络直播'
-                break
-              default:
-                curinstType = ''
-            }
-            return h('div', curinstType)
-          }
+          title: '昵称',
+          align: 'center',
+          key: 'nickName'
         },
         {
           title: '状态',
           key: 'status',
+          align: 'center',
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
-              curStatus = '运行中'
+              curStatus = '正常'
               return h(
                 'div',
                 {
@@ -166,7 +154,7 @@ export default {
                 curStatus
               )
             } else if (curStatus === 0) {
-              curStatus = '已停止'
+              curStatus = '停用'
               return h(
                 'div',
                 {
@@ -183,20 +171,19 @@ export default {
           }
         },
         {
-          title: '实例地址',
-          key: 'host'
-        },
-        {
-          title: '端口号',
-          key: 'port'
+          title: '描述',
+          align: 'center',
+          key: 'description'
         },
         {
           title: '创建时间',
-          key: 'createTime',
-          sortable: 'custom'
+          align: 'center',
+          key: 'createTime'
+          // sortable: 'custom'
         },
         {
           title: '账户ID/账户名称',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -214,7 +201,8 @@ export default {
                         name: 'edit_account',
                         params: {
                           id: params.row.accountId,
-                          mode: 'view'
+                          mode: 'view',
+                          to: 'users_page'
                         }
                       })
                     }
@@ -228,8 +216,30 @@ export default {
         },
         {
           title: '操作',
+          width: 190,
           render: (h, params) => {
             return h('div', [
+              h(
+                'Button',
+                {
+                  props: {
+                    type: 'success',
+                    size: 'small'
+                  },
+                  style: {
+                    margin: '4px'
+                  },
+                  on: {
+                    click: () => {
+                      this.openForm.id = params.row.id
+                      this.openForm.userName = params.row.userName
+                      this.exampleModal = true
+                      this.width = 50
+                    }
+                  }
+                },
+                '开通'
+              ),
               h(
                 'Button',
                 {
@@ -279,6 +289,24 @@ export default {
     }
   },
   methods: {
+    // 监听子组件关闭mask变化
+    getModal(data) {
+      this.exampleModal = data
+    },
+    // 空方法，阻止表单刷新
+    searchN() {},
+    // 处理查询条件
+    clearSearch() {
+      this.searchForm.userName = null
+      this.searchForm.nickName = null
+      this.searchForm.description = null
+    },
+    // 清空
+    reset() {
+      this.$refs['searchForm'].resetFields()
+      this.loading = true
+      this.getPage(this.searchForm)
+    },
     // 搜索
     search() {
       if (!this.searchForm.content) {
@@ -300,17 +328,17 @@ export default {
     // 编辑
     edit(id) {
       this.$router.push({
-        name: 'edit_example',
+        name: 'edit_users',
         params: {
           id: id,
           mode: 'edit',
-          title: '编辑账户'
+          title: '编辑用户'
         }
       })
     },
     // 删除
     delete(id) {
-      delExample(id).then(res => {
+      delUser(id).then(res => {
         if (res.data.code === 200) {
           this.$Message.success(res.data.msg)
           this.getPage()
@@ -334,17 +362,18 @@ export default {
       this.loading = true
       this.getPage(search)
     },
-    // 获取实例列表
+    // 获取列表
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
-      getExampleList(params).then(res => {
+      getUserList(params).then(res => {
         if (res.status === 200 && res.data.data.data !== '') {
           if (res.data.data.data === null) {
-            return (this.dataList.data = [])
+            this.dataList.data = []
+          } else {
+            this.dataList = res.data.data
           }
-          this.dataList = res.data.data
         } else {
-          console.log('实例列表获取失败')
+          console.log('用户列表获取失败')
         }
         this.loading = false
       })
@@ -352,17 +381,17 @@ export default {
     // 新增
     add() {
       this.$router.push({
-        name: 'edit_example',
+        name: 'edit_users',
         params: {
           id: '',
           mode: 'add',
-          title: '新增账户'
+          title: '新增用户'
         }
       })
     }
   },
   mounted() {
-    this.getPage()
+    this.getPage(this.searchForm)
   }
 }
 </script>

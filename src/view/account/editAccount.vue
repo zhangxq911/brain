@@ -105,10 +105,10 @@
           <FormItem label="电子邮箱">
             <Input type="text" v-model="editForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
-          <FormItem label="账户状态">
+          <FormItem v-if="defAccount === 'super_admin'" label="账户状态">
             <RadioGroup v-model="editForm.status">
               <Radio :label="1">正常</Radio>
-              <Radio :label="0">停用</Radio>
+              <Radio :label="0">禁用</Radio>
             </RadioGroup>
           </FormItem>
           <FormItem>
@@ -195,9 +195,9 @@ export default {
     }
 
     return {
+      defAccount: '',
       editForm: {},
       addForm: {},
-      editForm: {},
       remoteType: '', // 详细展示账号类型
       curMode: this.mode,
       rulesValidate: {
@@ -217,7 +217,9 @@ export default {
             trigger: 'change'
           }
         ],
-        mobile: [{ required: true, validator: validateMobile, trigger: 'blur' }]
+        mobile: [{ required: true, validator: validateMobile, trigger: 'blur' }],
+        companyName: [{ max: 36, message: '最多为36个字符', trigger: 'blur' }],
+        description: [{ max: 100, message: '最多为100个字符', trigger: 'blur' }]
       },
       rulesValidate2: {
         accountName: [{ validator: validateName, trigger: 'blur' }],
@@ -234,7 +236,6 @@ export default {
   },
   created() {
     if (this.curMode === 'view') {
-      console.log('当前页面为' + this.curMode)
     } else if (this.curMode === 'add') {
       this.rulesValidate.mobile[0].required = true
     } else if (this.curMode === 'edit') {
@@ -244,6 +245,13 @@ export default {
       this.$router.push({
         name: 'account_page'
       })
+    }
+    // 控制权限
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {
@@ -280,13 +288,14 @@ export default {
       let data = {
         id: this.editForm.id,
         accountName: this.editForm.accountName,
-        accountPsw: '',
+        accountPsw: this.editForm.accountPsw,
         accountType: this.editForm.accountType,
         companyName: this.editForm.companyName,
         description: this.editForm.description,
         imageUrl: '',
         email: this.editForm.email,
-        mobile: this.editForm.mobile
+        mobile: this.editForm.mobile,
+        status: this.editForm.status
       }
       if (this.editForm.mobile === this.defMobile) {
         data.mobile = null

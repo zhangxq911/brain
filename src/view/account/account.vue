@@ -1,24 +1,32 @@
 <template>
   <div>
     <div class="card-box">
-      <Row style="padding-bottom: 10px;">
+      <Row style="">
         <Button type="primary" @click="add('createAccount')">新增</Button>
-        <div style="float: right;">
-          <Select v-model="searchForm.filter" style="width: 100px;">
-            <Option
-              v-for="(item, index) in filterList"
-              :value="item.value"
-              :key="index"
-            >{{ item.name }}</Option>
-          </Select>
-          <Input
-            search
-            v-model="searchForm.content"
-            placeholder="请输入搜索内容"
-            style="width: 200px; margin-left: 10px;"
-            @on-search="search"
-          ></Input>
-          <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/>
+        <div style="float: right; margin-bottom: -10px;">
+          <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
+            <FormItem prop="filter">
+              <Select @on-change="clearSearch" v-model="searchForm.filter" style="width: 100px;">
+                <Option
+                  v-for="(item, index) in filterList"
+                  :value="item.value"
+                  :key="index"
+                >{{ item.name }}</Option>
+              </Select>
+            </FormItem>
+            <FormItem prop="content">
+              <Input
+                search
+                v-model="searchForm.content"
+                placeholder="请输入搜索内容"
+                style="width: 200px;"
+                @on-search="search"
+              ></Input>
+            </FormItem>
+            <FormItem>
+              <Button @click="search">刷新</Button>
+            </FormItem>
+          </Form>
         </div>
       </Row>
       <Table
@@ -81,7 +89,8 @@ export default {
       dataList: {},
       columns: [
         {
-          title: '用户ID/账户名称',
+          title: '账户ID/账户名称',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -99,7 +108,8 @@ export default {
                         name: 'edit_account',
                         params: {
                           id: params.row.id,
-                          mode: 'view'
+                          mode: 'view',
+                          title: '账户详情'
                         }
                       })
                     }
@@ -113,6 +123,7 @@ export default {
         },
         {
           title: '账户类型',
+          align: 'center',
           render: (h, params) => {
             let curaccountType = params.row.accountType
             switch (curaccountType) {
@@ -133,6 +144,7 @@ export default {
         },
         {
           title: '状态',
+          align: 'center',
           key: 'status',
           render: (h, params) => {
             let curStatus = params.row.status
@@ -148,7 +160,7 @@ export default {
                 curStatus
               )
             } else if (curStatus === 0) {
-              curStatus = '停用'
+              curStatus = '禁用'
               return h(
                 'div',
                 {
@@ -166,19 +178,25 @@ export default {
         },
         {
           title: '企业名称',
-          key: 'companyName'
+          align: 'center',
+          key: 'companyName',
+          ellipsis: true
         },
         {
           title: '描述',
-          key: 'description'
+          align: 'center',
+          key: 'description',
+          ellipsis: true
         },
         {
           title: '创建时间',
+          align: 'center',
           key: 'createTime',
           sortable: 'custom'
         },
         {
           title: '操作',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -213,7 +231,8 @@ export default {
                     click: () => {
                       this.$Modal.confirm({
                         title: '信息',
-                        content: '<p>确定删除吗？</p>',
+                        content:
+                          '<p>删除账户信息会一同删除其他关联项，确定删除吗？</p>',
                         onOk: () => {
                           this.delete(params.row.id)
                         }
@@ -230,20 +249,32 @@ export default {
     }
   },
   methods: {
+    // 处理查询条件
+    clearSearch() {
+      this.searchForm.accountName = null
+      this.searchForm.companyName = null
+      this.searchForm.mobile = null
+    },
+    // 清空
+    reset() {
+      this.$refs['searchForm'].resetFields()
+      this.loading = true
+      this.getPage(this.searchForm)
+    },
+    searchN(){},
     // 搜索
     search() {
+      if (!this.searchForm.content) {
+        this.searchForm.content = null
+      }
       if (this.searchForm.filter === undefined) {
         this.$Message.error('请先选择查询类型')
         return
       } else {
         this.searchForm[this.searchForm.filter] = this.searchForm.content
+        this.loading = true
         this.getPage(this.searchForm)
       }
-    },
-    // 刷新
-    refresh() {
-      this.loading = true
-      this.getPage(this.searchForm)
     },
     // 编辑
     edit(curAccount) {
@@ -283,10 +314,14 @@ export default {
     },
     // 获取账户列表
     getPage(params = {}) {
-      params ? params : this.searchForm
+      params ? params : (params = this.searchForm)
       getAccountList(params).then(res => {
         if (res.status === 200 && res.data.data.data !== '') {
-          this.dataList = res.data.data
+          if (res.data.data.data === null) {
+            this.dataList.data = []
+          } else {
+            this.dataList = res.data.data
+          }
         } else {
           console.log('账户列表获取失败')
         }

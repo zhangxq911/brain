@@ -5,12 +5,15 @@ import store from '@/store'
 import iView from 'iview'
 import { setToken, getToken, canTurnTo, setTitle } from '@/libs/util'
 import config from '@/config'
+import { tokenLogin } from '@/api/user'
 const { homeName } = config
 
 Vue.use(Router)
 const router = new Router({
   routes,
-  mode: 'history'
+  // mode: 'hash',
+  mode: 'history',
+  base: '/console'
 })
 const LOGIN_PAGE_NAME = 'login'
 
@@ -19,21 +22,67 @@ const turnTo = (to, access, next) => {
   else next({ replace: true, name: 'error_401' }) // 无权限，重定向到401页面
 }
 
+// 获取url中token参数值
+const getQueryString = name => {
+  var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+  var r = window.location.search.substr(1).match(reg);
+  if (r != null) return r[2]; return '';
+}
+
 router.beforeEach((to, from, next) => {
   // 如果传参有title 值，则替换原本的值
-  if(to.params.title) {
+  if (to.params.title) {
     to.meta.title = to.params.title
   }
   iView.LoadingBar.start()
   const token = getToken()
   if (!token && to.name !== LOGIN_PAGE_NAME) {
     // 未登录且要跳转的页面不是登录页
-    next({
-      name: LOGIN_PAGE_NAME // 跳转到登录页
-    })
+    if (to.name === 'register' || to.name === 'forget') {
+      turnTo(to, store.state.user.access, next)
+    } else {
+      next({
+        name: LOGIN_PAGE_NAME // 跳转到登录页
+      })
+    }
   } else if (!token && to.name === LOGIN_PAGE_NAME) {
     // 未登陆且要跳转的页面是登录页
-    next() // 跳转
+    // 判断是否带token参数，如果带token参数带话直接加入 token， 获取权限后跳转主页
+    let loginToken = getQueryString('token')
+    if (loginToken) {
+      // 带token 参数, 将token放入store，然后请求权限数据，重新替换现有的token
+      tokenLogin(loginToken).then(res => {
+        if (res.data.code === 200) {
+          // 返回成功，重新插入数据
+          store.commit('setToken', res.data.data.token)
+          store.commit('setUserName', res.data.data.accountName)
+          store.commit('setUserId', res.data.data.accountId)
+          // 0 系统 1 阿里
+          store.commit('setSource', res.data.data.accountSource)
+          switch (res.data.data.accountType) {
+            case 0:
+              store.commit('setAccess', ['super_admin', 'company', 'personal'])
+              break;
+            case 1:
+              store.commit('setAccess', ['company', 'personal'])
+              break;
+            case 2:
+              store.commit('setAccess', ['personal'])
+              break;
+            default:
+              return
+          }
+          next({
+            name: homeName // 跳转到homeName页
+          })
+        } else {
+          // 跳转失败，重新返回登录页面
+          next() // 跳转
+        }
+      })
+    } else {
+      next() // 跳转
+    }
   } else if (token && to.name === LOGIN_PAGE_NAME) {
     // 已登录且要跳转的页面是登录页
     next({

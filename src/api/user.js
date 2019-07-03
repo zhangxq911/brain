@@ -5,7 +5,7 @@ import hmacsha1 from 'crypto-js/hmac-sha1'
 
 // sign 设置
 let date = new Date().getTime()
-const stringToString = `POST\n${date}\n/access/console/account/login`
+const stringToString = `POST\n${date}\n/account/login`
 
 export const login = ({ userName, password }) => {
   // ZjMxMTM2MTdiYWQyYTQxNTcyODk2NmQwNDM2ZWUwMDgxYmU1ZTVhZg==
@@ -14,12 +14,26 @@ export const login = ({ userName, password }) => {
   }
   let sign = Base64.encode(hmacsha1(stringToString, md5(password).toString()).toString())
   return axios.request({
-    url: '/access/console/account/login',
+    url: '/account/login',
     data,
     method: 'post',
     headers: {
       'Authorization': sign,
       "Time": date
+    }
+  })
+}
+
+/**
+ * token获取数据
+ */
+export const tokenLogin = data => {
+  return axios.request({
+    url: '/account/tokenLogin',
+    data: {},
+    method: 'post',
+    headers: {
+      'token': data
     }
   })
 }

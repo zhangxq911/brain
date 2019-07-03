@@ -57,7 +57,7 @@ class HttpRequest {
       // token 失效拦截
       if(res.data.code === -10086) {
         store.commit('setToken', '')
-        window.location.href = '/login'
+        window.location.href = '/console/login'
       }
       this.destroy(url)
       const { data, status } = res

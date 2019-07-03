@@ -5,14 +5,14 @@
         <Icon
           class="backBtn"
           type="ios-arrow-back"
-          v-if="list[list.length-1].meta.to"
+          v-if="list[list.length-1].meta.to && !list[list.length-1].meta.disBack"
           @click="to(list[list.length-1].meta.to)"
         ></Icon>
         {{showTitle(list[list.length-1])}}
       </BreadcrumbItem>
     </Breadcrumb>
 
-    <!-- {{ list }} -->
+    <!-- {{ list[list.length-1].meta }} -->
   </div>
 </template>
 <script>

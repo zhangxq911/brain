@@ -8,7 +8,7 @@
       v-show="curMode === 'view'"
     >
       编辑
-      <Icon type="md-create"/>
+      <Icon type="md-create" />
     </a>
     <Row>
       <!-- 查看 -->
@@ -19,10 +19,12 @@
           <FormItem label="实例描述">{{editForm.description }}</FormItem>
           <FormItem label="实例链接地址">{{editForm.host }}</FormItem>
           <FormItem label="实例端口号">{{editForm.port }}</FormItem>
-          <FormItem label="定位服务链接地址">{{editForm.gpsHost }}</FormItem>
-          <FormItem label="定位服务端口号">{{editForm.gpsPort }}</FormItem>
+          <FormItem v-if="showGps" label="定位服务链接地址">{{editForm.gpsHost }}</FormItem>
+          <FormItem v-if="showGps" label="定位服务端口号">{{editForm.gpsPort }}</FormItem>
           <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
           <FormItem label="运行状态">{{remoteStatus }}</FormItem>
+          <Divider dashed />
+          <FormItem label="账户名称">{{editForm.accountName }}</FormItem>
         </Form>
       </Col>
       <!-- 新增 -->
@@ -38,6 +40,9 @@
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="addForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
+          <FormItem label="实例描述">
+            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入实例描述"></Input>
+          </FormItem>
           <FormItem prop="instType" label="实例类型">
             <Select v-model="addForm.instType" @on-change="ifShowGps">
               <Option value="call">远程会议</Option>
@@ -45,37 +50,38 @@
               <Option value="live">网络直播</Option>
             </Select>
           </FormItem>
-          <FormItem label="实例描述">
-            <Input type="textarea" v-model="addForm.description" placeholder="请输入实例描述"></Input>
+          <FormItem prop="capacity" label="实例容量">
+            <InputNumber
+              style="width: 100%;"
+              :min="1"
+              v-model="addForm.capacity"
+            ></InputNumber>
           </FormItem>
-          <FormItem prop="host" label="实例连接地址">
-            <Input v-model="addForm.host" placeholder="请输入实例连接地址"></Input>
+          <FormItem prop="serverId" label="实例">
+            <Input v-show="false" :value="addForm.serverId"></Input>
+            <Input
+              readonly
+              :rows="7"
+              type="textarea"
+              placeholder="请选择实例"
+              :value="serverContent"
+              @on-focus="showMask('example', 50)"
+            ></Input>
+            <Button @click="showMask('example', 50)" class="select-btn">· · ·</Button>
           </FormItem>
-          <FormItem prop="port" label="实例端口号">
-            <InputNumber style="width: 100%;" v-model="addForm.port" placeholder="请输入实例端口号"></InputNumber>
-          </FormItem>
-          <FormItem v-if="showGps" label="定位服务连接地址">
-            <Input type="text" v-model="addForm.gpsHost" placeholder="请输入定位服务连接地址"></Input>
-          </FormItem>
-          <FormItem v-if="showGps" label="定位服务端口号">
-            <InputNumber style="width: 100%;" v-model="addForm.gpsPort" placeholder="请输入定位服务端口号"></InputNumber>
-          </FormItem>
-        </Col>
-
-        <!-- 判断是否管理员权限 -->
-        <Divider dashed/>
-        <Col span="12">
-          <!-- <FormItem prop="accountId" label="账户Id">
-            <Input type="text" v-model="addForm.accountId" placeholder="请输入账户Id"></Input>
-          </FormItem>-->
-          <FormItem label="账户id" v-if="defAccount === 'super_admin'">
-            <Input readonly v-model="addForm.accountId" placeholder="点击选择" @on-focus="getAccount"></Input>
-            <Icon class="addIcon" type="md-add"/>
-          </FormItem>
-          <FormItem label="频道所属账户" v-if="defAccount === 'unit'">
-            <Input readonly v-model="curChannelDetail.account_name"></Input>
-          </FormItem>
-
+          <div v-if="defAccount === 'super_admin'">
+            <Divider dashed />
+            <FormItem prop="accountName" style="position: relative;" label="账户名称">
+              <Input v-show="false" :value="addForm.accountName"></Input>
+              <Input
+                readonly
+                :value="accountContent"
+                placeholder="请选择账户"
+                @on-focus="showMask('account', 50)"
+              ></Input>
+              <Button @click="showMask('account', 50)" class="select-btn">· · ·</Button>
+            </FormItem>
+          </div>
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
           </FormItem>
@@ -93,11 +99,8 @@
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="editForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
-          <!-- <FormItem prop="accountPsw" label="账户密码">
-            <Input type="password" v-model="editForm.accountPsw" placeholder="不修改密码请留空"></Input>
-          </FormItem>-->
           <FormItem prop="instType" label="实例类型">
-            <Select v-model="editForm.instType">
+            <Select v-model="editForm.instType" @on-change="ifShowGps">
               <Option value="call">远程会议</Option>
               <Option value="gis">联情指挥</Option>
               <Option value="live">网络直播</Option>
@@ -112,10 +115,10 @@
           <FormItem prop="port" label="实例端口号">
             <Input type="text" v-model="editForm.port" placeholder="请输入实例端口号"></Input>
           </FormItem>
-          <FormItem label="定位服务连接地址">
+          <FormItem v-if="showGps" label="定位服务连接地址">
             <Input type="text" v-model="editForm.gpsHost" placeholder="请输入定位服务连接地址"></Input>
           </FormItem>
-          <FormItem label="定位服务端口号">
+          <FormItem v-if="showGps" label="定位服务端口号">
             <Input type="text" v-model="editForm.gpsPort" placeholder="请输入定位服务端口号"></Input>
           </FormItem>
           <FormItem>
@@ -124,18 +127,7 @@
         </Form>
       </Col>
     </Row>
-    <Modal v-model="modalAccount" :scrollable="true" title="账户选择">
-      <Table style="margin-top:20px;" border :columns="accountColumns" :data="accountData.data"></Table>
-      <h3 v-show="accountData.length == 0">当前没有账户可进行选择，请选择先添加账户！</h3>
-      <div slot="footer">
-        <Page
-          v-show="accountData.length != 0"
-          :current.sync="accountData.pageNumber"
-          :page-size="accountData.pageSize"
-          :total="accountData.totalPage"
-        />
-      </div>
-    </Modal>
+    <MaskUsers @sendModal="getModal" @sendAccount="getAccount" @sendServer="getServer" :editForm="openForm" :basicInfo="basicInfo"></MaskUsers>
   </div>
 </template>
 
@@ -148,9 +140,11 @@ import {
   getAccountList
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
+import MaskUsers from './maskExample'
 
 export default {
   props: ['id', 'mode'],
+  components: { MaskUsers },
   data() {
     const validateName = (rule, value, callback) => {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
@@ -223,13 +217,17 @@ export default {
     }
 
     return {
+      accountContent: '',
+      serverContent: '',
+      openForm: {},
+      exampleModal: false,
+      basicInfo: {},
       showGps: false,
       modalAccount: false,
-      accountData: [],
       defAccount: '',
       editForm: {},
       addForm: {
-        port: 1
+        capacity: 1
       },
       remoteType: '',
       remoteStatus: '',
@@ -274,7 +272,7 @@ export default {
                   click: () => {
                     // 选择当前信息后关闭模态框
                     this.addForm.accountId = params.row.id
-                    // this.addForm.instName = params.row.instName
+                    this.addForm.accountName = params.row.accountName
                     this.modalAccount = false
                   }
                 }
@@ -289,19 +287,10 @@ export default {
           { required: true, validator: validateName, trigger: 'blur' }
         ],
         instType: [
-          { required: true, message: '请输入实例类型', trigger: 'blur' }
+          { required: true, message: '请输入实例类型', trigger: 'change' }
         ],
-        host: [
-          { required: true, message: '请输入实例连接地址', trigger: 'blur' }
-        ],
-        port: [
-          {
-            type: 'number',
-            required: true,
-            // message: '请输入实例端口号',
-            validator: validatePort,
-            trigger: 'blur'
-          }
+        capacity: [
+          { type: 'number', required: true, message: '请输入实例容量', trigger: 'blur' }
         ],
         accountId: [
           {
@@ -310,7 +299,9 @@ export default {
             message: '请输入账户Id',
             trigger: 'blur'
           }
-        ]
+        ],
+        serverId: [{ required: true, message: '请选择实例', trigger: 'change' }],
+        accountName: [{ required: true, message: '请选择账户', trigger: 'change' }],
       },
       rulesValidate2: {
         instName: [{ validator: validateName, trigger: 'blur' }],
@@ -334,6 +325,42 @@ export default {
     }
   },
   methods: {
+    getAccount(data) {
+      this.addForm.accountId = data[0].id
+      this.accountContent =  data[0].name
+    },
+    getServer(data) {
+      this.addForm.serverId = data[0].id
+      this.serverContent = 
+        `实例链接地址：${data[0].serverHost}\n实例端口号：${data[0].serverPort}\n定位服务链接地址：${data[0].gpsHost}\n定位服务端口号：${data[0].gpsPort}`
+    },
+    getModal(data) {
+      this.basicInfo.type = data
+    },
+    showMask(type, width) {
+      // 新增要填写基本信息后才能选择，否则选择页面相关字段为空值
+      if (this.curMode === 'add') {
+        this.rulesValidate.serverId[0].required = false
+        this.rulesValidate.accountName[0].required = false
+        this.$refs['addForm'].validate(valid => {
+          if (valid) {
+            this.openForm = this.addForm
+            this.basicInfo = {
+              type: type,
+              width: width
+            }
+          } else {
+            this.$Message.error('请先填写基本信息')
+          }
+        })
+      } else {
+        this.basicInfo = {
+          type: type,
+          width: width
+        }
+        this.openForm = this.editForm
+      }
+    },
     // 是否显示填写gps内容
     ifShowGps(val) {
       if (val === 'gis') {
@@ -341,22 +368,6 @@ export default {
       } else {
         this.showGps = false
       }
-    },
-    // 列表获取
-    getAccount() {
-      this.modalAccount = true
-      this.getAccountPage()
-    },
-    // 获取列表
-    getAccountPage() {
-      getAccountList({ page: 1 }).then(res => {
-        if (res.status === 200 && res.data.data.data !== '') {
-          this.accountData = res.data.data
-        } else {
-          console.log('账户列表获取失败')
-        }
-        this.loading = false
-      })
     },
     // 新增提交
     save() {
@@ -382,14 +393,6 @@ export default {
     },
     // 修改信息
     update() {
-      // 判断手机号是否填写
-      // if (this.editForm.mobile) {
-      //   console.log('需要验证码')
-      //   this.rulesValidate.identityCode[0].required = true
-      // } else {
-      //   this.rulesValidate.mobile[0].required = false
-      // }
-      console.log(this.editForm)
       let data = {
         id: this.editForm.id,
         instName: this.editForm.instName,
@@ -403,7 +406,6 @@ export default {
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           putExample(data).then(res => {
-            console.log(res)
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               this.$router.push({ name: 'example_page' })
@@ -459,12 +461,15 @@ export default {
     },
     // 获取用户信息，新增时无id传入，不查询
     getInfo() {
-      if (this.id === '') {
+      if (!this.id) {
         return
       }
       getExampleInfo(this.id).then(res => {
         if (res.data.code === 200) {
           this.editForm = res.data.data
+          if (this.editForm.instType === 'gis') {
+            this.showGps = true
+          }
           switch (this.editForm.instType) {
             case 'call':
               this.remoteType = '远程会议'
@@ -510,5 +515,13 @@ export default {
   color: #ccc;
   right: 4px;
   top: 6px;
+}
+.select-btn {
+  position: absolute;
+  right: -60px;
+  top: 1px;
+  font-weight: bold;
+  background: #86a1c1;
+  color: #fff;
 }
 </style>

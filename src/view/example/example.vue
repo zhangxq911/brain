@@ -1,24 +1,65 @@
 <template>
   <div>
     <div class="card-box">
-      <Row style="padding-bottom: 10px;">
+      <Row style>
         <Button type="primary" @click="add()">新增</Button>
-        <div style="float: right;">
-          <Select v-model="searchForm.filter" style="width: 100px;">
-            <Option
-              v-for="(item, index) in filterList"
-              :value="item.value"
-              :key="index"
-            >{{ item.name }}</Option>
-          </Select>
-          <Input
-            search
-            v-model="searchForm.content"
-            placeholder="请输入搜索内容"
-            style="width: 200px; margin-left: 10px;"
-            @on-search="search"
-          ></Input>
-          <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/>
+        <div style="float: right; margin-bottom: -10px;">
+          <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
+            <FormItem prop="status">
+              <Select
+                @on-change="search"
+                v-model="searchForm.status"
+                style="width: 100px;"
+                placeholder="实例状态"
+              >
+                <Option :value="0">停止</Option>
+                <Option :value="1">运行</Option>
+                <!-- <Option value="">全选</Option> -->
+              </Select>
+            </FormItem>
+            <FormItem prop="instType">
+              <Select
+                @on-change="search"
+                v-model="searchForm.instType"
+                style="width: 100px; "
+                placeholder="实例类型"
+              >
+                <Option value="call">远程会议</Option>
+                <Option value="gis">联情指挥</Option>
+                <Option value="live">网络直播</Option>
+              </Select>
+            </FormItem>
+            <FormItem prop="filter">
+              <Select
+                @on-change="clearSearch"
+                v-model="searchForm.filter"
+                style="width: 100px; "
+                placeholder="其他条件"
+              >
+                <Option
+                  v-for="(item, index) in filterList"
+                  :value="item.value"
+                  :key="index"
+                >{{ item.name }}</Option>
+              </Select>
+            </FormItem>
+            <FormItem prop="content">
+              <Input
+                search
+                v-model="searchForm.content"
+                placeholder="请输入搜索内容"
+                style="width: 200px; "
+                @on-search="search"
+              ></Input>
+            </FormItem>
+            <!-- <FormItem>
+              <Button type="primary" @click="search">查询</Button>
+            </FormItem>-->
+            <FormItem>
+              <Button @click="search">刷新</Button>
+            </FormItem>
+            <!-- <FormItem></FormItem> -->
+          </Form>
         </div>
       </Row>
       <Table
@@ -41,7 +82,7 @@
 </template>
 
 <script>
-import { getExampleList, delExample } from '@/api/data'
+import { getExampleList, delExample, operateExample } from '@/api/data'
 import { parse } from 'path'
 import { callbackify } from 'util'
 import { loadavg } from 'os'
@@ -56,7 +97,7 @@ export default {
         instName: null,
         description: null,
         instType: null,
-        host: null,
+        serverHost: null,
         status: null
       },
       filterList: [
@@ -73,16 +114,8 @@ export default {
           value: 'description'
         },
         {
-          name: '实例类型',
-          value: 'instType'
-        },
-        {
           name: '实例连接地址',
-          value: 'host'
-        },
-        {
-          name: '实例状态',
-          value: 'status'
+          value: 'serverHost'
         }
       ],
       modal: false,
@@ -100,6 +133,7 @@ export default {
       columns: [
         {
           title: '实例ID/实例名称',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -118,7 +152,7 @@ export default {
                         params: {
                           id: params.row.id,
                           mode: 'view',
-                          title: '查看实例',
+                          title: '实例详情'
                         }
                       })
                     }
@@ -132,6 +166,7 @@ export default {
         },
         {
           title: '实例类型',
+          align: 'center',
           render: (h, params) => {
             let curinstType = params.row.instType
             switch (curinstType) {
@@ -153,6 +188,7 @@ export default {
         {
           title: '状态',
           key: 'status',
+          align: 'center',
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
@@ -185,19 +221,23 @@ export default {
         },
         {
           title: '实例地址',
-          key: 'host'
+          key: 'serverHost',
+          align: 'center'
         },
         {
           title: '端口号',
-          key: 'port'
+          align: 'center',
+          key: 'serverPort'
         },
         {
           title: '创建时间',
-          key: 'createTime',
-          sortable: 'custom'
+          align: 'center',
+          key: 'createTime'
+          // sortable: 'custom'
         },
         {
           title: '账户ID/账户名称',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -215,7 +255,9 @@ export default {
                         name: 'edit_account',
                         params: {
                           id: params.row.accountId,
-                          mode: 'view'
+                          mode: 'view',
+                          title: '账户详情',
+                          to: 'example_page'
                         }
                       })
                     }
@@ -229,6 +271,7 @@ export default {
         },
         {
           title: '操作',
+          align: 'center',
           render: (h, params) => {
             return h('div', [
               h(
@@ -243,11 +286,18 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.edit(params.row.id)
+                      this.$router.push({
+                        name: 'edit_example',
+                        params: {
+                          id: params.row.id,
+                          mode: 'edit',
+                          title: '实例编辑'
+                        }
+                      })
                     }
                   }
                 },
-                '编辑'
+                '管理'
               ),
               h(
                 'Button',
@@ -256,18 +306,9 @@ export default {
                     type: 'error',
                     size: 'small'
                   },
-                  style: {
-                    margin: '4px'
-                  },
                   on: {
                     click: () => {
-                      this.$Modal.confirm({
-                        title: '信息',
-                        content: '<p>确定删除吗？</p>',
-                        onOk: () => {
-                          this.delete(params.row.id)
-                        }
-                      })
+                      this.delete(params.row.id)
                     }
                   }
                 },
@@ -280,23 +321,34 @@ export default {
     }
   },
   methods: {
+    // 空方法，阻止表单刷新
+    searchN() {},
+    // 处理查询条件
+    clearSearch() {
+      this.searchForm.accountId = null
+      this.searchForm.description = null
+      this.searchForm.serverHost = null
+      this.searchForm.instName = null
+    },
+    // 清空
+    reset() {
+      this.$refs['searchForm'].resetFields()
+      this.loading = true
+      this.getPage(this.searchForm)
+    },
     // 搜索
     search() {
       if (!this.searchForm.content) {
         this.searchForm.content = null
       }
-      if (this.searchForm.filter === undefined) {
+      if (this.searchForm.filter === undefined && this.searchForm.content) {
         this.$Message.error('请先选择查询类型')
         return
       } else {
         this.searchForm[this.searchForm.filter] = this.searchForm.content
+        this.loading = true
         this.getPage(this.searchForm)
       }
-    },
-    // 刷新
-    refresh() {
-      this.loading = true
-      this.getPage(this.searchForm)
     },
     // 编辑
     edit(id) {
@@ -324,8 +376,8 @@ export default {
     sortChange(res) {
       let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
       let search = { ...this.search }
-      search.sort = key + ',' + res.order
-      res.order === 'normal' ? (search.sort = '') : ''
+      search.order = 'i.' + key + ',' + res.order
+      res.order === 'normal' ? (search.order = '') : ''
       this.getPage(search)
     },
     // 分页查询
@@ -339,11 +391,12 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getExampleList(params).then(res => {
-        if (res.status === 200 && res.data.data.data !== '') {
+        if (res.status === 200 && res.data) {
           if (res.data.data.data === null) {
-            return (this.dataList.data = [])
+            this.dataList.data = []
+          } else {
+            this.dataList = res.data.data
           }
-          this.dataList = res.data.data
         } else {
           console.log('实例列表获取失败')
         }

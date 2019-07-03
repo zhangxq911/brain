@@ -1,13 +1,63 @@
 import axios from '@/libs/api.request'
-import store from '@/store'
+// import store from '@/store'
 
 /**
  * 验证码获取
  */
 export const getIdentityCode = data => {
   return axios.request({
-    url: '/access/console/common/getIdentityCode',
+    url: '/common/getIdentityCode',
     data: data,
+    method: 'post'
+  })
+}
+
+/**
+ * 服务管理
+ * @param  params 
+ */
+export const getServiceList = params => {
+  return axios.request({
+    url: '/server',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const addServer = data => {
+  return axios.request({
+    url: '/server',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const getServiceInfo = params => {
+  return axios.request({
+    url: `/server/info/${params}`,
+    method: 'get'
+  })
+}
+
+export const putService = data => {
+  return axios.request({
+    url: `/server/${data.id}`,
+    data: data,
+    method: 'put'
+  })
+}
+
+export const delService = data => {
+  return axios.request({
+    url: `/server/${data}`,
+    method: 'delete'
+  })
+}
+
+export const operateService= data => {
+  return axios.request({
+    url: `/server/${data.serverId}/${data.serverStatus}/operate`,
+    data: {},
     method: 'post'
   })
 }
@@ -17,7 +67,7 @@ export const getIdentityCode = data => {
  */
 export const getAccountList = params => {
   return axios.request({
-    url: '/access/console/account',
+    url: '/account',
     params: params,
     method: 'get'
   })
@@ -25,7 +75,7 @@ export const getAccountList = params => {
 
 export const addAccount = data => {
   return axios.request({
-    url: '/access/console/account',
+    url: '/account',
     data: data,
     method: 'post'
   })
@@ -33,32 +83,39 @@ export const addAccount = data => {
 
 export const delAccount = data => {
   return axios.request({
-    url: `/access/console/account/${data}`,
+    url: `/account/${data}`,
     method: 'delete'
   })
 }
 
 export const getAccountInfo = params => {
   return axios.request({
-    url: `/access/console/account/info/${params}`,
+    url: `/account/info/${params}`,
     method: 'get'
   })
 }
 
 export const putAccount = data => {
   return axios.request({
-    url: `/access/console/account/${data.id}`,
+    url: `/account/${data.id}`,
     data: data,
     method: 'put'
   })
 }
 
+export const register = data => {
+  return axios.request({
+    url: '/account/register',
+    data: data,
+    method: 'post'
+  })
+}
 /**
  * 实例列表
  */
 export const getExampleList = params => {
   return axios.request({
-    url: '/access/console/instance',
+    url: '/instance',
     params: params,
     method: 'get'
   })
@@ -66,7 +123,7 @@ export const getExampleList = params => {
 
 export const addExample = data => {
   return axios.request({
-    url: '/access/console/instance',
+    url: '/instance',
     data: data,
     method: 'post'
   })
@@ -74,14 +131,14 @@ export const addExample = data => {
 
 export const delExample = data => {
   return axios.request({
-    url: `/access/console/instance/${data}`,
+    url: `/instance/${data}`,
     method: 'delete'
   })
 }
 
 export const putExample = data => {
   return axios.request({
-    url: `/access/console/instance/${data.id}`,
+    url: `/instance/${data.id}`,
     data: data,
     method: 'put'
   })
@@ -89,8 +146,16 @@ export const putExample = data => {
 
 export const getExampleInfo = params => {
   return axios.request({
-    url: `/access/console/instance/${params}`,
+    url: `/instance/${params}`,
     method: 'get'
+  })
+}
+
+export const operateExample = data => {
+  return axios.request({
+    url: `/instance/${data.instId}/${data.instStatus}/operate`,
+    data: {},
+    method: 'post'
   })
 }
 
@@ -99,12 +164,103 @@ export const getExampleInfo = params => {
  */
 export const getUserList = params => {
   return axios.request({
-    url: '/access/console/user',
+    url: '/user',
     params: params,
     method: 'get'
   })
 }
 
+export const getUserInfo = params => {
+  return axios.request({
+    url: `/user/${params}`,
+    method: 'get'
+  })
+}
+
+export const getUserExample = params => {
+  return axios.request({
+    url: `/user/${params}/relation`,
+    method: 'get'
+  })
+}
+
+export const addUser = data => {
+  return axios.request({
+    url: '/user',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const startUser = data => {
+  return axios.request({
+    url: `/user/${data.userId}/relation`,
+    data: data,
+    method: 'post'
+  })
+}
+
+export const delUser = data => {
+  return axios.request({
+    url: `/user/${data}`,
+    method: 'delete'
+  })
+}
+
+export const putUser = data => {
+  return axios.request({
+    url: `/access/user/${data.id}`,
+    data: data,
+    method: 'put'
+  })
+}
+
+/**
+ * 日志管理
+ */
+export const getLogList = data => {
+  return axios.request({
+    url: '/log/userLog',
+    data: data,
+    method: 'post'
+  })
+}
+
+/**
+ * 通话查询
+ */
+export const getCdrList = data => {
+  return axios.request({
+    url: '/stats/cdr',
+    data: data,
+    method: 'post'
+  })
+}
+
+/**
+ * 应用列表
+ */
+export const getAppList = () => {
+  return axios.request({
+    url: '/app/versions',
+    method: 'get'
+  })
+}
+
+export const addApp = data => {
+  return axios.request({
+    url: '/app/versions',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const delApp = data => {
+  return axios.request({
+    url: `/app/versions/${data}`,
+    method: 'delete'
+  })
+}
 
 /**
  * -------------------

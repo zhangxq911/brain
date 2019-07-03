@@ -65,6 +65,8 @@ export const getBreadCrumbList = (route, homeRoute) => {
       meta.__titleIsFunction__ = true
       meta.title = meta.title(route)
     }
+    // params中的to优先级更高
+    route.params.to ? meta.to = route.params.to : ''
     let obj = {
       icon: (item.meta && item.meta.icon) || '',
       name: item.name,

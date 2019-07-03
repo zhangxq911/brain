@@ -1,7 +1,7 @@
 <template>
   <Form ref="loginForm" :model="form" :rules="rules" @keydown.enter.native="handleSubmit">
     <FormItem prop="userName">
-      <Input v-model="form.userName" placeholder="请输入用户名">
+      <Input v-model="form.userName" placeholder="请输入用户名" :clearable="true">
         <span slot="prepend">
           <Icon :size="16" type="ios-person"></Icon>
         </span>
@@ -26,21 +26,17 @@ export default {
     userNameRules: {
       type: Array,
       default: () => {
-        return [
-          { required: true, message: '账号不能为空', trigger: 'blur' }
-        ]
+        return [{ required: true, message: '账号不能为空', trigger: 'blur' }]
       }
     },
     passwordRules: {
       type: Array,
       default: () => {
-        return [
-          { required: true, message: '密码不能为空', trigger: 'blur' }
-        ]
+        return [{ required: true, message: '密码不能为空', trigger: 'blur' }]
       }
     }
   },
-  data () {
+  data() {
     return {
       form: {
         userName: 'admin',
@@ -49,7 +45,7 @@ export default {
     }
   },
   computed: {
-    rules () {
+    rules() {
       return {
         userName: this.userNameRules,
         password: this.passwordRules
@@ -57,8 +53,8 @@ export default {
     }
   },
   methods: {
-    handleSubmit () {
-      this.$refs.loginForm.validate((valid) => {
+    handleSubmit() {
+      this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.$emit('on-success-valid', {
             userName: this.form.userName,
