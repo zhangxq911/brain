@@ -1,5 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
+import router from '@/router'
 // import { Spin } from 'iview'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
@@ -57,7 +58,8 @@ class HttpRequest {
       // token 失效拦截
       if(res.data.code === -10086) {
         store.commit('setToken', '')
-        window.location.href = '/console/login'
+        router.push({name: 'login'})
+        // window.location.href = '/console/login'
       }
       this.destroy(url)
       const { data, status } = res

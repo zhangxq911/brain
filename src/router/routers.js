@@ -111,7 +111,7 @@ export default [
         path: 'account_page',
         name: 'account_page',
         meta: {
-          icon: 'ios-paper',
+          icon: 'md-people',
           title: '账户管理'
         },
         component: () => import('@/view/account/account')
@@ -232,6 +232,7 @@ export default [
       }, {
         path: 'call',
         name: 'edit_call',
+        props: true,
         meta: {
           title: '通话详情',
           hideInMenu: true,
@@ -261,7 +262,7 @@ export default [
         path: 'log_page',
         name: 'log_page',
         meta: {
-          icon: 'ios-bug',
+          icon: 'md-calendar',
           title: '操作日志'
         },
         component: () => import('@/view/log/log')
@@ -281,10 +282,21 @@ export default [
         path: 'msg_page',
         name: 'msg_page',
         meta: {
-          icon: 'ios-bug',
+          icon: 'md-chatboxes',
           title: '消息管理'
         },
         component: () => import('@/view/message/message')
+      },
+      {
+        path: 'msg',
+        name: 'edit_msg',
+        props: true,
+        meta: {
+          title: '新建消息',
+          hideInMenu: true,
+          to: 'msg_page'
+        },
+        component: () => import('@/view/message/editMsg')
       }
     ]
   },

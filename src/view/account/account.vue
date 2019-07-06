@@ -316,8 +316,8 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getAccountList(params).then(res => {
-        if (res.status === 200 && res.data.data.data !== '') {
-          if (res.data.data.data === null) {
+        if (res.status === 200) {
+          if (!res.data.data.data) {
             this.dataList.data = []
           } else {
             this.dataList = res.data.data
@@ -341,7 +341,7 @@ export default {
     }
   },
   mounted() {
-    this.getPage()
+    this.getPage(this.searchForm)
   }
 }
 </script>

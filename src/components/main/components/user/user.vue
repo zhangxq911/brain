@@ -1,5 +1,9 @@
 <template>
   <div class="user-avatar-dropdown">
+    <span style="margin-right: 20px;">
+      APP下载
+      <!-- <span>sdfa</span> -->
+    </span>
     <Dropdown @on-click="handleClick">
       <!-- <Avatar/></Avatar> -->
       {{userName}}
@@ -31,7 +35,7 @@ export default {
   },
   data() {
     return {
-      source: -1
+      source: 0
     }
   },
   created() {

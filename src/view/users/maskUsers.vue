@@ -1,89 +1,125 @@
 <template>
-  <div class="mask" v-show="modal">
-    <div @click="closeMask" class="mask-left" :style="{'width': (100 - width) + 'vw'}"></div>
-    <div class="mask-content" :style="{'width': width + 'vw'}">
-      <Row>
-        <span class="mask-title">开通</span>
-        <Icon class="closeBtn" type="ios-close" @click="closeMask" />
-      </Row>
-      <div>
-        <Form :label-width="120">
-          <FormItem label="开通对象">{{editForm.id }} / {{editForm.userName }}</FormItem>
-          <!-- <FormItem label="选择实例"></FormItem> -->
-        </Form>
-        <div style="padding: 0px 60px;">
-          <h5 style="margin-bottom: 6px;">选择实例</h5>
-          <Input
-            v-model="searchForm.instanceInfo"
-            search
-            placeholder="请输入实例ID/实例名称"
-            @on-search="search"
-          ></Input>
-        </div>
-        <Table border :columns="columns" :data="dataList.data" style="margin: 10px 60px;"></Table>
-        <Page
-          v-show="dataList.length != 0"
-          :current.sync="dataList.pageNumber"
-          :page-size="dataList.pageSize"
-          :total="dataList.totalPage"
-          style="text-align: center;"
-          @on-change="changePage"
-        />
-        <div style="padding: 20px 60px;" v-show="selectExmpArr.length > 0">
-          已选中：
-          <span style="color: #2d8cf0;" v-for="(item, index) in selectExmpArr" :key="item.id">
-            {{item.name}}
-            <span class="del-select" @click="delSelect">删除</span>
-          </span>
-        </div>
-        <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何实例</div>
+  <div>
+    <div class="mask" v-if="basicInfo.type === 'account'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
         <Row>
-          <Col span="18">
-            <Form
-              ref="rulesValidate"
-              :model="addForm"
-              :label-width="120"
-              style="min-width: 500px;"
-              :rules="rulesValidate"
-            >
-              <FormItem label="登录名称" prop="username">
-                <Input v-model="addForm.username"></Input>
-              </FormItem>
-              <FormItem label="登录密码" prop="password">
-                <Input v-model="addForm.password"></Input>
-              </FormItem>
-              <Divider dashed />
-              <Button type="default" @click="open">开通</Button>
-            </Form>
-          </Col>
+          <span class="mask-title">选择</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
         </Row>
+        <div>
+          <Form :label-width="120">
+            <FormItem label="开通对象">{{editForm.instName }}</FormItem>
+          </Form>
+          <div style="padding: 0px 60px;">
+            <h5 style="margin-bottom: 6px;">选择账户</h5>
+            <Input
+              v-model="searchForm.accountInfo"
+              search
+              placeholder="请输入账户ID/名称"
+              @on-search="searchAccount"
+            ></Input>
+          </div>
+          <Table
+            style="margin: 10px 60px;"
+            :loading="loading"
+            border
+            :columns="accountColumns"
+            :data="dataAccountList.data"
+          ></Table>
+          <Page
+            v-show="dataAccountList.length != 0"
+            :current.sync="dataAccountList.pageNumber"
+            :page-size="dataAccountList.pageSize"
+            :total="dataAccountList.totalPage"
+            style="text-align: center;"
+            @on-change="changeAccountPage"
+          />
+          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length > 0">
+            已选中：
+            <span
+              style="color: #2d8cf0;"
+              v-for="(item, index) in selectExmpArr2"
+              :key="item.id"
+            >
+              {{item.name}}
+              <span class="del-select" @click="delSelect2">删除</span>
+            </span>
+          </div>
+          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length === 0">当前未选中任何服务</div>
+          <div style="display: flex; justify-content: center;">
+            <Button :disabled="!isDisabled2" type="primary" @click="saveAccount">确定</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'open'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">开通</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div>
+          <Form :label-width="120">
+            <FormItem label="开通对象">{{editForm.userName }}</FormItem>
+          </Form>
+          <div style="padding: 0px 60px;">
+            <h5 style="margin-bottom: 6px;">选择实例</h5>
+            <Input
+              v-model="searchForm.instanceInfo"
+              search
+              placeholder="请输入实例ID/名称"
+              @on-search="searchExample"
+            ></Input>
+          </div>
+          <Table
+            style="margin: 10px 60px;"
+            :loading="loading"
+            border
+            :columns="exampleColumns"
+            :data="dataExampleList.data"
+          ></Table>
+          <Page
+            v-show="dataExampleList.length != 0"
+            :current.sync="dataExampleList.pageNumber"
+            :page-size="dataExampleList.pageSize"
+            :total="dataExampleList.totalPage"
+            style="text-align: center;"
+            @on-change="changeExamplePage"
+          />
+          <div style="padding: 20px 60px;" v-show="selectExmpArr.length > 0">
+            已选中：
+            <span style="color: #2d8cf0;" v-for="(item, index) in selectExmpArr" :key="item.id">
+              {{item.name}}
+              <span class="del-select" @click="delSelect">删除</span>
+            </span>
+          </div>
+          <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何服务</div>
+          <div style="display: flex; justify-content: center;">
+            <Button :disabled="!isDisabled" type="primary" @click="saveExample">确定</Button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { getExampleList, startUser } from '@/api/data'
+import { getAccountList, getExampleList, startUser } from '@/api/data'
 
 export default {
-  props: ['exampleModal', 'editForm', 'width'],
+  props: ['basicInfo', 'editForm'],
   data() {
     return {
+      selectExmpArr2: [], // 账户
+      isDisabled2: false,
+      selectExmpArr: [], // 实例
       isDisabled: false,
-      modal: this.exampleModal,
-      dataList: {},
-      selectExmpArr: [],
-      searchForm: {
-        page: 1
-      },
-      addForm: {},
-      rulesValidate: {
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
-        ],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-      },
-      columns: [
+      searchForm: {},
+      loading: false,
+      dataExampleList: [],
+      exampleColumns: [
         {
           title: '选中',
           width: 60,
@@ -113,7 +149,7 @@ export default {
                     }
                     let data = {
                       id: params.row.id,
-                      name: params.row.instName
+                      name: params.row.instName,
                     }
                     this.selectExmpArr.push(data)
                     this.isDisabled = true
@@ -138,30 +174,7 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h(
-                'div',
-                {
-                  style: {
-                    color: '#2d8cf0'
-                  },
-                  attrs: {
-                    class: 'hoverAccount'
-                  },
-                  on: {
-                    click: () => {
-                      this.$router.push({
-                        name: 'edit_example',
-                        params: {
-                          id: params.row.id,
-                          mode: 'view',
-                          title: '实例详情'
-                        }
-                      })
-                    }
-                  }
-                },
-                params.row.id
-              ),
+              h('div', {}, params.row.id),
               h('div', {}, params.row.instName)
             ])
           }
@@ -189,7 +202,6 @@ export default {
         },
         {
           title: '状态',
-          key: 'status',
           align: 'center',
           render: (h, params) => {
             let curStatus = params.row.status
@@ -225,59 +237,187 @@ export default {
           title: '创建时间',
           align: 'center',
           key: 'createTime'
-          // sortable: 'custom'
+        }
+      ],
+      dataAccountList: [],
+      accountColumns: [
+        {
+          title: '选中',
+          width: 60,
+          align: 'center',
+          render: (h, params) => {
+            let val = false
+            if (this.selectExmpArr2.length > 0) {
+              this.selectExmpArr2.forEach(item => {
+                if (item.id === params.row.id) {
+                  val = true
+                }
+              })
+            }
+            return h('Checkbox', {
+              props: {
+                value: val,
+                disabled: this.isDisabled2
+              },
+              on: {
+                'on-change': res => {
+                  // 选中时填入arr数组，且查询时要先查看是否有数据
+                  if (res) {
+                    if (this.selectExmpArr2.length > 0) {
+                      this.$Message.warning('当前已选择，请清空选择后重试！')
+                      val = false
+                      return
+                    }
+                    let data = {
+                      id: params.row.id,
+                      name: params.row.accountName
+                    }
+                    this.selectExmpArr2.push(data)
+                    this.isDisabled2 = true
+                  } else {
+                    let id = params.row.id
+                    let arr = [...this.selectExmpArr2]
+                    this.selectExmpArr2.forEach((item, index) => {
+                      if (id === item.id) {
+                        arr.splice(index, 1)
+                      }
+                    })
+                    this.selectExmpArr2 = arr
+                    this.isDisabled2 = false
+                  }
+                }
+              }
+            })
+          }
+        },
+        {
+          title: '账户ID/账户名称',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('div', {}, params.row.id),
+              h('div', {}, params.row.accountName)
+            ])
+          }
+        },
+        {
+          title: '账户类型',
+          align: 'center',
+          render: (h, params) => {
+            let curaccountType = params.row.accountType
+            switch (curaccountType) {
+              case 0:
+                curaccountType = '系统管理员'
+                break
+              case 1:
+                curaccountType = '企业'
+                break
+              case 2:
+                curaccountType = '个人'
+                break
+              default:
+                curaccountType = ''
+            }
+            return h('div', curaccountType)
+          }
+        },
+        {
+          title: '企业名称',
+          align: 'center',
+          key: 'companyName',
+          ellipsis: true
+        },
+        {
+          title: '创建时间',
+          align: 'center',
+          key: 'createTime'
         }
       ]
     }
   },
-  watch: {
-    exampleModal(newName, oldName) {
-      this.modal = this.exampleModal
-    }
-  },
   methods: {
-    // 开通
-    open() {
-      this.addForm.instId = this.selectExmpArr[0].id
-      this.addForm.userId = this.editForm.id
-      startUser(this.addForm).then(res => {
-        if (res.data.code === 200) {
-          this.$Message.success(res.data.msg)
-          this.closeMask()
-        } else {
-          this.$Message.error(res.data.msg)
+    saveExample() {
+      if (!this.selectExmpArr.length) {
+        this.$Message.error('请选择实例后提交')
+      } else {
+        let data = {
+          userId: this.editForm.id,
+          instId: this.selectExmpArr[0].id
         }
-      })
+        startUser(data).then(res => {
+          if(res.data.code === 200) {
+            this.$Message.success(res.data.msg)
+            this.selectExmpArr = []
+            this.isDisabled = false
+            this.closeMask()
+          }else {
+            this.$Message.error(res.data.msg)
+          }
+        })
+      }
     },
-    // 删除当前选中实例
+    saveAccount() {
+      if (!this.selectExmpArr2.length) {
+        this.$Message.error('请选择账号后提交')
+      } else {
+        this.$emit('sendAccount', this.selectExmpArr2)
+        this.closeMask()
+      }
+    },
+    delSelect2() {
+      this.selectExmpArr2 = []
+      this.isDisabled2 = false
+    },
     delSelect() {
       this.selectExmpArr = []
       this.isDisabled = false
     },
-    changePage(curPage) {
+    changeAccountPage(curPage) {
       let search = { ...this.searchForm }
       search.page = curPage
-      this.getPage(search)
+      this.getAccountPage(searchForm)
     },
-    // 搜索
-    search() {
-      this.getPage(this.searchForm)
+    changeExamplePage() {
+      let search = { ...this.searchForm }
+      search.page = curPage
+      this.getExamplePage(searchForm)
     },
-    // 关闭mask通信父组件
+    searchAccount() {
+      this.loading = true
+      this.getAccountPage(this.searchForm)
+    },
+    searchExample() {
+      this.loading = true
+      this.getExamplePage(this.searchForm)
+    },
     closeMask() {
-      this.modal = false
-      this.selectExmpArr = []
-      this.$emit('sendModal', false)
+      this.basicInfo.type = 'normal'
+      this.$emit('sendModal', this.basicInfo.type)
     },
-    // 获取实例列表
-    getPage(params = {}) {
+    // 获取用户信息
+    getAccountPage(params = {}) {
+      params ? params : (params = this.searchForm)
+      getAccountList(params).then(res => {
+        if (res.status === 200) {
+          if (!res.data.data.data) {
+            this.dataAccountList.data = []
+          } else {
+            this.dataAccountList = res.data.data
+          }
+        } else {
+          console.log('账户列表获取失败')
+        }
+        this.loading = false
+      })
+    },
+    getExamplePage(params = {}) {
       params ? params : (params = this.searchForm)
       getExampleList(params).then(res => {
         if (res.status === 200) {
-          if (!res.data.data) {
-            this.dataList.data = []
+          if (!res.data.data.data) {
+            this.dataExampleList.data = []
           } else {
-            this.dataList = res.data.data
+            this.dataExampleList = res.data.data
           }
         } else {
           console.log('实例列表获取失败')
@@ -287,7 +427,8 @@ export default {
     }
   },
   mounted() {
-    this.getPage()
+    this.getAccountPage()
+    this.getExamplePage()
   }
 }
 </script>

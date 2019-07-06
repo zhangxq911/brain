@@ -16,12 +16,16 @@
         <Form :label-width="150" style="min-width: 500px;">
           <FormItem label="服务名称">{{editForm.serverName }}</FormItem>
           <FormItem label="服务类型">{{remoteType }}</FormItem>
+          <FormItem label="服务描述">{{editForm.description }}</FormItem>
           <FormItem label="服务域名或IP">{{editForm.serverHost }}</FormItem>
           <FormItem label="服务端口">{{editForm.serverPort }}</FormItem>
-          <FormItem label="服务总容量">{{editForm.totalCapacity }}</FormItem>
-          <FormItem v-if="showGps" label="定位服务域名或IP地址">{{editForm.gpsHost }}</FormItem>
-          <FormItem v-if="showGps" label="定位服务端口">{{editForm.gpsPort }}</FormItem>
-          <FormItem label="服务描述">{{editForm.description }}</FormItem>
+          <!-- <FormItem v-if="showGps" label="定位服务域名或IP地址">{{editForm.gpsHost }}</FormItem> -->
+          <!-- <FormItem v-if="showGps" label="定位服务端口">{{editForm.gpsPort }}</FormItem> -->
+          <FormItem label="定位服务域名或IP地址">{{editForm.gpsHost }}</FormItem>
+          <FormItem label="定位服务端口">{{editForm.gpsPort }}</FormItem>
+          <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
+          <FormItem label="运行状态">{{editForm.status ? '运行中': '已停止' }}</FormItem>
+          <FormItem label="用户容量">{{editForm.totalCapacity }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <Row style="margin-top: 20px;">
@@ -181,19 +185,147 @@ export default {
       },
       columns: [
         {
-          title: '账户ID/账户名称',
+          title: '实例ID/实例名称',
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('div', {}, params.row.accountId),
-              h('div', {}, params.row.accountName)
+              h(
+                'div',
+                {
+                  // style: {
+                  //   color: '#2d8cf0'
+                  // },
+                  // attrs: {
+                  //   class: 'hoverAccount'
+                  // },
+                  // on: {
+                  //   click: () => {
+                  //     this.$router.push({
+                  //       name: 'edit_example',
+                  //       params: {
+                  //         id: params.row.id,
+                  //         mode: 'view',
+                  //         title: '实例详情',
+                  //         to: 'edit_service'
+                  //       }
+                  //     })
+                  //   }
+                  // }
+                },
+                params.row.id
+              ),
+              h('div', {}, params.row.instName)
             ])
+          }
+        },
+        {
+          title: '实例类型',
+          align: 'center',
+          render: (h, params) => {
+            let curinstType = params.row.instType
+            switch (curinstType) {
+              case 'call':
+                curinstType = '远程会议'
+                break
+              case 'gis':
+                curinstType = '联情指挥'
+                break
+              case 'live':
+                curinstType = '网络直播'
+                break
+              default:
+                curinstType = ''
+            }
+            return h('div', curinstType)
+          }
+        },
+        {
+          title: '状态',
+          align: 'center',
+          render: (h, params) => {
+            let curStatus = params.row.status
+            if (curStatus === 1) {
+              curStatus = '运行中'
+              return h(
+                'div',
+                {
+                  style: {
+                    color: '#19be6b'
+                  }
+                },
+                curStatus
+              )
+            } else if (curStatus === 0) {
+              curStatus = '已停止'
+              return h(
+                'div',
+                {
+                  style: {
+                    color: '#ed4014'
+                  }
+                },
+                curStatus
+              )
+            } else {
+              curStatus = ''
+              return h('div', curStatus)
+            }
           }
         },
         {
           title: '创建时间',
           align: 'center',
           key: 'createTime'
+        },
+        {
+          title: '用户容量',
+          align: 'center',
+          key: 'capacity'
+        },
+        {
+          title: '账户ID/账户名称',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h(
+                'div',
+                // {
+                //   style: {
+                //     color: '#2d8cf0'
+                //   },
+                //   attrs: {
+                //     class: 'hoverAccount'
+                //   },
+                //   on: {
+                //     click: () => {
+                //       this.$router.push({
+                //         name: 'edit_account',
+                //         params: {
+                //           id: params.row.accountId,
+                //           mode: 'view',
+                //           title: '账户详情',
+                //           to: 'service_page'
+                //         }
+                //       })
+                //     }
+                //   }
+                // },
+                params.row.accountId
+              ),
+              h('div', {}, params.row.accountName)
+            ])
+          }
+        },
+        {
+          title: '操作',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', {
+              // porps: {
+              //   size: 'small'
+              // }
+            },'释放实例')
+          }
         }
       ]
     }

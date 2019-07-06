@@ -108,7 +108,9 @@ export default {
       isDisabled2: false,
       loading: false,
       searchForm: {
-        page: 1
+        page: 1,
+        status: 1,
+        capacity: 0
       },
       dataServiceList: [],
       dataAccountList: [],
@@ -378,7 +380,6 @@ export default {
     },
     // 账户查询
     searchAccount() {
-      console.log(this.searchForm)
       this.loading = true
       this.getAccountPage(this.searchForm)
     },
@@ -391,7 +392,7 @@ export default {
       this.basicInfo.type = 'normal'
       this.$emit('sendModal', this.basicInfo.type)
     },
-    getServicePage(params = { page: 1 }) {
+    getServicePage(params = { page: 1, status: 1, capacity: 0 }) {
       params ? params : (params = this.searchForm)
       getServiceList(params).then(res => {
         if (res.data.code === 200 && res.data.data) {

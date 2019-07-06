@@ -1,31 +1,101 @@
 <template>
   <div class="card-box">
-    <h3 class="detailTitle">基本信息</h3>
-    <a
-      class="editBtn"
-      href="javascript:void(0)"
-      @click="curMode = 'edit'"
-      v-show="curMode === 'view'"
-    >
-      编辑
-      <Icon type="md-create" />
-    </a>
+    <h3 class="detailTitle" v-show="curMode !== 'view'">基本信息</h3>
     <Row>
       <!-- 查看 -->
-      <Col span="12" v-show="curMode === 'view'">
-        <Form :label-width="120" style="min-width: 500px;">
-          <FormItem label="实例名称">{{editForm.instName }}</FormItem>
-          <FormItem label="实例类型">{{remoteType }}</FormItem>
-          <FormItem label="实例描述">{{editForm.description }}</FormItem>
-          <FormItem label="实例链接地址">{{editForm.host }}</FormItem>
-          <FormItem label="实例端口号">{{editForm.port }}</FormItem>
-          <FormItem v-if="showGps" label="定位服务链接地址">{{editForm.gpsHost }}</FormItem>
-          <FormItem v-if="showGps" label="定位服务端口号">{{editForm.gpsPort }}</FormItem>
-          <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
-          <FormItem label="运行状态">{{remoteStatus }}</FormItem>
-          <Divider dashed />
-          <FormItem label="账户名称">{{editForm.accountName }}</FormItem>
-        </Form>
+      <Col span="24" v-show="curMode === 'view'">
+        <Tabs value="name1" @on-click="getOrg">
+          <TabPane label="基本信息" name="name1">
+            <Row>
+              <Col span="12">
+                <Form :label-width="120" style="min-width: 500px;">
+                  <FormItem label="实例名称">
+                    {{editForm.instName }}
+                    <a
+                      class="editBtn"
+                      href="javascript:void(0)"
+                      @click="curMode = 'edit'"
+                      v-show="curMode === 'view'"
+                    >
+                      编辑
+                      <Icon type="md-create" />
+                    </a>
+                  </FormItem>
+                  <FormItem label="实例描述">
+                    {{editForm.description }}
+                    <a
+                      class="editBtn"
+                      href="javascript:void(0)"
+                      @click="curMode = 'edit'"
+                      v-show="curMode === 'view' && editForm.description"
+                    >
+                      编辑
+                      <Icon type="md-create" />
+                    </a>
+                  </FormItem>
+                  <FormItem label="实例类型">{{remoteType }}</FormItem>
+                  <FormItem label="实例容量">
+                    {{editForm.capacity }}
+                    <a
+                      class="editBtn"
+                      href="javascript:void(0)"
+                      @click="curMode = 'edit'"
+                      v-show="curMode === 'view'"
+                    >
+                      编辑
+                      <Icon type="md-create" />
+                    </a>
+                  </FormItem>
+                  <FormItem label="实例">
+                    <Input :rows="7" readonly type="textarea" :value="this.serverContent2"></Input>
+                  </FormItem>
+                  <Divider dashed />
+                  <FormItem label="账户名称">{{editForm.accountName }}</FormItem>
+                </Form>
+              </Col>
+            </Row>
+          </TabPane>
+          <TabPane label="组织机构" name="name2">
+            <Row style>
+              <Button type="primary">添加部门</Button>
+              <Button type="primary">添加人员</Button>
+              <div style="float: right; margin-bottom: -10px;">
+                <Form
+                  ref="searchForm"
+                  :model="searchForm"
+                  inline
+                >
+                  <FormItem prop="filter">
+                    <Select
+                      @on-change="clearSearch"
+                      v-model="searchForm.filter"
+                      style="width: 100px;"
+                    >
+                      <Option
+                        v-for="(item, index) in filterList"
+                        :value="item.value"
+                        :key="index"
+                      >{{ item.name }}</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem prop="content">
+                    <Input
+                      search
+                      v-model="searchForm.content"
+                      placeholder="请输入搜索内容"
+                      style="width: 200px;"
+                      @on-search="search"
+                    ></Input>
+                  </FormItem>
+                  <FormItem>
+                    <Button @click="search">刷新</Button>
+                  </FormItem>
+                </Form>
+              </div>
+            </Row>
+          </TabPane>
+          <TabPane label="工作组" name="name3">标签三的内容</TabPane>
+        </Tabs>
       </Col>
       <!-- 新增 -->
       <Form
@@ -51,11 +121,7 @@
             </Select>
           </FormItem>
           <FormItem prop="capacity" label="实例容量">
-            <InputNumber
-              style="width: 100%;"
-              :min="1"
-              v-model="addForm.capacity"
-            ></InputNumber>
+            <InputNumber style="width: 100%;" :min="1" v-model="addForm.capacity"></InputNumber>
           </FormItem>
           <FormItem prop="serverId" label="实例">
             <Input v-show="false" :value="addForm.serverId"></Input>
@@ -99,27 +165,17 @@
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="editForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
-          <FormItem prop="instType" label="实例类型">
-            <Select v-model="editForm.instType" @on-change="ifShowGps">
-              <Option value="call">远程会议</Option>
-              <Option value="gis">联情指挥</Option>
-              <Option value="live">网络直播</Option>
-            </Select>
-          </FormItem>
           <FormItem label="实例描述">
-            <Input type="textarea" v-model="editForm.description" placeholder="请输入实例描述"></Input>
+            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入实例描述"></Input>
           </FormItem>
-          <FormItem porp="host" label="实例链接地址">
-            <Input type="text" v-model="editForm.host" placeholder="请输入实例链接地址"></Input>
+          <FormItem label="实例类型">
+            <Input readonly :value="remoteType"></Input>
           </FormItem>
-          <FormItem prop="port" label="实例端口号">
-            <Input type="text" v-model="editForm.port" placeholder="请输入实例端口号"></Input>
+          <FormItem prop="capacity" label="实例容量">
+            <InputNumber style="width: 100%;" :min="1" v-model="editForm.capacity"></InputNumber>
           </FormItem>
-          <FormItem v-if="showGps" label="定位服务连接地址">
-            <Input type="text" v-model="editForm.gpsHost" placeholder="请输入定位服务连接地址"></Input>
-          </FormItem>
-          <FormItem v-if="showGps" label="定位服务端口号">
-            <Input type="text" v-model="editForm.gpsPort" placeholder="请输入定位服务端口号"></Input>
+          <FormItem label="实例">
+            <Input readonly :rows="7" type="textarea" :value="serverContent2"></Input>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -127,7 +183,13 @@
         </Form>
       </Col>
     </Row>
-    <MaskUsers @sendModal="getModal" @sendAccount="getAccount" @sendServer="getServer" :editForm="openForm" :basicInfo="basicInfo"></MaskUsers>
+    <MaskUsers
+      @sendModal="getModal"
+      @sendAccount="getAccount"
+      @sendServer="getServer"
+      :editForm="openForm"
+      :basicInfo="basicInfo"
+    ></MaskUsers>
   </div>
 </template>
 
@@ -137,7 +199,8 @@ import {
   getIdentityCode,
   putExample,
   addExample,
-  getAccountList
+  getAccountList,
+  getOrgList
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
 import MaskUsers from './maskExample'
@@ -217,6 +280,8 @@ export default {
     }
 
     return {
+      searchForm: {},
+      serverContent2: '', // 详情、编辑实例内容
       accountContent: '',
       serverContent: '',
       openForm: {},
@@ -287,10 +352,15 @@ export default {
           { required: true, validator: validateName, trigger: 'blur' }
         ],
         instType: [
-          { required: true, message: '请输入实例类型', trigger: 'change' }
+          { required: true, message: '请选择实例类型', trigger: 'change' }
         ],
         capacity: [
-          { type: 'number', required: true, message: '请输入实例容量', trigger: 'blur' }
+          {
+            type: 'number',
+            required: true,
+            message: '请输入实例容量',
+            trigger: 'blur'
+          }
         ],
         accountId: [
           {
@@ -300,14 +370,27 @@ export default {
             trigger: 'blur'
           }
         ],
-        serverId: [{ required: true, message: '请选择实例', trigger: 'change' }],
-        accountName: [{ required: true, message: '请选择账户', trigger: 'change' }],
+        serverId: [
+          { required: true, message: '请选择实例', trigger: 'change' }
+        ],
+        accountName: [
+          { required: true, message: '请选择账户', trigger: 'change' }
+        ]
       },
       rulesValidate2: {
-        instName: [{ validator: validateName, trigger: 'blur' }],
-        mobile: [{ validator: validateMobile, trigger: 'blur' }],
-        identityCode: [
-          { required: false, validator: validateCode, trigger: 'blur' }
+        instName: [
+          { required: true, message: '请输入实例名称', trigger: 'blur' }
+        ],
+        instType: [
+          { required: true, message: '请选择实例类型', trigger: 'change' }
+        ],
+        capacity: [
+          {
+            type: 'number',
+            required: true,
+            message: '请输入实例容量',
+            trigger: 'blur'
+          }
         ]
       },
       btntxt: '发送验证码',
@@ -325,14 +408,30 @@ export default {
     }
   },
   methods: {
+    // 获取组织信息
+    getOrg(name) {
+      if (name === 'name2') {
+        // 组织结构
+        // this.getOrgLists()
+        // this.getOrgPages()
+      } else if (name === 'name3') {
+        // 工作组
+      }
+    },
+    getOrgPages() {},
+    getOrgLists() {
+      let params = { id: this.id }
+      getOrgList(params).then(res => {
+        console.log(res)
+      })
+    },
     getAccount(data) {
       this.addForm.accountId = data[0].id
-      this.accountContent =  data[0].name
+      this.accountContent = data[0].name
     },
     getServer(data) {
       this.addForm.serverId = data[0].id
-      this.serverContent = 
-        `实例链接地址：${data[0].serverHost}\n实例端口号：${data[0].serverPort}\n定位服务链接地址：${data[0].gpsHost}\n定位服务端口号：${data[0].gpsPort}`
+      this.serverContent = `实例链接地址：${data[0].serverHost}\n实例端口号：${data[0].serverPort}\n定位服务链接地址：${data[0].gpsHost}\n定位服务端口号：${data[0].gpsPort}`
     },
     getModal(data) {
       this.basicInfo.type = data
@@ -373,7 +472,10 @@ export default {
     save() {
       this.$refs['addForm'].validate(valid => {
         if (valid) {
-          // 定位服务端口号，后端未插入 FIXME
+          // accountId 普通用户时为空
+          // if(this.defAccount !== 'super_admin') {
+          //   this.addForm.accountId = this.$store.state.user.userId
+          // }
           addExample(this.addForm).then(res => {
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
@@ -396,12 +498,8 @@ export default {
       let data = {
         id: this.editForm.id,
         instName: this.editForm.instName,
-        instType: this.editForm.instType,
         description: this.editForm.description,
-        host: this.editForm.host,
-        port: this.editForm.port,
-        gpsHost: '',
-        gpsPort: ''
+        capacity: this.editForm.capacity
       }
       this.$refs['editForm'].validate(valid => {
         if (valid) {
@@ -459,7 +557,7 @@ export default {
         }
       })
     },
-    // 获取用户信息，新增时无id传入，不查询
+    // 获取实例信息，新增时无id传入，不查询
     getInfo() {
       if (!this.id) {
         return
@@ -493,6 +591,8 @@ export default {
             default:
               break
           }
+          let data = this.editForm
+          this.serverContent2 = `实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost}\n定位服务端口号：${data.gpsPort}`
         } else {
           this.$Message.error(res.data.msg)
         }

@@ -60,7 +60,7 @@
             <Input type="text" v-model="addForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
           <FormItem label="账户描述">
-            <Input type="textarea" v-model="addForm.description" placeholder="请输入账户描述"></Input>
+            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入账户描述"></Input>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
@@ -93,7 +93,7 @@
             <Input v-model="editForm.companyName" placeholder="请输入企业名称"></Input>
           </FormItem>
           <FormItem label="账户描述">
-            <Input type="textarea" v-model="editForm.description" placeholder="请输入账户描述"></Input>
+            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入账户描述"></Input>
           </FormItem>
           <!-- 预留功能 -->
           <!-- <FormItem label="自定义头像">

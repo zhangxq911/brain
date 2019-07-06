@@ -24,7 +24,7 @@
           <!-- 最多三条，每个类型一条 -->
           <Row>
             <Button
-              @click="exampleModal = true"
+              @click="showMask('open', 50)"
               style="margin: 0 70px 10px;"
               size="small"
               type="primary"
@@ -67,20 +67,20 @@
             <Input type="text" v-model="addForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
           <FormItem prop="description" label="用户描述">
-            <Input type="textarea" v-model="addForm.description" placeholder="请输入用户描述"></Input>
+            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入用户描述"></Input>
           </FormItem>
           <div v-if="defAccount === 'super_admin'">
             <Divider dashed />
             <FormItem style="position: relative;" label="账户名称">
               <Input
                 readonly
-                v-model="addForm.accountName"
+                :value="accontContent"
                 placeholder="请选择账户"
-                @on-focus="getAccount"
+                @on-focus="showMask('account', 50)"
               ></Input>
               <Input v-show="false" v-model="addForm.accountId"></Input>
               <Button
-                @click="getAccount"
+                @click="showMask('account', 50)"
                 style="position: absolute; right: -60px; top: 1px; font-weight: bold; background: #86A1C1; color: #fff;"
               >· · ·</Button>
             </FormItem>
@@ -95,21 +95,21 @@
         <Form
           ref="editForm"
           :model="editForm"
-          :rules="rulesValidate"
+          :rules="rulesValidate2"
           :label-width="120"
           style="min-width: 500px;"
         >
           <FormItem prop="userName" label="用户名称">
             <Input type="text" v-model="editForm.userName" placeholder="请输入用户名称"></Input>
           </FormItem>
-          <FormItem label="用户密码">
-            <Input type="text" v-model="editForm.userPsw" placeholder="用户密码不修改请留空"></Input>
+          <FormItem prop="userPsw" label="用户密码">
+            <Input type="password" v-model="editForm.userPsw" placeholder="用户密码不修改请留空"></Input>
           </FormItem>
-          <FormItem prop="userPsw2" label="重复密码">
-            <Input type="text" v-model="editForm.userPsw2" placeholder="请再次输入密码"></Input>
+          <FormItem prop="repeatPsw" label="重复密码">
+            <Input type="password" v-model="editForm.repeatPsw" placeholder="请再次输入密码"></Input>
           </FormItem>
           <FormItem label="昵称">
-            <Input type="textarea" v-model="editForm.nickName" placeholder="请输入昵称"></Input>
+            <Input type="text" v-model="editForm.nickName" placeholder="请输入昵称"></Input>
           </FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="editForm.mobile" placeholder="请输入手机号码"></Input>
@@ -124,7 +124,7 @@
             </RadioGroup>
           </FormItem>
           <FormItem label="用户描述">
-            <Input type="textarea" v-model="editForm.description" placeholder="请输入用户描述"></Input>
+            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入用户描述"></Input>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -132,20 +132,13 @@
         </Form>
       </Col>
     </Row>
-    <Modal v-model="modalAccount" :scrollable="true" title="账户选择">
-      <Table style="margin-top:20px;" border :columns="accountColumns" :data="accountData.data"></Table>
-      <h3 v-show="accountData.length == 0">当前没有账户可进行选择，请选择先添加账户！</h3>
-      <div slot="footer">
-        <Page
-          v-show="accountData.length != 0"
-          :current.sync="accountData.pageNumber"
-          :page-size="accountData.pageSize"
-          :total="accountData.totalPage"
-        />
-      </div>
-    </Modal>
     <!-- 实例开通页面 -->
-    <MaskUsers @sendModal="getModal" :exampleModal="exampleModal" :editForm="editForm"></MaskUsers>
+    <MaskUsers
+      @sendModal="getModal"
+      @sendAccount="getAccount"
+      :editForm="editForm"
+      :basicInfo="basicInfo"
+    ></MaskUsers>
   </div>
 </template>
 
@@ -156,7 +149,8 @@ import {
   putUser,
   getAccountList,
   addUser,
-  getUserExample
+  getUserExample,
+  closeUser
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
 import MaskUsers from './maskUsers'
@@ -177,9 +171,9 @@ export default {
     }
 
     const validatePwd2 = (rule, value, callback) => {
-      if (!value) {
+      if (!value && this.editForm.userPsw) {
         callback(new Error('密码确认不能为空'))
-      } else if (value === this.addForm.userPsw) {
+      } else if (value === this.addForm.userPsw || value === this.editForm.userPsw) {
         callback()
       } else {
         callback(new Error('两次输入密码不一致!'))
@@ -208,6 +202,8 @@ export default {
     }
 
     return {
+      accontContent: '',
+      basicInfo: {},
       editForm: {},
       addForm: {},
       curMode: this.mode,
@@ -215,7 +211,6 @@ export default {
       accountData: [],
       exampleColumns: [{}],
       exampleData: [],
-      exampleModal: false,
       rulesValidate: {
         userName: [
           { required: true, validator: validateName, trigger: 'blur' }
@@ -227,6 +222,19 @@ export default {
           { required: true, validator: validatePwd2, trigger: 'blur' }
         ],
         nickName: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
+        mobile: [{ validator: validateMobile, trigger: 'blur' }],
+        email: [{ validator: validateEmail, trigger: 'blur' }]
+      },
+      rulesValidate2: {
+        userName: [
+          { required: true, validator: validateName, trigger: 'blur' }
+        ],
+        userPsw: [
+          { message: '请输入用户密码', trigger: 'blur' }
+        ],
+        repeatPsw: [
+          { validator: validatePwd2, trigger: 'blur' }
+        ],
         mobile: [{ validator: validateMobile, trigger: 'blur' }],
         email: [{ validator: validateEmail, trigger: 'blur' }]
       },
@@ -285,8 +293,10 @@ export default {
           title: '实例ID/实例名称',
           align: 'center',
           render: (h, params) => {
-            let val = params.row.instId + '/' + params.row.instName
-            h('div', val)
+            return h('div', [
+              h('div', params.row.instId),
+              h('div', params.row.instName)
+            ])
           }
         },
         {
@@ -345,28 +355,36 @@ export default {
           }
         },
         {
-          title: '登录名称',
+          title: '实例地址',
           align: 'center',
-          key: 'username'
+          key: 'serverHost'
         },
         {
-          title: '登录密码',
+          title: '用户容量',
           align: 'center',
-          key: 'password'
+          key: 'capacity'
         },
         {
           title: '操作',
           align: 'center',
           render: (h, params) => {
             return h(
-              'span',
+              'Button',
               {
+                props: {
+                  type: 'error',
+                  size: 'small'
+                },
                 on: {
                   click: () => {
                     // 选择当前信息后关闭模态框
-                    // this.addForm.accountId = params.row.id
-                    // this.addForm.accountName = params.row.accountName
-                    // this.modalAccount = false
+                    this.$Modal.confirm({
+                      title: '信息',
+                      content: '<p>确定移除该实例吗？</p>',
+                      onOk: () => {
+                        this.remove(params.row.relationId)
+                      }
+                    })
                   }
                 }
               },
@@ -385,17 +403,43 @@ export default {
       this.defAccount = 'unit'
     }
   },
-  watch: {
-    exampleModal: () => {
-      if (this.exampleModal === false) {
-        this.getExample()
-      }
-    }
-  },
   methods: {
-    // 监听子组件关闭mask变化
+    // 移除实例
+    remove(id) {
+      closeUser(id).then(res => {
+        if (res.data.code === 200) {
+          this.$Message.success(res.data.msg)
+          this.getExample()
+        } else {
+          this.$Message.error(res.data.msg)
+        }
+      })
+    },
+    getAccount(data) {
+      this.addForm.accountId = data[0].id
+      this.accontContent = data[0].name
+    },
     getModal(data) {
-      this.exampleModal = data
+      this.basicInfo.type = data
+    },
+    showMask(type, width) {
+      if (this.curMode === 'add') {
+        this.$refs['addForm'].validate(valid => {
+          if (valid) {
+            this.basicInfo = {
+              type: type,
+              width: width
+            }
+          } else {
+            this.$Message.error('请先填写基本信息')
+          }
+        })
+      } else {
+        this.basicInfo = {
+          type: type,
+          width: width
+        }
+      }
     },
     // 是否显示填写gps内容
     ifShowGps(val) {
@@ -405,27 +449,11 @@ export default {
         this.showGps = false
       }
     },
-    // 列表获取
-    getAccount() {
-      this.modalAccount = true
-      this.getAccountPage()
-    },
-    // 获取列表
-    getAccountPage() {
-      getAccountList({ page: 1 }).then(res => {
-        if (res.status === 200 && res.data.data.data !== '') {
-          this.accountData = res.data.data
-        } else {
-          console.log('账户列表获取失败')
-        }
-        this.loading = false
-      })
-    },
     // 新增提交
     save() {
       this.$refs['addForm'].validate(valid => {
+        console.log(valid)
         if (valid) {
-          // 定位服务端口号，后端未插入 FIXME
           addUser(this.addForm).then(res => {
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
@@ -445,28 +473,18 @@ export default {
     },
     // 修改信息
     update() {
-      // let data = {
-      //   id: this.editForm.id,
-      //   instName: this.editForm.instName,
-      //   instType: this.editForm.instType,
-      //   description: this.editForm.description,
-      //   host: this.editForm.host,
-      //   port: this.editForm.port,
-      //   gpsHost: '',
-      //   gpsPort: ''
-      // }
-      console.log('更新用户数据', this.editForm)
-      return
+      this.rulesValidate.userPsw[0].required = false
+      this.rulesValidate.repeatPsw[0].required = false
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           putUser(this.editForm).then(res => {
             console.log('更新用户', res)
-            // if (res.data.code === 200) {
-            //   this.$Message.success(res.data.msg)
-            //   this.$router.push({ name: 'example_page' })
-            // } else {
-            //   this.$Message.error(res.data.msg)
-            // }
+            if (res.data.code === 200) {
+              this.$Message.success(res.data.msg)
+              this.$router.push({ name: 'users_page' })
+            } else {
+              this.$Message.error(res.data.msg)
+            }
           })
         }
       })
@@ -566,5 +584,8 @@ export default {
   display: inline-block;
   /* border-bottom: 2px solid #5fa1ee; */
   margin-bottom: 20px;
+}
+.link {
+  color: blue;
 }
 </style>

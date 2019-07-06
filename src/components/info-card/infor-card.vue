@@ -69,6 +69,7 @@ export default {
   vertical-align: middle;
 }
 .info-card-wrapper{
+  box-shadow: 0 0 4px #ccc;
   .size;
   overflow: hidden;
   .ivu-card-body{
@@ -84,9 +85,13 @@ export default {
       }
     }
     .right-area{
+      font-size: 32px;
       .common;
       & > div{
         .middle-center;
+        p {
+          font-size: 10px;
+        }
       }
     }
   }

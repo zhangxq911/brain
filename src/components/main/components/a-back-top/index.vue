@@ -64,7 +64,7 @@ export default {
     },
     styles () {
       return {
-        bottom: `${this.bottom}px`,
+        bottom: `50px`, // 默认值为 ${this.bottom}
         right: `${this.right}px`
       }
     },

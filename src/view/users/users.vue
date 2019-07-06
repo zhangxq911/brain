@@ -46,12 +46,12 @@
         />
       </div>
     </div>
-    <MaskUsers @sendModal="getModal" :exampleModal="exampleModal" :editForm="openForm" :width="width"></MaskUsers>
+    <MaskUsers @sendModal="getModal" :basicInfo="basicInfo" :editForm="openForm"></MaskUsers>
   </div>
 </template>
 
 <script>
-import { getExampleList, delUser, getUserList } from '@/api/data'
+import { delUser, getUserList } from '@/api/data'
 import { parse } from 'path'
 import { callbackify } from 'util'
 import { loadavg } from 'os'
@@ -61,10 +61,9 @@ export default {
   components: { MaskUsers },
   data() {
     return {
-      width: '',
       loading: true,
-      exampleModal: false,
       openForm: {},
+      basicInfo: {},
       searchForm: {
         page: 1,
         description: '',
@@ -233,8 +232,7 @@ export default {
                     click: () => {
                       this.openForm.id = params.row.id
                       this.openForm.userName = params.row.userName
-                      this.exampleModal = true
-                      this.width = 50
+                      this.showMask('open', 50)
                     }
                   }
                 },
@@ -289,9 +287,14 @@ export default {
     }
   },
   methods: {
-    // 监听子组件关闭mask变化
     getModal(data) {
-      this.exampleModal = data
+      this.basicInfo.type = data
+    },
+    showMask(type, width) {
+      this.basicInfo = {
+        type: type,
+        width: width
+      }
     },
     // 空方法，阻止表单刷新
     searchN() {},
@@ -366,8 +369,8 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getUserList(params).then(res => {
-        if (res.status === 200 && res.data.data.data !== '') {
-          if (res.data.data.data === null) {
+        if (res.status === 200) {
+          if (!res.data.data.data) {
             this.dataList.data = []
           } else {
             this.dataList = res.data.data

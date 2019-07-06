@@ -14,7 +14,6 @@
               >
                 <Option :value="0">停止</Option>
                 <Option :value="1">运行</Option>
-                <!-- <Option value="">全选</Option> -->
               </Select>
             </FormItem>
             <FormItem prop="instType">
@@ -187,7 +186,6 @@ export default {
         },
         {
           title: '状态',
-          key: 'status',
           align: 'center',
           render: (h, params) => {
             let curStatus = params.row.status

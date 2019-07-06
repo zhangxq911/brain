@@ -81,8 +81,7 @@ export default {
         {
           title: '更新时间',
           align: 'center',
-          key: 'version'
-          // sortable: 'custom'
+          key: 'updateTime'
         },
         {
           title: '操作',

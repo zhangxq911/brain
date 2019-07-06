@@ -54,7 +54,7 @@ export const delService = data => {
   })
 }
 
-export const operateService= data => {
+export const operateService = data => {
   return axios.request({
     url: `/server/${data.serverId}/${data.serverStatus}/operate`,
     data: {},
@@ -200,6 +200,13 @@ export const startUser = data => {
   })
 }
 
+export const closeUser = data => {
+  return axios.request({
+    url: `/user/${data}/relation`,
+    method: 'delete'
+  })
+}
+
 export const delUser = data => {
   return axios.request({
     url: `/user/${data}`,
@@ -209,7 +216,7 @@ export const delUser = data => {
 
 export const putUser = data => {
   return axios.request({
-    url: `/access/user/${data.id}`,
+    url: `/user/${data.id}`,
     data: data,
     method: 'put'
   })
@@ -237,6 +244,13 @@ export const getCdrList = data => {
   })
 }
 
+export const getCallInfo = params => {
+  return axios.request({
+    url: `/stats/cdr/${params}`,
+    method: 'get'
+  })
+}
+
 /**
  * 应用列表
  */
@@ -261,6 +275,59 @@ export const delApp = data => {
     method: 'delete'
   })
 }
+
+/**
+ * 消息
+ */
+export const getMsgList = params => {
+  return axios.request({
+    url: '/message',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const saveMsg = data => {
+  return axios.request({
+    url: 'message',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const getMsgInfo = params => {
+  return axios.request({
+    url: `/message/${params}`,
+    method: 'get'
+  })
+}
+
+export const putMsg = data => {
+  return axios.request({
+    url: `/message/${data.id}`,
+    data: data,
+    method: 'put'
+  })
+}
+
+export const delMsg = data => {
+  return axios.request({
+    url: `/message/${data}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * poc接口
+ */
+export const getOrgList = params => {
+  return axios.request({
+    url: 'pocorganization/selectorg',
+    params: params,
+    method: 'get'
+  })
+}
+
 
 /**
  * -------------------
