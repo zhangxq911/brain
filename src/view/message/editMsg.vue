@@ -10,10 +10,11 @@
           <pre style="text-align: justify; white-space: pre-wrap; padding: 0 200px;">
             {{editForm.content}}
           <Button
-  type="primary"
-  style="float: right; margin-top: 20px;"
-  @click="curMode = 'edit'"
->编辑</Button>  
+            type="primary"
+            style="float: right; margin-top: 20px;"
+            @click="curMode = 'edit'"
+            v-if="defAccount === 'super_admin'"
+          >编辑</Button>  
           </pre>
         </div>
       </Col>
@@ -68,6 +69,7 @@ export default {
   props: ['id', 'mode'],
   data() {
     return {
+      defAccount: '',
       curMode: this.mode,
       addForm: {},
       editForm: {},
@@ -75,6 +77,14 @@ export default {
         title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
         content: [{ required: true, message: '请输入内容', trigger: 'blur' }]
       }
+    }
+  },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {

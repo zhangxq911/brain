@@ -1,7 +1,7 @@
 <template>
   <div class="card-box">
     <Row>
-      <Button type="primary" @click="add">新增</Button>
+      <Button v-if="defAccount === 'super_admin'" type="primary" @click="add">新增</Button>
     </Row>
     <div style="margin: 20px 0;">
       <Timeline>
@@ -21,8 +21,8 @@
               <span class="line-content">{{item.content}}</span>
               <span style="padding: 0 20px; font-weight: 500;">{{item.updateTime}}</span>
               <span class="btn" @click="view(item.id)">详情</span>
-              <span class="btn" @click="edit(item.id)">编辑</span>
-              <span class="btn" style="color: #BE6B75;" @click="showDel(item.id)">删除</span>
+              <span class="btn" @click="edit(item.id)" v-if="defAccount==='super_admin'">编辑</span>
+              <span class="btn" style="color: #BE6B75;" @click="showDel(item.id)" v-if="defAccount === 'super_admin'">删除</span>
             </div>
           </div>
         </TimelineItem>
@@ -42,10 +42,19 @@ import { parseTime } from '@/libs/tools'
 export default {
   data() {
     return {
+      defAccount: '',
       delId: '',
       modal: false,
       dataList: [],
       searchForm: { pageNumber: 1 }
+    }
+  },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {
@@ -56,10 +65,10 @@ export default {
     },
     del() {
       delMsg(this.delId).then(res => {
-        if(res.data.code === 200) {
+        if (res.data.code === 200) {
           this.$Message.success(res.data.msg)
           this.getList()
-        }else {
+        } else {
           this.$Message.error(res.data.msg)
         }
       })

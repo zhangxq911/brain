@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card-box">
-      <Row style="">
+      <Row style>
         <Button type="primary" @click="add('createAccount')">新增</Button>
         <div style="float: right; margin-bottom: -10px;">
           <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
@@ -37,7 +37,12 @@
         @on-sort-change="sortChange"
       ></Table>
       <div class="footerPage">
-        <Page :page-size="dataList.pageSize" :total="dataList.totalPage" :on-change="changePage"/>
+        <Page
+          :current="dataList.pageNumber"
+          :page-size="dataList.pageSize"
+          :total="dataList.count"
+          @on-change="changePage"
+        />
       </div>
     </div>
   </div>
@@ -261,7 +266,7 @@ export default {
       this.loading = true
       this.getPage(this.searchForm)
     },
-    searchN(){},
+    searchN() {},
     // 搜索
     search() {
       if (!this.searchForm.content) {

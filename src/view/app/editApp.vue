@@ -21,7 +21,6 @@
               <Option value="remote">云Remote</Option>
               <Option value="tv">云视听</Option>
             </Select>
-            <!-- <Input type="text" v-model="addForm.appName" placeholder="请输入应用名称"></Input> -->
           </FormItem>
           <FormItem prop="type" label="应用类型">
             <RadioGroup v-model="addForm.type">
@@ -40,10 +39,17 @@
             <Input type="text" v-model="addForm.version" placeholder="请输入更新版本"></Input>
           </FormItem>
           <FormItem prop="url" label="应用地址">
-            <Input :rows="7" type="textarea" v-model="addForm.url" placeholder="请输入应用地址"></Input>
+            <Input
+              v-if="file === null"
+              :rows="7"
+              type="textarea"
+              v-model="addForm.url"
+              placeholder="请输入应用地址"
+            ></Input>
+            <Input v-if="file !== null" :rows="7" type="textarea" v-model="file.name"></Input>
             <Upload
               :before-upload="handleUpload"
-              action=''
+              action
               v-show="addForm.type === 'android'"
               class="upload-icon"
             >
@@ -67,24 +73,8 @@
           :label-width="80"
           style="min-width: 500px;"
         >
-          <FormItem prop="appName" label="应用名称">
-            <Input type="text" v-model="editForm.appName" placeholder="请输入应用名称"></Input>
-          </FormItem>
-          <FormItem prop="type" label="应用类型">
-            <RadioGroup v-model="editForm.type">
-              <Radio label="android"></Radio>
-              <Radio label="ios"></Radio>
-            </RadioGroup>
-          </FormItem>
-          <FormItem prop="version" label="更新版本">
-            <Input v-model="editForm.version" placeholder="请输入更新版本"></Input>
-          </FormItem>
-          <FormItem label="应用描述">
-            <Input type="textarea" v-model="editForm.description" placeholder="请输入应用描述"></Input>
-          </FormItem>
-          <FormItem prop="url" label="下载链接">
-            <Input type="text" v-model="editForm.url" placeholder="请输入下载链接"></Input>
-          </FormItem>
+          <FormItem label="应用名称">{{editForm.appName}}</FormItem>
+          <FormItem label="应用类型">{{editForm.type}}</FormItem>
           <FormItem prop="status" label="更新状态">
             <Select v-model="editForm.status">
               <Option :value="0">无更新</Option>
@@ -92,8 +82,29 @@
               <Option :value="2">必须更新</Option>
             </Select>
           </FormItem>
+          <FormItem prop="version" label="更新版本">
+            <Input v-model="editForm.version" placeholder="请输入更新版本"></Input>
+          </FormItem>
+          <FormItem prop="url" label="应用地址">
+            <Input
+              v-if="file === null"
+              :rows="7"
+              type="textarea"
+              v-model="editForm.url"
+              placeholder="请输入应用地址"
+            ></Input>
+            <Input v-if="file !== null" :rows="7" type="textarea" v-model="file.name"></Input>
+            <Upload
+              :before-upload="handleUpload"
+              action
+              v-show="editForm.type === 'android'"
+              class="upload-icon"
+            >
+              <Icon type="ios-cloud-upload-outline" />
+            </Upload>
+          </FormItem>
           <FormItem label="更新内容">
-            <Input type="textarea" v-model="editForm.content"></Input>
+            <Input :rows="7" type="textarea" v-model="editForm.content"></Input>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -105,7 +116,7 @@
 </template>
 
 <script>
-import { addApp } from '@/api/data'
+import { addApp, getAppInfo, putApp } from '@/api/data'
 
 export default {
   props: ['id', 'mode'],
@@ -128,7 +139,7 @@ export default {
         version: [
           { required: true, message: '请输入更新版本', trigger: 'blur' }
         ],
-        url: [{ required: true, message: '请输入应用地址', trigger: 'blur' }],
+        // url: [{ required: true, message: '请输入应用地址', trigger: 'blur' }],
         status: [
           {
             type: 'number',
@@ -138,7 +149,22 @@ export default {
           }
         ]
       },
-      rulesValidate2: {}
+      rulesValidate2: {
+        content: [
+          { required: true, message: '请输入更新内容', trigger: 'blur' }
+        ],
+        version: [
+          { required: true, message: '请输入更新版本', trigger: 'blur' }
+        ],
+        status: [
+          {
+            type: 'number',
+            required: true,
+            message: '请选择更新状态',
+            trigger: 'change'
+          }
+        ]
+      }
     }
   },
   created() {},
@@ -146,16 +172,47 @@ export default {
     // 上传文件前处理
     handleUpload(file) {
       this.file = file
+      this.addForm.url = file.name
+      this.rulesValidate.url[0].required = false
       return false
     },
     // 更新
-    update() {},
+    update() {
+      let formData = new FormData()
+      formData.append('file', this.file)
+      formData.append('id', this.id)
+      formData.append('content', this.editForm.content)
+      formData.append('version', this.editForm.version)
+      formData.append('url', this.editForm.url)
+      formData.append('status', this.editForm.status)
+      this.$refs['editForm'].validate(valid => {
+        putApp(formData).then(res => {
+          if (res.data.code === 200) {
+            this.$Message.success(res.data.msg)
+            // 重置表单
+            this.$refs['editForm'].resetFields()
+            this.$router.push({
+              name: 'app_page'
+            })
+          } else {
+            this.$Message.error(res.data.msg)
+          }
+        })
+      })
+    },
     // 保存
     save() {
-      console.log(this.file)
+      let formData = new FormData()
+      formData.append('file', this.file)
+      formData.append('appName', this.addForm.appName)
+      formData.append('type', this.addForm.type)
+      formData.append('content', this.addForm.content)
+      formData.append('version', this.addForm.version)
+      formData.append('url', this.addForm.url)
+      formData.append('status', this.addForm.status)
       this.$refs['addForm'].validate(valid => {
         if (valid) {
-          addApp(this.addForm).then(res => {
+          addApp(formData).then(res => {
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -169,9 +226,49 @@ export default {
           })
         }
       })
+    },
+    getInfo() {
+      if (!this.id) {
+        return
+      }
+      getAppInfo(this.id).then(res => {
+        if (res.data.code === 200) {
+          this.editForm = res.data.data
+          let appName = res.data.data.appName
+          switch (appName) {
+            case 'center':
+              this.editForm.appName = '联络中心'
+              break
+            case 'call':
+              this.editForm.appName = '远程会议'
+              break
+            case 'gis':
+              this.editForm.appName = '联情指挥'
+              break
+            case 'live':
+              this.editForm.appName = '网络直播'
+              break
+            case 'meeting':
+              this.editForm.appName = '云会议'
+              break
+            case 'remote':
+              this.editForm.appName = '云Remote'
+              break
+            case 'tv':
+              this.editForm.appName = '云视听'
+              break
+            default:
+              break
+          }
+        } else {
+          console.log('获取详情失败')
+        }
+      })
     }
   },
-  mounted() {}
+  mounted() {
+    this.getInfo()
+  }
 }
 </script>
 

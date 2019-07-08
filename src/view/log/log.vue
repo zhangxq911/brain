@@ -95,7 +95,7 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('div', params.row.name),
+              h('div', params.row.id),
               h('div', params.row.name)
             ])
           }

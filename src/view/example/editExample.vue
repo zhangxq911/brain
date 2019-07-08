@@ -56,45 +56,107 @@
             </Row>
           </TabPane>
           <TabPane label="组织机构" name="name2">
-            <Row style>
-              <Button type="primary">添加部门</Button>
-              <Button type="primary">添加人员</Button>
+            <Row>
+              <Button type="primary" @click="showMask('addOrg', 30)">添加部门</Button>
+              <Button type="primary" style="margin-left: 10px;">添加人员</Button>
               <div style="float: right; margin-bottom: -10px;">
-                <Form
-                  ref="searchForm"
-                  :model="searchForm"
-                  inline
-                >
-                  <FormItem prop="filter">
-                    <Select
-                      @on-change="clearSearch"
-                      v-model="searchForm.filter"
-                      style="width: 100px;"
-                    >
-                      <Option
-                        v-for="(item, index) in filterList"
-                        :value="item.value"
-                        :key="index"
-                      >{{ item.name }}</Option>
+                <Form inline>
+                  <FormItem>
+                    <Select style="width: 100px;">
+                      <Option value="1">option1</Option>
                     </Select>
                   </FormItem>
-                  <FormItem prop="content">
-                    <Input
-                      search
-                      v-model="searchForm.content"
-                      placeholder="请输入搜索内容"
-                      style="width: 200px;"
-                      @on-search="search"
-                    ></Input>
+                  <FormItem>
+                    <Select style="width: 100px;">
+                      <Option value="2">option2</Option>
+                    </Select>
                   </FormItem>
                   <FormItem>
-                    <Button @click="search">刷新</Button>
+                    <Input search placeholder="请输入搜索内容" style="width: 200px;"></Input>
+                  </FormItem>
+                  <FormItem>
+                    <Button type="default">同步</Button>
                   </FormItem>
                 </Form>
               </div>
             </Row>
+            <div style="display: flex; height: 100%;">
+              <div style="width: 200px; background: #F1F3F6; padding: 0 10px;">
+                <!-- 左侧组织树 -->
+                <Tree :data="orgList" :render="renderContent"></Tree>
+              </div>
+              <div style="flex: 1;">
+                <Table
+                  border
+                  ref="selection"
+                  :columns="orgColumns"
+                  :data="orgData.data[0].pocUserList"
+                ></Table>
+                <div>
+                  <Button style="margin: 10px;" type="error">删除用户</Button>
+                  <Button style="margin: 10px;" type="primary">添加至工作组</Button>
+                </div>
+                <div style="text-align: center;">
+                  <Page
+                    :current="orgData.pageNumber"
+                    :page-size="orgData.pageSize"
+                    :total="orgData.count"
+                    @on-change="changeOrgPage"
+                  />
+                </div>
+              </div>
+            </div>
           </TabPane>
-          <TabPane label="工作组" name="name3">标签三的内容</TabPane>
+          <TabPane label="工作组" name="name3">
+            <Row>
+              <Button type="primary">添加</Button>
+              <div style="float: right; margin-bottom: -10px;">
+                <Form inline>
+                  <FormItem>
+                    <Select style="width: 100px;">
+                      <Option value="1">option1</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem>
+                    <Select style="width: 100px;">
+                      <Option value="2">option2</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem>
+                    <Input search placeholder="请输入搜索内容" style="width: 200px;"></Input>
+                  </FormItem>
+                  <FormItem>
+                    <Button type="default">同步</Button>
+                  </FormItem>
+                </Form>
+              </div>
+            </Row>
+            <div style="display: flex; height: 100%;">
+              <div style="width: 200px; background: #F1F3F6; padding: 0 10px;">
+                <!-- 左侧组织树 -->
+                <!-- <Tree :data="orgList" :render="renderContent"></Tree> -->
+              </div>
+              <div style="flex: 1;">
+                <!-- <Table
+                  border
+                  ref="selection"
+                  :columns="orgColumns"
+                  :data="orgData.data[0].pocUserList"
+                ></Table>-->
+                <div>
+                  <Button style="margin: 10px;" type="error">删除用户</Button>
+                </div>
+                <div style="text-align: center;">
+                  <!-- <Page
+                    :current="orgData.pageNumber"
+                    :page-size="orgData.pageSize"
+                    :total="orgData.count"
+                    @on-change="changeOrgPage"
+                  />-->
+                </div>
+              </div>
+            </div>
+          </TabPane>
         </Tabs>
       </Col>
       <!-- 新增 -->
@@ -200,7 +262,10 @@ import {
   putExample,
   addExample,
   getAccountList,
-  getOrgList
+  getOrgList,
+  getOrgDatas,
+  getGroupList,
+  getGroupData
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
 import MaskUsers from './maskExample'
@@ -280,7 +345,68 @@ export default {
     }
 
     return {
-      searchForm: {},
+      orgColumns: [
+        {
+          type: 'selection',
+          width: 60,
+          align: 'center'
+        },
+        {
+          title: '人员ID/人员名称',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('div', params.row.uid),
+              h('div', params.row.name)
+            ])
+          }
+        },
+        {
+          title: '人员号码',
+          align: 'center',
+          key: 'tel'
+        },
+        {
+          title: '手机号码',
+          align: 'center',
+          key: 'phone'
+        },
+        {
+          title: '人员职称',
+          key: 'position'
+        },
+        {
+          title: '状态',
+          key: 'status',
+          render: (h, params) => {
+            let curStatus = ''
+            switch (params.row.status) {
+              case 'logout':
+                curStatus = '登出'
+                break
+              case 'login':
+                curStatus = '登录'
+                break
+              default:
+                break
+            }
+            return h('div', curStatus)
+          }
+        },
+        {
+          title: '操作',
+          render: (h, params) => {
+            return h('div', '操作')
+          }
+        }
+      ],
+      orgData: { data: [{ pocUserList: [] }] },
+      orgList: [],
+      activeId: '',
+      searchForm: {
+        instanceId: this.id,
+        page: 1
+      },
       serverContent2: '', // 详情、编辑实例内容
       accountContent: '',
       serverContent: '',
@@ -408,20 +534,141 @@ export default {
     }
   },
   methods: {
+    // 组织分页
+    changeOrgPage(curPage) {
+      this.searchForm.page = curPage
+      this.getOrgPage()
+    },
+    // 自定义组织菜单
+    renderContent(h, { root, node, data }) {
+      return h(
+        'span',
+        {
+          style: {
+            display: 'inline-block',
+            width: '100%'
+          }
+        },
+        [
+          h(
+            'span',
+            {
+              props: {
+                'v-show': data.id === this.activeId
+              }
+            },
+            data.title
+          ),
+          h(
+            'Dropdown',
+            {
+              style: {
+                display: 'inline-block',
+                float: 'right',
+                marginRight: '32px'
+              }
+            },
+            [
+              h('span', '···'),
+              h(
+                'DropdownMenu',
+                {
+                  slot: 'list'
+                },
+                [
+                  h(
+                    'DropdownItem',
+                    {
+                      on: {
+                        'on-click': () => {
+                          console.log('xixix')
+                          alert('编辑')
+                        }
+                      }
+                    },
+                    '编辑'
+                  ),
+                  h('DropdownItem', '删除')
+                ]
+              )
+            ]
+          )
+        ]
+      )
+    },
     // 获取组织信息
     getOrg(name) {
       if (name === 'name2') {
         // 组织结构
-        // this.getOrgLists()
-        // this.getOrgPages()
+        this.searchForm.page = 1
+        this.getOrgLists()
+        this.getOrgPage()
       } else if (name === 'name3') {
         // 工作组
+        this.searchForm.page = 1
+        this.getGroupLists()
+        this.getGroupPage()
       }
     },
-    getOrgPages() {},
+    // 处理组织树数据，原数据格式 【】list pid id 关联
+    listToTree(list) {
+      const copyList = list.slice(0)
+      const tree = []
+      for (let i = 0; i < copyList.length; i++) {
+        // 找出每一项的父节点，并将其作为父节点的children
+        for (let j = 0; j < copyList.length; j++) {
+          if (copyList[i].parentOid === copyList[j].oid) {
+            if (copyList[j].children === undefined) {
+              copyList[j].children = []
+            }
+            copyList[j].children.push(copyList[i])
+          }
+        }
+        // 把根节点提取出来，parentId为null的就是根节点
+        if (copyList[i].parentOid === 0) {
+          tree.push(copyList[i])
+        }
+      }
+      return tree
+    },
+    handleList(list) {
+      let newList = []
+      list.forEach((item, index) => {
+        let obj = {}
+        obj.title = item.name
+        obj.oid = item.oid
+        obj.parentOid = item.parentOid
+        newList.push(obj)
+      })
+      return newList
+    },
+    // 组织表格数据
+    getOrgPage() {
+      let params = this.searchForm
+      getOrgDatas(params).then(res => {
+        this.orgData = res.data.data
+      })
+    },
+    // 工作组数据
+    getGroupPage() {
+      let params = this.searchForm
+      getGroupData(params).then(res => {
+        console.log(res)
+      })
+    },
+    // 组织菜单数据
     getOrgLists() {
-      let params = { id: this.id }
+      let params = { instanceId: this.id }
       getOrgList(params).then(res => {
+        if (res.data.code === 200) {
+          this.orgList = this.listToTree(this.handleList(res.data.data))
+        }
+      })
+    },
+    // 工作组菜单数据
+    getGroupLists() {
+      let params = { instanceId: this.id }
+      getGroupList(params).then(res => {
         console.log(res)
       })
     },

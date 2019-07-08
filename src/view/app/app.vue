@@ -18,6 +18,7 @@
 <script>
 import { getAppList, delApp } from '@/api/data'
 import { parseTime } from '@/libs/tools'
+import { stat } from 'fs';
 
 export default {
   data() {
@@ -29,6 +30,32 @@ export default {
           title: '应用ID/应用名称',
           align: 'center',
           render: (h, params) => {
+            let appName = params.row.appName
+            switch (appName) {
+              case 'center':
+                appName = '联络中心'
+                break
+              case 'call':
+                appName = '远程会议'
+                break
+              case 'gis':
+                appName = '联情指挥'
+                break
+              case 'live':
+                appName = '网络直播'
+                break
+              case 'meeting':
+                appName = '云会议'
+                break
+              case 'remote':
+                appName = '云Remote'
+                break
+              case 'tv':
+                appName = '云视听'
+                break
+              default:
+                break
+            }
             return h('div', [
               h(
                 'div',
@@ -54,7 +81,7 @@ export default {
                 },
                 params.row.id
               ),
-              h('div', {}, params.row.appName)
+              h('div', appName)
             ])
           }
         },
@@ -76,7 +103,23 @@ export default {
         {
           title: '更新状态',
           align: 'center',
-          key: 'status'
+          render: (h, params) => {
+            let status = params.row.status
+            switch (status) {
+              case 0:
+                status = '无更新'
+                break
+              case 1:
+                status = '建议更新'
+                break
+              case 2:
+                status = '必须更新'
+                break
+              default:
+                break
+            }
+            return h('div', status)
+          }
         },
         {
           title: '更新时间',

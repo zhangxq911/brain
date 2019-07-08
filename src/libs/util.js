@@ -67,6 +67,7 @@ export const getBreadCrumbList = (route, homeRoute) => {
     }
     // params中的to优先级更高
     route.params.to ? meta.to = route.params.to : ''
+    route.params.disBack ? meta.disBack = route.params.disBack : ''
     let obj = {
       icon: (item.meta && item.meta.icon) || '',
       name: item.name,

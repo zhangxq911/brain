@@ -63,7 +63,12 @@
           </Form>
           <div style="padding: 0px 60px;">
             <h5 style="margin-bottom: 6px;">选择账户</h5>
-            <Input v-model="searchForm.accountInfo" @on-search="searchAccount" search placeholder="请输入账户ID/账户名称"></Input>
+            <Input
+              v-model="searchForm.accountInfo"
+              @on-search="searchAccount"
+              search
+              placeholder="请输入账户ID/账户名称"
+            ></Input>
           </div>
           <Table
             border
@@ -80,7 +85,11 @@
           />
           <div style="padding: 20px 60px;" v-show="selectExmpArr2.length > 0">
             已选中：
-            <span style="color: #2d8cf0;" v-for="(item, index) in selectExmpArr2" :key="item.id">
+            <span
+              style="color: #2d8cf0;"
+              v-for="(item, index) in selectExmpArr2"
+              :key="item.id"
+            >
               {{item.name}}
               <span class="del-select" @click="delSelect2">删除</span>
             </span>
@@ -89,6 +98,35 @@
           <div style="display: flex; justify-content: center;">
             <Button type="primary" @click="saveAccount">确定</Button>
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'addOrg'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">添加部门</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div>
+          <Form ref="orgForm" :model="orgForm" :rules="orgValidate" label-position="top">
+            <FormItem label="部门名称">
+              <Input v-model="orgForm.name"></Input>
+            </FormItem>
+            <FormItem label="顶级部门">
+              <!-- 顶级部门为否的话 pid 传 0 -->
+              <RadioGroup v-model="orgForm.top">
+                <Radio :label="0">否</Radio>
+                <Radio :label="1">是</Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem label="上级部门">
+              <Input v-model="orgForm.parentOid"></Input>
+            </FormItem>
+            <FormItem>
+              <Button>保存</Button>
+            </FormItem>
+          </Form>
         </div>
       </div>
     </div>
@@ -102,6 +140,8 @@ export default {
   props: ['basicInfo', 'editForm'],
   data() {
     return {
+      orgForm: {},
+      orgValidate: {},
       selectExmpArr: [], // 选中的服务
       selectExmpArr2: [], // 选中的账户
       isDisabled: false,
@@ -144,7 +184,7 @@ export default {
                     }
                     let data = {
                       id: params.row.id,
-                      name: params.row.accountName,
+                      name: params.row.accountName
                     }
                     this.selectExmpArr2.push(data)
                     this.isDisabled2 = true

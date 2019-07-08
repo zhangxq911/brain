@@ -39,7 +39,7 @@ class HttpRequest {
       if(store.state.user.token) {
         config.headers.token = store.state.user.token
       }
-      if (config.method === 'post') {
+      if (config.method === 'post' && !config.upload) {
         const formData = new FormData()
         Object.keys(config.data).forEach(key => formData.append(key, config.data[key]))
         config.data = formData

@@ -46,6 +46,15 @@ export default [
     component: () => import('@/view/forget/forget')
   },
   {
+    path: '/h5',
+    name: 'h5',
+    meta: {
+      title: 'APP下载',
+      hideInMenu: true
+    },
+    component: () => import('@/view/h5/h5')
+  },
+  {
     path: '/main',
     name: '_home',
     redirect: '/home',

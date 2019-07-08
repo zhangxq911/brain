@@ -265,7 +265,8 @@ export const addApp = data => {
   return axios.request({
     url: '/app/versions',
     data: data,
-    method: 'post'
+    method: 'post',
+    upload: true
   })
 }
 
@@ -275,6 +276,30 @@ export const delApp = data => {
     method: 'delete'
   })
 }
+
+export const getAppInfo = params => {
+  return axios.request({
+    url: `/app/versions/getAppVersionInfo/${params}`,
+    method: 'get'
+  })
+}
+
+export const putApp = data => {
+  return axios.request({
+    url: `/app/versions/${data.get('id')}`,
+    data: data,
+    method: 'put'
+  })
+}
+
+// h5 下载，最新app内容请求
+export const getLatestInfo = () => {
+  return axios.request({
+    url: '/app/versions/getNewestAppVersionList',
+    method: 'get'
+  })
+}
+
 
 /**
  * 消息
@@ -320,7 +345,7 @@ export const delMsg = data => {
 /**
  * poc接口
  */
-export const getOrgList = params => {
+export const getOrgDatas = params => {
   return axios.request({
     url: 'pocorganization/selectorg',
     params: params,
@@ -328,6 +353,29 @@ export const getOrgList = params => {
   })
 }
 
+export const getOrgList = params => {
+  return axios.request({
+    url: 'pocorganization/selectallorg',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getGroupList = params => {
+  return axios.request({
+    url: 'pocgroup/selectgroup',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getGroupData = params => {
+  return axios.request({
+    url: 'pocgroup/selectusergroup',
+    params: params,
+    method: 'get'
+  })
+}
 
 /**
  * -------------------

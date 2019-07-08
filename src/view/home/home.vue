@@ -28,10 +28,10 @@
         </i-col>
         <example style="height: 380px; margin-top: 130px; padding: 0px;" />
       </div>
-      <div class="card-box" style="flex: 1;">
+      <div class="card-box" style="flex: 1; height: 600px; overflow: auto;">
         <div style="border-bottom: .5px solid #ccc; margin-bottom: 20px;">
           <h3 class="detailTitle" style="border: none;">消息中心</h3>
-          <span class="showMore" style>更多</span>
+          <span class="showMore" @click="showMore">更多</span>
         </div>
         <div v-if="timeLineData.length === 0">暂无消息!</div>
         <Timeline>
@@ -40,12 +40,14 @@
               <div class="title">
                 <span v-if="index === 0" style=" color: red; position: absolute; left: 24px;">新</span>
                 <span class="pot"></span>
-                <h5>
+                <h5 class="nowrap-content">
                   {{item.title}}
-                  <span style="float: right; font-size: 10px; color: #c5c5c5; font-weight: 400;">{{item.time}}</span>
+                  <span
+                    style="float: right; font-size: 10px; color: #333333; font-weight: 400;"
+                  >{{item.updateTime}}</span>
                 </h5>
               </div>
-              <p class="content">{{item.content}}</p>
+              <p class="content nowrap-content">{{item.content}}</p>
             </div>
           </TimelineItem>
         </Timeline>
@@ -58,6 +60,7 @@
 import { parseTime } from '@/libs/tools'
 import InforCard from '_c/info-card'
 import Example from './example.vue'
+import { getMsgList } from '@/api/data'
 
 export default {
   components: {
@@ -66,6 +69,7 @@ export default {
   },
   data() {
     return {
+      searchForm: { pageNumber: 1 },
       basicInfo: {
         userName: '',
         status: '正常',
@@ -89,33 +93,7 @@ export default {
         },
         { title: '通话总量', icon: 'md-headset', count: 0, color: '#ed3f14' }
       ],
-      timeLineData: [
-        // {
-        //   title: 'sda',
-        //   content: 'csdsas',
-        //   time: parseTime(new Date(), '{y}.{m}.{d}')
-        // },
-        // {
-        //   title: 'sda',
-        //   content: 'csdsas',
-        //   time: parseTime(new Date(), '{y}.{m}.{d}')
-        // },
-        // {
-        //   title: 'sda',
-        //   content: 'csdsas',
-        //   time: parseTime(new Date(), '{y}.{m}.{d}')
-        // },
-        // {
-        //   title: 'sda',
-        //   content: 'csdsas',
-        //   time: parseTime(new Date(), '{y}.{m}.{d}')
-        // },
-        // {
-        //   title: 'sda',
-        //   content: 'csdsas',
-        //   time: parseTime(new Date(), '{y}.{m}.{d}')
-        // }
-      ]
+      timeLineData: []
     }
   },
   created() {
@@ -131,6 +109,30 @@ export default {
     } else {
       this.basicInfo.access = '其他'
     }
+  },
+  methods: {
+    // 跳转更多
+    showMore() {
+      this.$router.push({
+        name: 'msg_page'
+      })
+    },
+    // 获取消息数据
+    getMsgLists() {
+      getMsgList(this.searchForm).then(res => {
+        if (res.data.code === 200) {
+          let arr = res.data.data
+          arr.forEach(item => {
+            item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
+          })
+          // this.dataList.concat(arr) 该方法每次合并后豆薯保留原来的对象，造成空间浪费
+          this.timeLineData.push.apply(this.timeLineData, arr)
+        }
+      })
+    }
+  },
+  mounted() {
+    this.getMsgLists()
   }
 }
 </script>
@@ -153,5 +155,10 @@ export default {
 .showMore:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+.nowrap-content {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 </style>

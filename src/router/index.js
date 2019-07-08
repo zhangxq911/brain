@@ -11,8 +11,8 @@ const { homeName } = config
 Vue.use(Router)
 const router = new Router({
   routes,
-  mode: 'hash',
-  // mode: 'history',
+  // mode: 'hash',
+  mode: 'history',
   base: '/console'
 })
 const LOGIN_PAGE_NAME = 'login'
