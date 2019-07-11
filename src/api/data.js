@@ -110,6 +110,31 @@ export const register = data => {
     method: 'post'
   })
 }
+
+export const registered = params => {
+  return axios.request({
+    url: '/account/registered',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const isExitsAccount = params => {
+  return axios.request({
+    url: '/account/isExitsAccount',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const forget = data => {
+  return axios.request({
+    url: '/account/forget',
+    data: data,
+    method: 'post'
+  })
+}
+
 /**
  * 实例列表
  */
@@ -345,9 +370,98 @@ export const delMsg = data => {
 /**
  * poc接口
  */
+
+export const delUserGroup = data => {
+  return axios.request({
+    url: 'usergroup/delusersgroup',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const putGroup = data => {
+  return axios.request({
+    url: 'pocgroup/updategroup',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const delGroup = data => {
+  return axios.request({
+    url: '/pocgroup/delgroup',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const addGroop = data => {
+  return axios.request({
+    url: '/pocgroup/addgroup',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const putPermission = data => {
+  return axios.request({
+    url: '/pocuser/udpusershow',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const getDefPermission = params => {
+  return axios.request({
+    url: '/pocuser/selectusershow',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const updateUsers = data => {
+  return axios.request({
+    url: '/pocuser/updateuser',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const addToGroup = data => {
+  return axios.request({
+    url: '/pocgroup/addusersgroup',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const delUsers = data => {
+  return axios.request({
+    url: '/pocuser/delusers',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const addUser2 = data => {
+  return axios.request({
+    url: '/pocuser/adduser',
+    data: data,
+    method: 'post'
+  })
+}
+
 export const getOrgDatas = params => {
   return axios.request({
-    url: 'pocorganization/selectorg',
+    url: '/pocorganization/selectorg',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getUser = params => {
+  return axios.request({
+    url: '/pocorganization/selectuserorg',
     params: params,
     method: 'get'
   })
@@ -355,7 +469,7 @@ export const getOrgDatas = params => {
 
 export const getOrgList = params => {
   return axios.request({
-    url: 'pocorganization/selectallorg',
+    url: '/pocorganization/selectallorg',
     params: params,
     method: 'get'
   })
@@ -363,7 +477,7 @@ export const getOrgList = params => {
 
 export const getGroupList = params => {
   return axios.request({
-    url: 'pocgroup/selectgroup',
+    url: '/pocgroup/selectgroup',
     params: params,
     method: 'get'
   })
@@ -371,11 +485,36 @@ export const getGroupList = params => {
 
 export const getGroupData = params => {
   return axios.request({
-    url: 'pocgroup/selectusergroup',
+    url: '/pocgroup/selectusergroup',
     params: params,
     method: 'get'
   })
 }
+
+export const addOrg = data => {
+  return axios.request({
+    url: '/pocorganization/addorg',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const delOrg = data => {
+  return axios.request({
+    url: '/pocorganization/delorg',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const updateOrg = data => {
+  return axios.request({
+    url: '/pocorganization/updateorg',
+    data: data,
+    method: 'post'
+  })
+}
+
 
 /**
  * -------------------

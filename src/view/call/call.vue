@@ -25,6 +25,7 @@
           style="width: 200px; margin-left: 10px;"
           @on-search="search"
         ></Input>
+        <Button @click="search" style="margin-left: 10px;">刷新</Button>
       </div>
     </Row>
     <Table :loading="loading" border :columns="columns" :data="dataList.data"></Table>
@@ -47,7 +48,7 @@ import { parse } from 'path'
 export default {
   data() {
     return {
-      loading: true,
+      loading: false,
       rangeTime: '',
       dataList: [],
       columns: [
@@ -55,7 +56,7 @@ export default {
           title: '通话时间',
           align: 'center',
           render: (h, params) => {
-            return h('div', params.row.startTime + ' - ' + params.row.endTime)
+            return h('div', params.row.callTime + ' - ' + params.row.endTime)
           }
         },
         {

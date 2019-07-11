@@ -25,6 +25,7 @@
           style="width: 200px; margin-left: 10px;"
           @on-search="search"
         ></Input>
+        <Button @click="search" style="margin-left: 10px;">刷新</Button>
       </div>
     </Row>
     <Table :loading="loading" border :columns="columns" :data="dataList.data"></Table>
@@ -46,7 +47,7 @@ import { parseTime } from '@/libs/tools'
 export default {
   data() {
     return {
-      loading: true,
+      loading: false,
       rangeTime: '',
       dataList: [],
       searchForm: {},

@@ -26,6 +26,7 @@
           <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
           <FormItem label="运行状态">{{editForm.status ? '运行中': '已停止' }}</FormItem>
           <FormItem label="用户容量">{{editForm.totalCapacity }}</FormItem>
+          <FormItem label="编号前缀">{{editForm.numberPrefix }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <Row style="margin-top: 20px;">
@@ -76,6 +77,15 @@
           </FormItem>
           <FormItem v-show="showGps" label="定位服务端口">
             <Input type="text" v-model="addForm.gpsPort" placeholder="请输入定位服务端口"></Input>
+          </FormItem>
+          <FormItem prop="numberPrefix" label="编号前缀">
+            <InputNumber
+              style="width: 100%;"
+              :min="0"
+              :max="99999999"
+              v-model="addForm.numberPrefix"
+              placeholder="请输入编号前缀"
+            ></InputNumber>
           </FormItem>
           <FormItem label="服务描述">
             <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入服务描述"></Input>
@@ -153,7 +163,8 @@ export default {
       curMode: this.mode,
       addForm: {
         serverPort: 1,
-        totalCapacity: 1
+        totalCapacity: 1,
+        numberPrefix: 0
       },
       editForm: {},
       rulesValidate: {
@@ -171,6 +182,14 @@ export default {
             type: 'number',
             required: true,
             message: '请输入服务端口',
+            trigger: 'blur'
+          }
+        ],
+        numberPrefix: [
+          {
+            type: 'number',
+            required: true,
+            message: '请输入编号前缀',
             trigger: 'blur'
           }
         ],

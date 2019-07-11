@@ -1,7 +1,27 @@
 <template>
   <div class="card-box">
     <h3 class="detailTitle">基本信息</h3>
+    <a
+      class="editBtn"
+      href="javascript:void(0)"
+      @click="curMode = 'edit'"
+      v-show="curMode === 'view'"
+    >
+      编辑
+      <Icon type="md-create" />
+    </a>
     <Row>
+      <!-- 详情 -->
+      <Col span="12" v-if="curMode === 'view'">
+        <Form :label-width="80" style="min-width: 500px;">
+          <FormItem label="应用名称">{{editForm.appName}}</FormItem>
+          <FormItem label="应用类型">{{editForm.type}}</FormItem>
+          <FormItem label="更新状态">{{curStatus}}</FormItem>
+          <FormItem label="更新版本">{{editForm.version}}</FormItem>
+          <FormItem label="应用地址">{{editForm.url}}</FormItem>
+          <FormItem label="更新内容">{{editForm.content}}</FormItem>
+        </Form>
+      </Col>
       <!-- 新增 -->
       <Col span="12" v-if="curMode === 'add'">
         <Form
@@ -117,6 +137,7 @@
 
 <script>
 import { addApp, getAppInfo, putApp } from '@/api/data'
+import { stat } from 'fs'
 
 export default {
   props: ['id', 'mode'],
@@ -124,6 +145,7 @@ export default {
     return {
       file: null,
       curMode: this.mode,
+      curStatus: '',
       editForm: {},
       addForm: {
         type: 'android'
@@ -167,7 +189,6 @@ export default {
       }
     }
   },
-  created() {},
   methods: {
     // 上传文件前处理
     handleUpload(file) {
@@ -235,6 +256,7 @@ export default {
         if (res.data.code === 200) {
           this.editForm = res.data.data
           let appName = res.data.data.appName
+          let status = res.data.data.status
           switch (appName) {
             case 'center':
               this.editForm.appName = '联络中心'
@@ -256,6 +278,20 @@ export default {
               break
             case 'tv':
               this.editForm.appName = '云视听'
+              break
+            default:
+              break
+          }
+
+          switch (status) {
+            case 0:
+              this.curStatus = '无更新'
+              break
+            case 1:
+              this.curStatus = '建议更新'
+              break
+            case 2:
+              this.curStatus = '必须更新'
               break
             default:
               break
@@ -285,5 +321,8 @@ export default {
 .upload-icon:hover {
   cursor: pointer;
   color: #2d8cf0;
+}
+.editBtn {
+  padding-left: 24px;
 }
 </style>

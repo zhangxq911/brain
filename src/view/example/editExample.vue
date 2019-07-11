@@ -46,6 +46,7 @@
                       <Icon type="md-create" />
                     </a>
                   </FormItem>
+                  <FormItem label="到期时间">{{editForm.expirationTime}}</FormItem>
                   <FormItem label="实例">
                     <Input :rows="7" readonly type="textarea" :value="this.serverContent2"></Input>
                   </FormItem>
@@ -58,21 +59,45 @@
           <TabPane label="组织机构" name="name2">
             <Row>
               <Button type="primary" @click="showMask('addOrg', 30)">添加部门</Button>
-              <Button type="primary" style="margin-left: 10px;">添加人员</Button>
+              <Button
+                type="primary"
+                style="margin-left: 10px;"
+                @click="showMask('addUser', 30)"
+              >添加人员</Button>
               <div style="float: right; margin-bottom: -10px;">
-                <Form inline>
+                <Form inline @submit.native.prevent>
                   <FormItem>
-                    <Select style="width: 100px;">
-                      <Option value="1">option1</Option>
+                    <Select
+                      @on-change="search"
+                      v-model="searchForm.status"
+                      style="width: 100px;"
+                      placeholder="状态"
+                    >
+                      <Option value="logout">登出</Option>
+                      <Option value="login">登录</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem prop="filter">
+                    <Select
+                      @on-change="clearSearch"
+                      v-model="searchForm.filter"
+                      style="width: 100px;"
+                    >
+                      <Option
+                        v-for="(item, index) in filterList"
+                        :value="item.value"
+                        :key="index"
+                      >{{ item.name }}</Option>
                     </Select>
                   </FormItem>
                   <FormItem>
-                    <Select style="width: 100px;">
-                      <Option value="2">option2</Option>
-                    </Select>
-                  </FormItem>
-                  <FormItem>
-                    <Input search placeholder="请输入搜索内容" style="width: 200px;"></Input>
+                    <Input
+                      @on-search="search"
+                      search
+                      v-model="searchForm.content"
+                      placeholder="请输入搜索内容"
+                      style="width: 200px;"
+                    ></Input>
                   </FormItem>
                   <FormItem>
                     <Button type="default">同步</Button>
@@ -81,7 +106,9 @@
               </div>
             </Row>
             <div style="display: flex; height: 100%;">
-              <div style="width: 200px; background: #F1F3F6; padding: 0 10px;">
+              <div
+                style="width: 200px; background: #F1F3F6; padding: 0 10px; max-height: 460px; overflow: auto;"
+              >
                 <!-- 左侧组织树 -->
                 <Tree :data="orgList" :render="renderContent"></Tree>
               </div>
@@ -91,10 +118,21 @@
                   ref="selection"
                   :columns="orgColumns"
                   :data="orgData.data[0].pocUserList"
+                  @on-selection-change="selectUser"
                 ></Table>
                 <div>
-                  <Button style="margin: 10px;" type="error">删除用户</Button>
-                  <Button style="margin: 10px;" type="primary">添加至工作组</Button>
+                  <Button
+                    :disabled="selectUserStr.length > 0 ? false: true"
+                    style="margin: 10px;"
+                    type="error"
+                    @click="delUser"
+                  >删除用户</Button>
+                  <Button
+                    :disabled="selectUserStr.length > 0 ? false: true"
+                    style="margin: 10px;"
+                    type="primary"
+                    @click="showMask('addToWork', 30)"
+                  >添加至工作组</Button>
                 </div>
                 <div style="text-align: center;">
                   <Page
@@ -109,21 +147,41 @@
           </TabPane>
           <TabPane label="工作组" name="name3">
             <Row>
-              <Button type="primary">添加</Button>
+              <Button type="primary" @click="showMask('addWork', 30)">添加</Button>
               <div style="float: right; margin-bottom: -10px;">
-                <Form inline>
+                <Form inline @submit.native.prevent>
                   <FormItem>
-                    <Select style="width: 100px;">
-                      <Option value="1">option1</Option>
+                    <Select
+                      @on-change="searchWork"
+                      v-model="searchForm.status"
+                      style="width: 100px;"
+                      placeholder="状态"
+                    >
+                      <Option value="logout">登出</Option>
+                      <Option value="login">登录</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem prop="filter">
+                    <Select
+                      @on-change="clearSearch"
+                      v-model="searchForm.filter"
+                      style="width: 100px;"
+                    >
+                      <Option
+                        v-for="(item, index) in filterList2"
+                        :value="item.value"
+                        :key="index"
+                      >{{ item.name }}</Option>
                     </Select>
                   </FormItem>
                   <FormItem>
-                    <Select style="width: 100px;">
-                      <Option value="2">option2</Option>
-                    </Select>
-                  </FormItem>
-                  <FormItem>
-                    <Input search placeholder="请输入搜索内容" style="width: 200px;"></Input>
+                    <Input
+                      @on-search="searchWork"
+                      v-model="searchForm.content"
+                      search
+                      placeholder="请输入搜索内容"
+                      style="width: 200px;"
+                    ></Input>
                   </FormItem>
                   <FormItem>
                     <Button type="default">同步</Button>
@@ -132,27 +190,35 @@
               </div>
             </Row>
             <div style="display: flex; height: 100%;">
-              <div style="width: 200px; background: #F1F3F6; padding: 0 10px;">
+              <div
+                style="width: 200px; background: #F1F3F6; padding: 0 10px; max-height: 460px; overflow: auto;"
+              >
                 <!-- 左侧组织树 -->
-                <!-- <Tree :data="orgList" :render="renderContent"></Tree> -->
+                <Tree :data="groupList" :render="renderContent2"></Tree>
               </div>
               <div style="flex: 1;">
-                <!-- <Table
+                <Table
                   border
                   ref="selection"
-                  :columns="orgColumns"
-                  :data="orgData.data[0].pocUserList"
-                ></Table>-->
+                  :columns="groupColumns"
+                  :data="groupData.data[0].pocUserList"
+                  @on-selection-change="selectWorkUser"
+                ></Table>
                 <div>
-                  <Button style="margin: 10px;" type="error">删除用户</Button>
+                  <Button
+                    :disabled="selectWorkUserStr.length > 0 ? false: true"
+                    style="margin: 10px;"
+                    type="error"
+                    @click="delWorkUser"
+                  >删除用户</Button>
                 </div>
                 <div style="text-align: center;">
-                  <!-- <Page
-                    :current="orgData.pageNumber"
-                    :page-size="orgData.pageSize"
-                    :total="orgData.count"
-                    @on-change="changeOrgPage"
-                  />-->
+                  <Page
+                    :current="groupData.pageNumber"
+                    :page-size="groupData.pageSize"
+                    :total="groupData.count"
+                    @on-change="changeGroupPage"
+                  />
                 </div>
               </div>
             </div>
@@ -160,15 +226,15 @@
         </Tabs>
       </Col>
       <!-- 新增 -->
-      <Form
-        ref="addForm"
-        :model="addForm"
-        :rules="rulesValidate"
-        :label-width="120"
-        style="min-width: 500px;"
-        v-if="curMode === 'add'"
-      >
-        <Col span="12">
+      <Col span="12">
+        <Form
+          ref="addForm"
+          :model="addForm"
+          :rules="rulesValidate"
+          :label-width="120"
+          style="min-width: 500px;"
+          v-if="curMode === 'add'"
+        >
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="addForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
@@ -184,6 +250,14 @@
           </FormItem>
           <FormItem prop="capacity" label="实例容量">
             <InputNumber style="width: 100%;" :min="1" v-model="addForm.capacity"></InputNumber>
+          </FormItem>
+          <FormItem v-if="defAccount === 'super_admin'" label="到期时间">
+            <DatePicker
+              v-model="addForm.expirationTime"
+              type="date"
+              placeholder="请选择到期时间"
+              style="width: 100%"
+            ></DatePicker>
           </FormItem>
           <FormItem prop="serverId" label="实例">
             <Input v-show="false" :value="addForm.serverId"></Input>
@@ -213,8 +287,8 @@
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
           </FormItem>
-        </Col>
-      </Form>
+        </Form>
+      </Col>
       <!-- 编辑 -->
       <Col span="12" v-if="curMode === 'edit'">
         <Form
@@ -236,6 +310,14 @@
           <FormItem prop="capacity" label="实例容量">
             <InputNumber style="width: 100%;" :min="1" v-model="editForm.capacity"></InputNumber>
           </FormItem>
+          <FormItem v-if="defAccount === 'super_admin'" label="到期时间">
+            <DatePicker
+              v-model="editForm.expirationTime"
+              type="date"
+              placeholder="请选择到期时间"
+              style="width: 100%"
+            ></DatePicker>
+          </FormItem>
           <FormItem label="实例">
             <Input readonly :rows="7" type="textarea" :value="serverContent2"></Input>
           </FormItem>
@@ -245,13 +327,23 @@
         </Form>
       </Col>
     </Row>
-    <MaskUsers
+    <MaskExample
       @sendModal="getModal"
       @sendAccount="getAccount"
       @sendServer="getServer"
+      @refreshOrg="getRefreshOrg"
+      @refreshUser="getRefrechUser"
+      @refreshWork="getWork"
+      :selectUserStr="selectUserStr"
+      :groupTree="groupList"
+      :orgTree="orgList"
       :editForm="openForm"
+      :orgForm2="orgForm2"
       :basicInfo="basicInfo"
-    ></MaskUsers>
+      :editUserFrom="editUserFrom"
+      :modifyArr="modifyArr"
+      :groupForm="groupForm"
+    ></MaskExample>
   </div>
 </template>
 
@@ -265,14 +357,19 @@ import {
   getOrgList,
   getOrgDatas,
   getGroupList,
-  getGroupData
+  getGroupData,
+  delOrg,
+  getUser,
+  delUsers,
+  delGroup,
+  delUserGroup
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
-import MaskUsers from './maskExample'
+import MaskExample from './maskExample'
 
 export default {
   props: ['id', 'mode'],
-  components: { MaskUsers },
+  components: { MaskExample },
   data() {
     const validateName = (rule, value, callback) => {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
@@ -311,8 +408,8 @@ export default {
 
     const validateMobile = (rule, value, callback) => {
       const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
-      if (value === undefined || value === '') {
-        callback(new Error('请输入手机号码'))
+      if (!value) {
+        callback()
       } else if (!reg.test(value)) {
         callback(new Error('手机号格式不正确'))
       } else {
@@ -345,6 +442,79 @@ export default {
     }
 
     return {
+      selectWorkUserStr: '',
+      groupForm: {},
+      modifyArr: [],
+      editUserFrom: {},
+      filterList: [
+        {
+          name: '人员名称',
+          value: 'name'
+        },
+        {
+          name: '人员号码',
+          value: 'tel'
+        },
+        {
+          name: '手机号码',
+          value: 'phone'
+        },
+        {
+          name: '人员职称',
+          value: 'position'
+        }
+      ],
+      filterList2: [
+        {
+          name: '人员名称',
+          value: 'name'
+        },
+        {
+          name: '人员号码',
+          value: 'tel'
+        }
+      ],
+      groupColumns: [
+        {
+          type: 'selection',
+          width: 60,
+          align: 'center'
+        },
+        {
+          title: '人员ID/人员名称',
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('div', params.row.uid),
+              h('div', params.row.name)
+            ])
+          }
+        },
+        {
+          title: '人员号码',
+          align: 'center',
+          key: 'tel'
+        },
+        {
+          title: '状态',
+          key: 'status',
+          align: 'center',
+          render: (h, params) => {
+            let curStatus = ''
+            switch (params.row.status) {
+              case 'logout':
+                curStatus = '登出'
+                break
+              case 'login':
+                curStatus = '登录'
+                break
+              default:
+                break
+            }
+            return h('div', curStatus)
+          }
+        }
+      ],
       orgColumns: [
         {
           type: 'selection',
@@ -373,11 +543,13 @@ export default {
         },
         {
           title: '人员职称',
+          align: 'center',
           key: 'position'
         },
         {
           title: '状态',
           key: 'status',
+          align: 'center',
           render: (h, params) => {
             let curStatus = ''
             switch (params.row.status) {
@@ -395,18 +567,60 @@ export default {
         },
         {
           title: '操作',
+          align: 'center',
           render: (h, params) => {
-            return h('div', '操作')
+            return h('div', [
+              h(
+                'Button',
+                {
+                  props: {
+                    type: 'primary',
+                    size: 'small'
+                  },
+                  on: {
+                    click: () => {
+                      this.editUserFrom = params.row
+                      this.showMask('editUser', 30)
+                    }
+                  }
+                },
+                '编辑'
+              ),
+              h(
+                'Button',
+                {
+                  props: {
+                    type: 'success',
+                    size: 'small'
+                  },
+                  style: {
+                    'margin-left': '10px'
+                  },
+                  on: {
+                    click: () => {
+                      this.orgForm2.uid = params.row.uid
+                      this.editUserFrom = params.row
+                      this.showMask('changePermission', 30)
+                    }
+                  }
+                },
+                '权限'
+              )
+            ])
           }
         }
       ],
       orgData: { data: [{ pocUserList: [] }] },
+      groupData: { data: [{ pocUserList: [] }] },
       orgList: [],
+      groupList: [],
       activeId: '',
       searchForm: {
         instanceId: this.id,
+        ip: this.id,
         page: 1
       },
+      selectUserStr: '',
       serverContent2: '', // 详情、编辑实例内容
       accountContent: '',
       serverContent: '',
@@ -417,6 +631,9 @@ export default {
       modalAccount: false,
       defAccount: '',
       editForm: {},
+      orgForm2: {
+        ip: this.id
+      },
       addForm: {
         capacity: 1
       },
@@ -522,7 +739,9 @@ export default {
       btntxt: '发送验证码',
       codeType: false,
       time: 0,
-      defMobile: '' // 编辑默认手机号，用来判断是否需要校验
+      defMobile: '', // 编辑默认手机号，用来判断是否需要校验
+      activeOrg: '',
+      activeOrg2: ''
     }
   },
   created() {
@@ -534,10 +753,119 @@ export default {
     }
   },
   methods: {
+    // 工作组查询
+    searchWork() {
+      if (!this.searchForm.filter && !this.searchForm.status) {
+        this.$Message.error('请先选择查询类型')
+        return
+      } else {
+        this.searchForm[this.searchForm.filter] = this.searchForm.content
+        this.loading = true
+        this.getGroupPage(this.searchForm)
+      }
+    },
+    // 删除选中的工作组用户
+    delWorkUser() {
+      let data = {
+        ip: this.id,
+        uidList: this.selectWorkUserStr,
+        gid: this.searchForm.gid
+      }
+      delUserGroup(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (result.RES === 'OK') {
+          this.getGroupPage()
+          this.$Message.success('删除成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 工作组人员选中
+    selectWorkUser(select) {
+      let str = ''
+      select.forEach(item => {
+        str += item.uid + ','
+      })
+      str = str.substr(0, str.length - 1)
+      this.selectWorkUserStr = str
+    },
+    // 删除工作组
+    deleteGroup(params) {
+      delGroup(params).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (result.RES === 'OK') {
+          this.getGroupLists()
+          this.$Message.success('删除成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 当前选中的人员
+    selectUser(select) {
+      let str = ''
+      select.forEach(item => {
+        str += item.uid + ','
+      })
+      str = str.substr(0, str.length - 1)
+      this.selectUserStr = str
+    },
+    // 删除当前选中
+    delUser() {
+      let data = {
+        uidList: this.selectUserStr,
+        ip: this.id
+      }
+      delUsers(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (result.RES === 'OK') {
+          this.loading = true
+          this.getOrgPage()
+          this.$Message.success('删除成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 搜索组织结构
+    search() {
+      if (!this.searchForm.filter && !this.searchForm.status) {
+        this.$Message.error('请先选择查询类型')
+        return
+      } else {
+        this.searchForm[this.searchForm.filter] = this.searchForm.content
+        this.loading = true
+        this.getOrgPage(this.searchForm)
+      }
+    },
+    // 组织机构筛选条件清除之前的
+    clearSearch() {
+      this.searchForm.name = ''
+      this.searchForm.tel = ''
+      this.searchForm.phone = ''
+      this.searchForm.position = ''
+    },
+    // 组织刷新
+    getRefreshOrg() {
+      this.getOrgLists()
+    },
+    // 人员刷新
+    getRefrechUser() {
+      this.getOrgPage()
+    },
+    // 工作组刷新
+    getWork() {
+      this.getGroupLists()
+    },
     // 组织分页
     changeOrgPage(curPage) {
       this.searchForm.page = curPage
       this.getOrgPage()
+    },
+    changeGroupPage(curPage) {
+      this.searchForm.page = curPage
+      this.getGroupPage()
     },
     // 自定义组织菜单
     renderContent(h, { root, node, data }) {
@@ -546,26 +874,60 @@ export default {
         {
           style: {
             display: 'inline-block',
-            width: '100%'
+            width: '100%',
+            background: this.activeOrg === data.oid ? '#2d8cf0' : 'none',
+            color: this.activeOrg === data.oid ? '#FFF' : '#515a6e'
+          },
+          on: {
+            click: () => {
+              this.searchForm.oid = data.oid
+              this.searchForm.page = 1
+              this.getOrgPage()
+              if (this.activeOrg === data.oid) {
+                this.activeOrg = ''
+              } else {
+                this.activeOrg = data.oid
+                this.orgForm2.pid = data.oid
+                this.orgForm2.realPid = data.parentOid
+                this.orgForm2.ptitle = data.title
+              }
+            }
           }
         },
         [
-          h(
-            'span',
-            {
-              props: {
-                'v-show': data.id === this.activeId
-              }
-            },
-            data.title
-          ),
+          h('span', data.title), // + '/' + data.oid),
           h(
             'Dropdown',
             {
+              props: {
+                trigger: 'click'
+              },
               style: {
                 display: 'inline-block',
                 float: 'right',
                 marginRight: '32px'
+              },
+              on: {
+                'on-click': name => {
+                  if (name === 'edit') {
+                    // 编辑部门
+                    this.showMask('editOrg', 30)
+                  } else if (name === 'del') {
+                    this.$Modal.confirm({
+                      title: '信息',
+                      content:
+                        '<p>删除该部门会同时删除底下关联的部门结构，确定删除吗？</p>',
+                      onOk: () => {
+                        let params = {
+                          ip: this.orgForm2.ip,
+                          oid: data.oid
+                        }
+                        this.deleteOrg(params)
+                      }
+                    })
+                  } else {
+                  }
+                }
               }
             },
             [
@@ -579,16 +941,21 @@ export default {
                   h(
                     'DropdownItem',
                     {
-                      on: {
-                        'on-click': () => {
-                          console.log('xixix')
-                          alert('编辑')
-                        }
+                      props: {
+                        name: 'edit'
                       }
                     },
                     '编辑'
                   ),
-                  h('DropdownItem', '删除')
+                  h(
+                    'DropdownItem',
+                    {
+                      props: {
+                        name: 'del'
+                      }
+                    },
+                    '删除'
+                  )
                 ]
               )
             ]
@@ -596,18 +963,145 @@ export default {
         ]
       )
     },
+    renderContent2(h, { root, node, data }) {
+      return h(
+        'span',
+        {
+          style: {
+            display: 'inline-block',
+            width: '100%',
+            background: this.activeOrg2 === data.gid ? '#2d8cf0' : 'none',
+            color: this.activeOrg2 === data.gid ? '#FFF' : '#515a6e'
+          },
+          on: {
+            click: () => {
+              // this.searchForm.vgcsTel = data.vgcsTel
+              this.searchForm.gid = data.gid
+              this.searchForm.page = 1
+              this.getGroupPage()
+              if (this.activeOrg2 === data.gid) {
+                this.activeOrg2 = ''
+              } else {
+                this.activeOrg2 = data.gid
+                // this.orgForm2.pid = data.gid
+                // this.orgForm2.ptitle = data.title
+              }
+            }
+          }
+        },
+        [
+          // <Icon type="md-people" />
+          h('Icon', {
+            props: {
+              type: 'md-people'
+            },
+            style: {
+              color: '#76AAFF'
+            }
+          }),
+          h('span', data.title + '(' + data.vgcsTel + ')'), // + '/' + data.gid),
+          h(
+            'Dropdown',
+            {
+              props: {
+                trigger: 'click'
+              },
+              style: {
+                display: 'inline-block',
+                float: 'right',
+                marginRight: '32px'
+              },
+              on: {
+                'on-click': name => {
+                  if (name === 'edit') {
+                    // 编辑工作组
+                    this.groupForm = data
+                    this.showMask('editWork', 30)
+                  } else if (name === 'del') {
+                    this.$Modal.confirm({
+                      title: '信息',
+                      content: `<p>确定删除${data.title}吗？</p>`,
+                      onOk: () => {
+                        let params = {
+                          ip: this.orgForm2.ip,
+                          gid: data.gid
+                        }
+                        this.deleteGroup(params)
+                      }
+                    })
+                  } else {
+                  }
+                }
+              }
+            },
+            [
+              h('span', '···'),
+              h(
+                'DropdownMenu',
+                {
+                  slot: 'list'
+                },
+                [
+                  h(
+                    'DropdownItem',
+                    {
+                      props: {
+                        name: 'edit'
+                      }
+                    },
+                    '编辑'
+                  ),
+                  h(
+                    'DropdownItem',
+                    {
+                      props: {
+                        name: 'del'
+                      }
+                    },
+                    '删除'
+                  )
+                ]
+              )
+            ]
+          )
+        ]
+      )
+    },
+    // 删除部门
+    deleteOrg(data) {
+      delOrg(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (result.RES === 'OK') {
+          this.getOrgLists()
+          this.$Message.success('删除成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
     // 获取组织信息
     getOrg(name) {
       if (name === 'name2') {
         // 组织结构
-        this.searchForm.page = 1
+        this.searchForm = {
+          page: 1,
+          ip: this.id,
+          instanceId: this.id
+        }
         this.getOrgLists()
-        this.getOrgPage()
+        if (this.groupList.length === 0) {
+          this.getGroupLists()
+        }
       } else if (name === 'name3') {
         // 工作组
-        this.searchForm.page = 1
-        this.getGroupLists()
-        this.getGroupPage()
+        this.searchForm = {
+          page: 1,
+          ip: this.id,
+          instanceId: this.id
+        }
+        if (this.groupList.length === 0) {
+          this.getGroupLists()
+        }
       }
     },
     // 处理组织树数据，原数据格式 【】list pid id 关联
@@ -638,22 +1132,34 @@ export default {
         obj.title = item.name
         obj.oid = item.oid
         obj.parentOid = item.parentOid
+        obj.id = item.oid
+        obj.label = item.name
         newList.push(obj)
       })
       return newList
     },
-    // 组织表格数据
+    // 组织表格数据, 人员
     getOrgPage() {
       let params = this.searchForm
-      getOrgDatas(params).then(res => {
-        this.orgData = res.data.data
+      getUser(params).then(res => {
+        if (!res.data.data.data) {
+          this.orgData = { data: [{ pocUserList: [] }] }
+        } else {
+          this.orgData = res.data.data
+        }
+        this.loading = false
       })
     },
     // 工作组数据
     getGroupPage() {
       let params = this.searchForm
       getGroupData(params).then(res => {
-        console.log(res)
+        if (!res.data.data.data) {
+          this.groupData = { data: [{ pocUserList: [] }] }
+        } else {
+          this.groupData = res.data.data
+        }
+        this.loading = false
       })
     },
     // 组织菜单数据
@@ -669,7 +1175,20 @@ export default {
     getGroupLists() {
       let params = { instanceId: this.id }
       getGroupList(params).then(res => {
-        console.log(res)
+        if (res.data.code === 200) {
+          let data = res.data.data
+          data.forEach((item, index) => {
+            let obj = item
+            obj.id = item.gid
+            obj.gid = item.gid
+            obj.title = item.name
+            obj.label = item.name
+            obj.vgcsTel = item.vgcsTel
+            obj.children = []
+            this.groupList.push(obj)
+          })
+          this.loading = false
+        }
       })
     },
     getAccount(data) {
@@ -717,12 +1236,11 @@ export default {
     },
     // 新增提交
     save() {
+      if (this.defAccount !== 'super_admin') {
+        this.addForm.expirationTime = null
+      }
       this.$refs['addForm'].validate(valid => {
         if (valid) {
-          // accountId 普通用户时为空
-          // if(this.defAccount !== 'super_admin') {
-          //   this.addForm.accountId = this.$store.state.user.userId
-          // }
           addExample(this.addForm).then(res => {
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
@@ -746,7 +1264,11 @@ export default {
         id: this.editForm.id,
         instName: this.editForm.instName,
         description: this.editForm.description,
-        capacity: this.editForm.capacity
+        capacity: this.editForm.capacity,
+        expirationTime: this.editForm.expirationTime
+      }
+      if (this.defAccount !== 'super_admin') {
+        this.editForm.expirationTime = null
       }
       this.$refs['editForm'].validate(valid => {
         if (valid) {
@@ -812,6 +1334,7 @@ export default {
       getExampleInfo(this.id).then(res => {
         if (res.data.code === 200) {
           this.editForm = res.data.data
+          this.orgForm2.ip = res.data.data.id
           if (this.editForm.instType === 'gis') {
             this.showGps = true
           }

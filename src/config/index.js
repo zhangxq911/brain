@@ -18,8 +18,8 @@ export default {
    */
   baseUrl: {
     // dev: 'https://www.easy-mock.com/mock/5add9213ce4d0e69998a6f51/iview-admin/',
-    dev: 'http://192.168.1.14:8888/access/',
-    // dev: 'http://192.168.1.26:8888/access/',
+    // dev: 'http://192.168.1.14:8888/access/',
+    dev: 'http://192.168.1.26:8888/access/',
     // dev: 'http://192.168.1.14:80/',
     // dev: 'http://dev.imbcloud.cn/brain/',
     // dev: 'http://39.96.105.154:8080/brain/',

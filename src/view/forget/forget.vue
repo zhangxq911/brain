@@ -11,12 +11,12 @@
           />
           <span>&nbsp;请输入您的账号或手机号码，以进行密码重设</span>
         </div>
-        <Form ref="stepForm1" :model="stepForm1" :rules="ruleValidate1">
-          <FormItem prop="user">
-            <Input style="width: 400px;"></Input>
+        <Form ref="stepForm1" :model="stepForm1" :rules="ruleValidate1" @submit.native.prevent>
+          <FormItem prop="account">
+            <Input style="width: 400px;" v-model="stepForm1.account" @on-enter="validate1"></Input>
           </FormItem>
           <FormItem>
-            <Button style="width: 100%;" type="primary" @click="type = 'step2'">下一步</Button>
+            <Button style="width: 100%;" type="primary" @click="validate1">下一步</Button>
           </FormItem>
         </Form>
       </div>
@@ -29,32 +29,36 @@
           :rules="ruleValidate"
           :label-width="0"
         >
-          <FormItem>账号： xx</FormItem>
-          <FormItem>手机号码： xx</FormItem>
-
-          <FormItem prop="name">
+          <FormItem>账号： {{formData.accountName}}</FormItem>
+          <FormItem>手机号码： {{formData.mobile}}</FormItem>
+          <FormItem prop="identityCode">
             <Row>
               <Col span="16">
-                <Input placeholder="请输入验证码"></Input>
+                <Input v-model="formData.identityCode" placeholder="请输入验证码"></Input>
               </Col>
-              <Button style="float: right;" type="primary">发送验证码</Button>
+              <Button
+                @click="sendCode"
+                style="float: right;"
+                :disabled="btnAttr.type"
+                type="primary"
+              >{{btnAttr.btntxt}}</Button>
             </Row>
           </FormItem>
-          <FormItem prop="name">
-            <Input placeholder="设置你的登录密码"></Input>
+          <FormItem prop="password">
+            <Input type="password" v-model="formData.password" placeholder="设置你的登录密码"></Input>
           </FormItem>
-          <FormItem prop="name">
-            <Input placeholder="请再次输入你的密码"></Input>
+          <FormItem prop="repeatPassword">
+            <Input @on-enter="save" type="password" v-model="formData.repeatPassword" placeholder="请再次输入你的密码"></Input>
           </FormItem>
           <FormItem>
-            <Button @click="type = 'step3'" style="width: 100%;" type="primary">确认</Button>
+            <Button @click="save" style="width: 100%;" type="primary">确认</Button>
           </FormItem>
         </Form>
       </div>
       <div class="content-area success-area" v-if="type === 'step3'">
         <Icon class="success-icon" type="ios-checkmark-circle" />
         <h2 style="color: #2d8cf0;">修改成功</h2>
-        <h3>账号： xx</h3>
+        <h3>账号： {{formData.accountName}}</h3>
         <Button style="width: 100%;" type="primary" @click="jumpToLogin">立即登录</Button>
       </div>
     </div>
@@ -62,17 +66,137 @@
 </template>
 
 <script>
+import { isExitsAccount, getIdentityCode, forget } from '@/api/data'
+
 export default {
   data() {
+    const validateAccount = (rule, value, callback) => {
+      let data = {
+        account: value
+      }
+      isExitsAccount(data).then(res => {
+        if (res.data.code === 200) {
+          this.formData.accountName = res.data.data.accountName
+          this.formData.mobile = res.data.data.mobile
+          callback()
+        } else {
+          callback(new Error(res.data.msg))
+        }
+      })
+    }
+
+    const validatePwd = (rule, value, callback) => {
+      const reg = /^[a-zA-Z0-9_@]+$/
+      if (!value) {
+        callback()
+      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
+        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else {
+        callback()
+      }
+    }
+
+    const validatePwd2 = (rule, value, callback) => {
+      if (!value) {
+        callback()
+      } else if (value === this.formData.password) {
+        callback()
+      } else {
+        callback(new Error('两次输入密码不一致!'))
+      }
+    }
+
     return {
+      time: 60,
+      btnAttr: {
+        btntxt: '发送验证码',
+        type: false
+      },
       type: 'step1',
       formData: {},
-      ruleValidate: {},
+      ruleValidate: {
+        identityCode: [
+          { required: true, message: '请输入验证码', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, validator: validatePwd, trigger: 'blur' },
+          { required: true, message: '请输入密码', trigger: 'blur' }
+        ],
+        repeatPassword: [
+          { required: true, validator: validatePwd2, trigger: 'blur' },
+          { required: true, message: '请输入重复密码', trigger: 'blur' }
+        ]
+      },
       stepForm1: {},
-      ruleValidate1: {}
+      ruleValidate1: {
+        account: [
+          { required: true, validator: validateAccount, trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
+    // 提交修改
+    save() {
+      this.$refs['formData'].validate(valid => {
+        if (valid) {
+          forget(this.formData).then(res => {
+            if (res.data.code === 200) {
+              this.type = 'step3'
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          })
+        }
+      })
+    },
+    // 发送验证码
+    sendCode() {
+      // 验证码不校验
+      this.ruleValidate.identityCode[0].required = false
+      this.ruleValidate.password[1].required = false
+      this.ruleValidate.repeatPassword[1].required = false
+      this.$refs['formData'].validate(valid => {
+        if (valid) {
+          this.time = 60
+          this.timer()
+          let data = {
+            mobile: this.formData.mobile,
+            type: 1
+          }
+          getIdentityCode(data).then(res => {
+            if (res.data.code === 200) {
+              this.$Message.success(res.data.msg)
+              this.ruleValidate.password[1].required = true
+              this.ruleValidate.repeatPassword[1].required = true
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          })
+        }
+      })
+    },
+    // 验证码计时器
+    timer() {
+      if (this.time > 1) {
+        this.time--
+        this.btnAttr.btntxt = '重发(' + this.time + 's)'
+        this.btnAttr.type = true
+        setTimeout(this.timer, 1000)
+      } else {
+        this.time = 0
+        this.btnAttr.btntxt = '发送验证码'
+        this.btnAttr.type = false
+      }
+    },
+    // 忘记密码下一步
+    validate1() {
+      this.$refs['stepForm1'].validate(valid => {
+        if (valid) {
+          this.type = 'step2'
+        }
+      })
+    },
     jumpToLogin() {
       this.$router.push({
         name: 'login'

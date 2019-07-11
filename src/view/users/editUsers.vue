@@ -19,6 +19,7 @@
           <FormItem label="手机号码">{{editForm.mobile }}</FormItem>
           <FormItem label="电子邮箱">{{editForm.email }}</FormItem>
           <FormItem label="用户描述">{{editForm.description }}</FormItem>
+          <FormItem label="用户类型">{{!editForm.userType ? '查看者' : '子用户' }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <!-- 最多三条，每个类型一条 -->
@@ -59,6 +60,12 @@
           </FormItem>
           <FormItem prop="nickName" label="昵称">
             <Input type="text" v-model="addForm.nickName" placeholder="请输入昵称"></Input>
+          </FormItem>
+          <FormItem v-if="defAccount === 'super_admin'" label="用户类型">
+            <RadioGroup v-model="addForm.userType">
+              <Radio :label="0">查看者</Radio>
+              <Radio :label="1">子用户</Radio>
+            </RadioGroup>
           </FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="addForm.mobile" placeholder="请输入手机号码"></Input>
@@ -111,13 +118,19 @@
           <FormItem label="昵称">
             <Input type="text" v-model="editForm.nickName" placeholder="请输入昵称"></Input>
           </FormItem>
+          <FormItem label="用户类型">
+            <RadioGroup v-model="editForm.userType">
+              <Radio :label="0">查看者</Radio>
+              <Radio :label="1">子用户</Radio>
+            </RadioGroup>
+          </FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="editForm.mobile" placeholder="请输入手机号码"></Input>
           </FormItem>
           <FormItem prop="email" label="电子邮箱">
             <Input type="text" v-model="editForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
-          <FormItem label="用户状态">
+          <FormItem v-if="defAccount === 'super_admin'" label="用户状态">
             <RadioGroup v-model="editForm.status">
               <Radio :label="1">正常</Radio>
               <Radio :label="0">停用</Radio>
@@ -173,7 +186,10 @@ export default {
     const validatePwd2 = (rule, value, callback) => {
       if (!value && this.editForm.userPsw) {
         callback(new Error('密码确认不能为空'))
-      } else if (value === this.addForm.userPsw || value === this.editForm.userPsw) {
+      } else if (
+        value === this.addForm.userPsw ||
+        value === this.editForm.userPsw
+      ) {
         callback()
       } else {
         callback(new Error('两次输入密码不一致!'))
@@ -205,7 +221,9 @@ export default {
       accontContent: '',
       basicInfo: {},
       editForm: {},
-      addForm: {},
+      addForm: {
+        userType: 0
+      },
       curMode: this.mode,
       modalAccount: false,
       accountData: [],
@@ -229,12 +247,8 @@ export default {
         userName: [
           { required: true, validator: validateName, trigger: 'blur' }
         ],
-        userPsw: [
-          { message: '请输入用户密码', trigger: 'blur' }
-        ],
-        repeatPsw: [
-          { validator: validatePwd2, trigger: 'blur' }
-        ],
+        userPsw: [{ message: '请输入用户密码', trigger: 'blur' }],
+        repeatPsw: [{ validator: validatePwd2, trigger: 'blur' }],
         mobile: [{ validator: validateMobile, trigger: 'blur' }],
         email: [{ validator: validateEmail, trigger: 'blur' }]
       },
@@ -451,8 +465,10 @@ export default {
     },
     // 新增提交
     save() {
+      if(this.defAccount !== 'super_admin') {
+        this.addForm.userType = 0
+      }
       this.$refs['addForm'].validate(valid => {
-        console.log(valid)
         if (valid) {
           addUser(this.addForm).then(res => {
             if (res.data.code === 200) {
@@ -473,12 +489,14 @@ export default {
     },
     // 修改信息
     update() {
+      if(this.defAccount !== 'super_admin') {
+        this.editForm.userType = 0
+      }
       this.rulesValidate.userPsw[0].required = false
       this.rulesValidate.repeatPsw[0].required = false
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           putUser(this.editForm).then(res => {
-            console.log('更新用户', res)
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               this.$router.push({ name: 'users_page' })

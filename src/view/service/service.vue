@@ -4,6 +4,29 @@
       <Button type="primary" @click="add">新增</Button>
       <div style="float: right; margin-bottom: -10px;">
         <Form ref="searchForm" :model="searchForm" inline>
+          <FormItem>
+            <Select
+              @on-change="search"
+              v-model="searchForm.status"
+              style="width: 100px;"
+              placeholder="服务状态"
+            >
+              <Option :value="0">已停止</Option>
+              <Option :value="1">运行中</Option>
+            </Select>
+          </FormItem>
+          <FormItem>
+            <Select
+              @on-change="search"
+              v-model="searchForm.serverType"
+              style="width: 100px; "
+              placeholder="服务类型"
+            >
+              <Option value="call">远程会议</Option>
+              <Option value="gis">联情指挥</Option>
+              <Option value="live">网络直播</Option>
+            </Select>
+          </FormItem>
           <FormItem prop="filter">
             <Select v-model="searchForm.filter" style="width: 100px; " placeholder="其他条件">
               <Option

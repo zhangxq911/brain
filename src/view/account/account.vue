@@ -56,7 +56,7 @@ import { loadavg } from 'os'
 export default {
   data() {
     return {
-      loading: true,
+      loading: false,
       searchForm: {
         accountId: '',
         sort: '',
@@ -321,7 +321,7 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getAccountList(params).then(res => {
-        if (res.status === 200) {
+        if (res.status === 200 && res.data.data) {
           if (!res.data.data.data) {
             this.dataList.data = []
           } else {

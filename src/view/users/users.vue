@@ -24,7 +24,7 @@
               ></Input>
             </FormItem>
             <FormItem>
-              <Button @click="reset">清空</Button>
+              <Button @click="search">刷新</Button>
               <!-- <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/> -->
             </FormItem>
           </Form>
@@ -61,7 +61,7 @@ export default {
   components: { MaskUsers },
   data() {
     return {
-      loading: true,
+      loading: false,
       openForm: {},
       basicInfo: {},
       searchForm: {
@@ -134,6 +134,22 @@ export default {
           title: '昵称',
           align: 'center',
           key: 'nickName'
+        },
+        {
+          title: '用户类型',
+          align: 'center',
+          render: (h, params) => {
+            let userType = params.row.userType
+            switch(userType) {
+              case 0:
+                userType = '查看者'
+                break;
+              case 1:
+                userType = '子用户'
+                break;
+            }
+            return h('div', userType)
+          }
         },
         {
           title: '状态',

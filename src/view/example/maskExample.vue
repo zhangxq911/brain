@@ -108,23 +108,200 @@
           <span class="mask-title">添加部门</span>
           <Icon class="closeBtn" type="ios-close" @click="closeMask" />
         </Row>
-        <div>
+        <div style="padding: 20px;">
           <Form ref="orgForm" :model="orgForm" :rules="orgValidate" label-position="top">
-            <FormItem label="部门名称">
+            <FormItem prop="name" label="部门名称">
               <Input v-model="orgForm.name"></Input>
             </FormItem>
             <FormItem label="顶级部门">
               <!-- 顶级部门为否的话 pid 传 0 -->
-              <RadioGroup v-model="orgForm.top">
+              <RadioGroup @on-change="changeTop" v-model="orgForm.top">
                 <Radio :label="0">否</Radio>
                 <Radio :label="1">是</Radio>
               </RadioGroup>
             </FormItem>
-            <FormItem label="上级部门">
-              <Input v-model="orgForm.parentOid"></Input>
+            <FormItem v-show="showTop" label="上级部门">
+              <Input disabled v-model="orgForm2.ptitle"></Input>
             </FormItem>
             <FormItem>
-              <Button>保存</Button>
+              <Button type="primary" @click="saveOrg">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'editOrg'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">组织结构编辑</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form
+            ref="orgEditForm"
+            :model="orgEditForm"
+            :rules="orgEditValidate"
+            label-position="top"
+          >
+            <FormItem prop="name" label="部门名称">
+              <Input v-model="orgEditForm.name"></Input>
+            </FormItem>
+            <FormItem label="顶级部门">
+              <RadioGroup v-model="orgEditForm.top">
+                <Radio :label="0">否</Radio>
+                <Radio :label="1">是</Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem v-if="!orgEditForm.top" label="上级部门">
+              <treeselect v-model="orgEditForm.parentOid" :options="orgTree" />
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="updateOrgs">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'addUser'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">添加人员</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form ref="userForm" :model="userForm" :rules="userValidate" label-position="top">
+            <FormItem prop="tel" label="人员号码">
+              <Input placeholder="请输入人员号码" v-model="userForm.tel"></Input>
+            </FormItem>
+            <FormItem prop="regPwd" label="人员密码">
+              <Input placeholder="请输入人员密码" v-model="userForm.regPwd" type="password"></Input>
+            </FormItem>
+            <FormItem prop="name" label="人员名称">
+              <Input v-model="userForm.name"></Input>
+            </FormItem>
+            <FormItem prop="phone" label="手机号码">
+              <Input v-model="userForm.phone"></Input>
+            </FormItem>
+            <FormItem label="职称">
+              <Input v-model="userForm.position"></Input>
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="saveUser">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'editUser'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">人员编辑</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form ref="editUserFrom" :model="editUserFrom" :rules="userValidate" label-position="top">
+            <FormItem label="人员号码">
+              <Input disabled v-model="editUserFrom.tel"></Input>
+            </FormItem>
+            <FormItem label="人员密码">
+              <Input v-model="editUserFrom.regPwd" type="password"></Input>
+            </FormItem>
+            <FormItem prop="name" label="人员名称">
+              <Input v-model="editUserFrom.name"></Input>
+            </FormItem>
+            <FormItem prop="phone" label="手机号码">
+              <Input v-model="editUserFrom.phone"></Input>
+            </FormItem>
+            <FormItem label="职称">
+              <Input v-model="editUserFrom.position"></Input>
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="updateUser">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'changePermission'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">修改权限</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form label-position="top">
+            <!-- <treeselect :flat="true" :multiple="true" v-model="modifyArr2" :options="orgTree" /> -->
+            <Tree
+              @on-check-change="selectModifyArr"
+              :multiple="true"
+              :data="orgTree2"
+              show-checkbox
+            ></Tree>
+            <FormItem>
+              <Button type="primary" @click="modifyPermission">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'addToWork'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">添加至工作组</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form label-position="top">
+            <FormItem label="工作组名称">
+              <Select filterable v-model="groupEditForm.gid">
+                <Option :value="item.id" v-for="item in groupTree" :key="item.id">{{item.title}}</Option>
+              </Select>
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="updateToGroup">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'addWork'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">添加工作组</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form label-position="top" ref="addWorkForm" :model="addWorkForm" :rules="ruleWorkForm">
+            <FormItem prop="workName" label="工作组名称">
+              <Input v-model="addWorkForm.workName" placeholder="请输入工作组名称"></Input>
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="addWork">保存</Button>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <div class="mask" v-if="basicInfo.type === 'editWork'">
+      <div @click="closeMask" class="mask-left" :style="{'width': (100 - basicInfo.width) + 'vw'}"></div>
+      <div class="mask-content" :style="{'width': basicInfo.width + 'vw'}">
+        <Row>
+          <span class="mask-title">修改工作组</span>
+          <Icon class="closeBtn" type="ios-close" @click="closeMask" />
+        </Row>
+        <div style="padding: 20px;">
+          <Form label-position="top" ref="editWorkForm" :model="editWorkForm" :rules="ruleWorkForm">
+            <FormItem prop="name" label="工作组名称">
+              <Input v-model="editWorkForm.name"></Input>
+            </FormItem>
+            <FormItem>
+              <Button type="primary" @click="editWork">保存</Button>
             </FormItem>
           </Form>
         </div>
@@ -134,16 +311,104 @@
 </template>
 
 <script>
-import { getServiceList, getAccountList } from '@/api/data'
+import {
+  getServiceList,
+  getAccountList,
+  addOrg,
+  updateOrg,
+  getUser,
+  addUser2,
+  addToGroup,
+  updateUsers,
+  getDefPermission,
+  getOrgList,
+  putPermission,
+  addGroop,
+  putGroup
+} from '@/api/data'
+import Treeselect from '@riophae/vue-treeselect'
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 export default {
-  props: ['basicInfo', 'editForm'],
+  props: [
+    'basicInfo',
+    'editForm',
+    'orgForm2',
+    'orgTree',
+    'groupTree',
+    'selectUserStr',
+    'editUserFrom',
+    "groupForm"
+  ],
+  components: { Treeselect },
   data() {
+    const validateMobile = (rule, value, callback) => {
+      const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+      if (!value) {
+        callback()
+      } else if (!reg.test(value)) {
+        callback(new Error('手机号格式不正确'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateTel = (rule, value, callback) => {
+      const reg = /^[0-9]*$/
+      if (!value) {
+        callback(new Error('请输入人员号码'))
+      } else if (!reg.test(value)) {
+        callback(new Error('人员号码必须为数字'))
+      } else {
+        callback()
+      }
+    }
+
     return {
-      orgForm: {},
-      orgValidate: {},
+      addWorkForm: {},
+      editWorkForm: {},
+      ruleWorkForm: {
+        workName: [
+          { required: true, message: '请输入工作组名称', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '请输入工作组名称', trigger: 'blur' }
+        ]
+      },
+      orgTree3: [],
+      orgTree2: [],
+      modifyArr: [],
+      modifyForm: {},
+      groupEditForm: {},
+      userForm: {},
+      userValidate: {
+        tel: [{ required: true, validator: validateTel, trigger: 'blur' }],
+        regPwd: [
+          { required: true, message: '请输入人员密码', trigger: 'blur' }
+        ],
+        name: [{ required: true, message: '请输入人员名称', trigger: 'blur' }],
+        phone: [{ required: false, validator: validateMobile, trigger: 'blur' }]
+      },
+      orgEditForm: {
+        name: '',
+        parentOid: '',
+        oid: '',
+        top: 0
+      },
+      orgEditValidate: {
+        name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
+      },
+      orgForm: {
+        top: this.orgForm2.pid ? 0 : 1,
+        parentOid: this.orgForm2.pid ? this.orgForm2.pid : 0
+      },
+      showTop: this.orgForm2.pid ? true : false,
+      orgValidate: {
+        name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
+      },
       selectExmpArr: [], // 选中的服务
       selectExmpArr2: [], // 选中的账户
+      selectOrg: [],
       isDisabled: false,
       isDisabled2: false,
       loading: false,
@@ -364,7 +629,6 @@ export default {
           title: '创建时间',
           align: 'center',
           key: 'createTime'
-          // sortable: 'custom'
         },
         {
           title: '可用/用户容量',
@@ -378,7 +642,279 @@ export default {
       ]
     }
   },
+  watch: {
+    basicInfo: function() {
+      // 更新部门
+      this.orgEditForm.name = this.orgForm2.ptitle
+      this.orgEditForm.top = !this.orgForm2.realPid ? 1 : 0
+      this.orgEditForm.parentOid = !this.orgForm2.realPid
+        ? null
+        : this.orgForm2.realPid
+      this.orgEditForm.oid = this.orgForm2.pid
+      this.orgEditForm.ip = this.orgForm2.ip
+      if (this.basicInfo.type === 'changePermission') {
+        this.getOrgLists()
+      }
+    },
+    groupForm: function() {
+      this.editWorkForm = this.groupForm
+    }
+  },
   methods: {
+    // 修改工作组
+    editWork() {
+      let data = {
+        ip: this.orgForm2.ip,
+        gid: this.editWorkForm.gid,
+        name: this.editWorkForm.name,
+        regPwd: this.editWorkForm.regPwd,
+        level: this.editWorkForm.level,
+        record: 0,
+        crtMode: this.editWorkForm.crtMode,
+        regName: this.editWorkForm.regName,
+        vgcsTel: this.editWorkForm.vgcsTel
+      }
+      putGroup(data).then(res =>{
+        let result = JSON.parse(res.data.msg)
+        if (res.data.code === 200) {
+          this.$refs['editWorkForm'].resetFields()
+          this.closeMask()
+          this.$emit('refreshWork', true)
+          this.$Message.success('编辑成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 添加工作组
+    addWork() {
+      let data = {
+        ip: this.orgForm2.ip,
+        name: this.addWorkForm.workName
+      }
+      addGroop(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (res.data.code === 200) {
+          this.$refs['addWorkForm'].resetFields()
+          this.closeMask()
+          this.$emit('refreshWork', true)
+          this.$Message.success('添加成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 组织菜单数据
+    getOrgLists() {
+      let params = { instanceId: this.orgForm2.ip }
+      getOrgList(params).then(res => {
+        if (res.data.code === 200) {
+          this.orgTree3 = this.listToTree(this.handleList(res.data.data))
+          this.getDefPermissions(this.orgForm2.uid)
+        }
+      })
+    },
+    handleList(list) {
+      let newList = []
+      list.forEach((item, index) => {
+        let obj = {}
+        obj.title = item.name
+        obj.oid = item.oid
+        obj.parentOid = item.parentOid
+        obj.id = item.oid
+        obj.label = item.name
+        newList.push(obj)
+      })
+      return newList
+    },
+    listToTree(list) {
+      const copyList = list.slice(0)
+      const tree = []
+      for (let i = 0; i < copyList.length; i++) {
+        // 找出每一项的父节点，并将其作为父节点的children
+        for (let j = 0; j < copyList.length; j++) {
+          if (copyList[i].parentOid === copyList[j].oid) {
+            if (copyList[j].children === undefined) {
+              copyList[j].children = []
+            }
+            copyList[j].children.push(copyList[i])
+          }
+        }
+        // 把根节点提取出来，parentId为null的就是根节点
+        if (copyList[i].parentOid === 0) {
+          tree.push(copyList[i])
+        }
+      }
+      return tree
+    },
+    // 获取当前人员的默认权限
+    getDefPermissions(uid) {
+      let params = {
+        uid: uid,
+        ip: this.orgForm2.ip
+      }
+      getDefPermission(params).then(res => {
+        let arr = []
+        res.data.data.forEach(item => {
+          arr.push(item.oid)
+        })
+        this.modifyArr = arr
+        this.ifSelect(this.orgTree3, arr)
+        this.orgTree2 = this.orgTree3
+      })
+    },
+    ifSelect(arr, temp) {
+      arr.forEach(item => {
+        if (temp.indexOf(item.oid) > -1) {
+          item.checked = true
+        }
+        if (item.children) {
+          this.ifSelect(item.children, temp)
+        }
+      })
+    },
+    selectModifyArr(selectArr) {
+      // 将数组处理 / 分割
+      let str = ''
+      selectArr.forEach(item => {
+        str += item.oid + '/'
+      })
+      str = str.substring(0, str.length - 1)
+      this.selectOrg = str
+    },
+    // 修改权限
+    modifyPermission() {
+      let data = {
+        uid: this.orgForm2.uid,
+        oid: this.selectOrg,
+        ip: this.orgForm2.ip
+      }
+      putPermission(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (res.data.code === 200) {
+          this.closeMask()
+          this.$Message.success('修改成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 人员编辑
+    updateUser() {
+      let data = {
+        ip: this.orgForm2.ip,
+        tel: this.editUserFrom.tel,
+        uid: this.editUserFrom.uid,
+        position: this.editUserFrom.position,
+        regPwd: this.editUserFrom.regPwd ? this.editUserFrom.regPwd : null,
+        name: this.editUserFrom.name,
+        phone: this.editUserFrom.phone
+      }
+      updateUsers(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (res.data.code === 200) {
+          this.$refs['editUserFrom'].resetFields()
+          this.closeMask()
+          this.$emit('refreshUser', true)
+          this.$Message.success('编辑成功')
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
+    // 添加至工作组
+    updateToGroup() {
+      let data = {
+        gid: this.groupEditForm.gid,
+        ip: this.orgForm2.ip,
+        idList: this.selectUserStr
+      }
+      if (!data.gid) {
+        this.$Message.error('请选择工作组！')
+        return
+      }
+      addToGroup(data).then(res => {
+        if (res.data.code === 200) {
+          this.groupEditForm.gid = ''
+          this.closeMask()
+          this.$Message.success(res.data.msg)
+        } else {
+          this.$Message.error('添加失败')
+        }
+      })
+    },
+    // 添加人员
+    saveUser() {
+      this.userForm.ip = this.orgForm2.ip
+      this.userForm.oid = this.orgForm2.pid
+      if (!this.userForm.oid) {
+        this.$Message.error('请先选择对应部门')
+        return
+      }
+      this.$refs['userForm'].validate(valid => {
+        if (valid) {
+          addUser2(this.userForm).then(res => {
+            let result = JSON.parse(res.data.msg)
+            if (res.data.code === 200) {
+              this.$refs['userForm'].resetFields()
+              this.closeMask()
+              this.$Message.success('添加成功')
+              this.$emit('refreshUser', true)
+            } else {
+              this.$Message.error(result.REASON)
+            }
+          })
+        }
+      })
+    },
+    // 更新部门
+    updateOrgs() {
+      this.$refs['orgEditForm'].validate(valid => {
+        updateOrg(this.orgEditForm).then(res => {
+          let result = JSON.parse(res.data.msg)
+          if (result.RES === 'OK') {
+            this.$refs['orgEditForm'].resetFields()
+            this.closeMask()
+            this.$Message.success('更新成功')
+            this.$emit('refreshOrg', true)
+          } else {
+            this.$Message.error(result.REASON)
+          }
+        })
+      })
+    },
+    // 改变顶级部门状态
+    changeTop(val) {
+      if (val === 1) {
+        this.showTop = false
+      } else {
+        this.showTop = true
+      }
+    },
+    // 添加部门
+    saveOrg() {
+      this.orgForm.ip = this.orgForm2.ip
+      if (this.orgForm.top === 0) {
+        this.orgForm.parentOid = this.orgForm2.pid
+      } else {
+        this.orgForm.parentOid = 0
+      }
+      this.$refs['orgForm'].validate(valid => {
+        if (valid) {
+          addOrg(this.orgForm).then(res => {
+            let result = JSON.parse(res.data.msg)
+            if (result.RES === 'OK') {
+              this.$refs['orgForm'].resetFields()
+              this.closeMask()
+              this.$Message.success('添加成功')
+              this.$emit('refreshOrg', true)
+            } else {
+              this.$Message.error(result.REASON)
+            }
+          })
+        }
+      })
+    },
     // 确定提交账户
     saveAccount() {
       if (!this.selectExmpArr2.length) {

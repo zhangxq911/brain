@@ -88,7 +88,7 @@ import { loadavg } from 'os'
 export default {
   data() {
     return {
-      loading: true,
+      loading: false,
       searchForm: {
         accountId: null,
         order: null,
@@ -231,7 +231,11 @@ export default {
           title: '创建时间',
           align: 'center',
           key: 'createTime'
-          // sortable: 'custom'
+        },
+        {
+          title: '到期时间',
+          align: 'center',
+          key: 'expirationTime'
         },
         {
           title: '账户ID/账户名称',
@@ -270,6 +274,7 @@ export default {
         {
           title: '操作',
           align: 'center',
+          width: 130,
           render: (h, params) => {
             return h('div', [
               h(
