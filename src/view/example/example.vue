@@ -338,6 +338,7 @@ export default {
       this.defAccount = 'super_admin'
     } else if (access.includes('company') || access.includes('personal')) {
       this.defAccount = 'unit'
+      this.columns.splice(7, 1)
     }
   },
   methods: {

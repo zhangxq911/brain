@@ -104,6 +104,15 @@ export default {
       ]
     }
   },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
+      this.columns.splice(5, 1)
+    }
+  },
   methods: {
     // 分页
     changePage(curPage) {

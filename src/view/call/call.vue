@@ -173,6 +173,15 @@ export default {
       ]
     }
   },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
+      this.columns.splice(6, 1)
+    }
+  },
   methods: {
     // 改变时间
     selectTime() {

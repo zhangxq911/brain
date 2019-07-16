@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card-box">
-      <Row style="">
+      <Row style>
         <Button type="primary" @click="add()">新增</Button>
         <div style="float: right; margin-bottom: -10px;">
           <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
@@ -140,13 +140,13 @@ export default {
           align: 'center',
           render: (h, params) => {
             let userType = params.row.userType
-            switch(userType) {
+            switch (userType) {
               case 0:
                 userType = '查看者'
-                break;
+                break
               case 1:
                 userType = '子用户'
-                break;
+                break
             }
             return h('div', userType)
           }
@@ -301,6 +301,15 @@ export default {
           }
         }
       ]
+    }
+  },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
+      this.columns.splice(6, 1)
     }
   },
   methods: {

@@ -4,29 +4,37 @@
       <Button v-if="defAccount === 'super_admin'" type="primary" @click="add">新增</Button>
     </Row>
     <div style="margin: 20px 0;">
-      <Timeline>
-        <TimelineItem v-for="(item, index) in dataList" :key="index">
-          <div style="padding-left: 20px;">
-            <div class="title">
-              <span v-if="index === 0" style=" color: red; position: absolute; left: 24px;">新</span>
-              <span class="pot"></span>
-              <h5>
-                {{item.title}}
+      <Scroll :height="520" :on-reach-bottom="handleReachBottom">
+        <Timeline>
+          <TimelineItem v-for="(item, index) in dataList" :key="index">
+            <div style="padding-left: 20px;">
+              <div class="title">
+                <span v-if="index === 0" style=" color: red; position: absolute; left: 24px;">新</span>
+                <span class="pot"></span>
+                <h5>
+                  {{item.title}}
+                  <span
+                    style="float: right; font-size: 10px; color: #c5c5c5; font-weight: 400;"
+                  >{{item.time}}</span>
+                </h5>
+              </div>
+              <div style="display: flex;">
+                <span class="line-content">{{item.content}}</span>
+                <span style="padding: 0 20px; font-weight: 500;">{{item.updateTime}}</span>
+                <span class="btn" @click="view(item.id)">详情</span>
+                <span class="btn" @click="edit(item.id)" v-if="defAccount==='super_admin'">编辑</span>
                 <span
-                  style="float: right; font-size: 10px; color: #c5c5c5; font-weight: 400;"
-                >{{item.time}}</span>
-              </h5>
+                  class="btn"
+                  style="color: #BE6B75;"
+                  @click="showDel(item.id)"
+                  v-if="defAccount === 'super_admin'"
+                >删除</span>
+              </div>
             </div>
-            <div style="display: flex;">
-              <span class="line-content">{{item.content}}</span>
-              <span style="padding: 0 20px; font-weight: 500;">{{item.updateTime}}</span>
-              <span class="btn" @click="view(item.id)">详情</span>
-              <span class="btn" @click="edit(item.id)" v-if="defAccount==='super_admin'">编辑</span>
-              <span class="btn" style="color: #BE6B75;" @click="showDel(item.id)" v-if="defAccount === 'super_admin'">删除</span>
-            </div>
-          </div>
-        </TimelineItem>
-      </Timeline>
+          </TimelineItem>
+          <div v-show="showBottom" style="text-align: center; font-size: 14px;">---啊哦，没有更多消息了---</div>
+        </Timeline>
+      </Scroll>
     </div>
     <Modal v-model="modal" title="信息" @on-ok="del">
       <p>确定移除该实例吗？</p>
@@ -42,6 +50,7 @@ import { parseTime } from '@/libs/tools'
 export default {
   data() {
     return {
+      showBottom: false,
       defAccount: '',
       delId: '',
       modal: false,
@@ -58,6 +67,10 @@ export default {
     }
   },
   methods: {
+    // 底部加载
+    handleReachBottom() {
+      this.getList()
+    },
     // 删除弹窗
     showDel(id) {
       this.delId = id
@@ -111,6 +124,13 @@ export default {
       getMsgList(this.searchForm).then(res => {
         if (res.data.code === 200) {
           let arr = res.data.data
+          // 默认每次加载20条数据，后端返回
+          if (arr.length > 0) {
+            this.searchForm.pageNumber++
+          } else {
+            this.showBottom = true
+            return
+          }
           arr.forEach(item => {
             item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
           })

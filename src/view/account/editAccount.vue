@@ -87,7 +87,7 @@
             <Input type="password" v-model="editForm.accountPsw" placeholder="不修改账户密码请留空"></Input>
           </FormItem>
           <FormItem v-if="defAccount === 'unit'" prop="confirmAccountPsw" label="重复密码">
-            <Input type="password" v-model="editForm.confirmAccountPsw"></Input>
+            <Input type="password" v-model="editForm.confirmAccountPsw" placeholder="修改密码需再次输入"></Input>
           </FormItem>
           <FormItem v-if="defAccount === 'super_admin'" prop="accountType" label="账户类型">
             <Select v-model="editForm.accountType">
