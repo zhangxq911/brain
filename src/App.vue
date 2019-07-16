@@ -151,4 +151,32 @@ body {
   cursor: pointer;
   text-decoration: underline;
 }
+.show-more {
+  font-size: 16px;
+}
+.show-more:hover {
+  cursor: pointer;
+  // color: #2d8cf0;
+}
+.tree-active {
+  display: inline-block;
+  width: 100%;
+  color: #FFF;
+  font-size: 14px;
+  margin-left: -12px;
+  background:#a7a7a7;
+}
+.tree-active:hover {
+  cursor: pointer;
+}
+.tree-active ~ .ivu-tree-arrow {
+  color: #fff;
+}
+.tree-active>span,
+.tree-active>i {
+  margin-left: 12px;
+}
+.tree-active>div {
+  margin-right: 3px;
+} 
 </style>

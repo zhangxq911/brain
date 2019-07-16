@@ -162,7 +162,7 @@ export default {
           this.timer()
           let data = {
             mobile: this.formData.mobile,
-            type: 1
+            type: 2
           }
           getIdentityCode(data).then(res => {
             if (res.data.code === 200) {

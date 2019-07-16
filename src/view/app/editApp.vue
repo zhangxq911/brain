@@ -33,11 +33,11 @@
         >
           <FormItem prop="appName" label="应用名称">
             <Select v-model="addForm.appName">
-              <Option value="center">联络中心</Option>
+              <Option value="center">云上会面pad版</Option>
               <Option value="call">远程会议</Option>
               <Option value="gis">联情指挥</Option>
               <Option value="live">网络直播</Option>
-              <Option value="meeting">云会议</Option>
+              <Option value="meeting">云上会面手机版</Option>
               <Option value="remote">云Remote</Option>
               <Option value="tv">云视听</Option>
             </Select>
@@ -80,7 +80,7 @@
             <Input :rows="7" type="textarea" v-model="addForm.content" placeholder="请输入更新内容"></Input>
           </FormItem>
           <FormItem>
-            <Button type="primary" @click="save">保存</Button>
+            <Button :loading="loading" type="primary" @click="save">保存</Button>
           </FormItem>
         </Form>
       </Col>
@@ -132,6 +132,12 @@
         </Form>
       </Col>
     </Row>
+    <div class="mask-loading" v-show="loading">
+      <div class="loading-box">
+        <Icon class="loading-btn" type="ios-loading"></Icon>
+        <span style="padding-top: 20px; font-size: 16px; color: #fff;">应用上传中，请稍后...</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -143,6 +149,7 @@ export default {
   props: ['id', 'mode'],
   data() {
     return {
+      loading: false,
       file: null,
       curMode: this.mode,
       curStatus: '',
@@ -207,18 +214,23 @@ export default {
       formData.append('url', this.editForm.url)
       formData.append('status', this.editForm.status)
       this.$refs['editForm'].validate(valid => {
-        putApp(formData).then(res => {
-          if (res.data.code === 200) {
-            this.$Message.success(res.data.msg)
-            // 重置表单
-            this.$refs['editForm'].resetFields()
-            this.$router.push({
-              name: 'app_page'
-            })
-          } else {
-            this.$Message.error(res.data.msg)
-          }
-        })
+        if (valid) {
+          this.loading = true
+          putApp(formData).then(res => {
+            if (res.data.code === 200) {
+              this.loading = false
+              this.$Message.success(res.data.msg)
+              // 重置表单
+              this.$refs['editForm'].resetFields()
+              this.$router.push({
+                name: 'app_page'
+              })
+            } else {
+              this.loading = false
+              this.$Message.error(res.data.msg)
+            }
+          })
+        }
       })
     },
     // 保存
@@ -233,8 +245,10 @@ export default {
       formData.append('status', this.addForm.status)
       this.$refs['addForm'].validate(valid => {
         if (valid) {
+          this.loading = true
           addApp(formData).then(res => {
             if (res.data.code === 200) {
+              this.loading = false
               this.$Message.success(res.data.msg)
               // 重置表单
               this.$refs['addForm'].resetFields()
@@ -242,6 +256,7 @@ export default {
                 name: 'app_page'
               })
             } else {
+              this.loading = false
               this.$Message.error(res.data.msg)
             }
           })
@@ -259,7 +274,7 @@ export default {
           let status = res.data.data.status
           switch (appName) {
             case 'center':
-              this.editForm.appName = '联络中心'
+              this.editForm.appName = '云上会面pad版'
               break
             case 'call':
               this.editForm.appName = '远程会议'
@@ -271,7 +286,7 @@ export default {
               this.editForm.appName = '网络直播'
               break
             case 'meeting':
-              this.editForm.appName = '云会议'
+              this.editForm.appName = '云上会面手机版'
               break
             case 'remote':
               this.editForm.appName = '云Remote'
@@ -324,5 +339,54 @@ export default {
 }
 .editBtn {
   padding-left: 24px;
+}
+.mask-loading {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+.loading-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.loading-btn {
+  font-size: 50px;
+  color: #fff;
+}
+.loading-btn {
+  -webkit-animation: myRotate 1s linear infinite;
+  animation: myRotate 1s linear infinite;
+}
+@-webkit-keyframes myRotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes myRotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 </style>

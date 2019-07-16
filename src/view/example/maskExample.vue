@@ -172,8 +172,12 @@
         </Row>
         <div style="padding: 20px;">
           <Form ref="userForm" :model="userForm" :rules="userValidate" label-position="top">
+            <input type="text" name="tel" style="position: absolute;z-index: -99" />
+            <input type="password" name="regPwd" style="position: absolute;z-index: -99" />
             <FormItem prop="tel" label="人员号码">
-              <Input placeholder="请输入人员号码" v-model="userForm.tel"></Input>
+              <Input placeholder="请输入人员号码" v-model="userForm.tel">
+                <span slot="prepend">{{prefix}}</span>
+              </Input>
             </FormItem>
             <FormItem prop="regPwd" label="人员密码">
               <Input placeholder="请输入人员密码" v-model="userForm.regPwd" type="password"></Input>
@@ -324,7 +328,8 @@ import {
   getOrgList,
   putPermission,
   addGroop,
-  putGroup
+  putGroup,
+  getNumberPrefix
 } from '@/api/data'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
@@ -338,14 +343,14 @@ export default {
     'groupTree',
     'selectUserStr',
     'editUserFrom',
-    "groupForm"
+    'groupForm'
   ],
   components: { Treeselect },
   data() {
     const validateMobile = (rule, value, callback) => {
-      const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+      const reg = 11 && /^((13|14|15|16|17|18|19)[0-9]{1}\d{8})$/
       if (!value) {
-        callback()
+        callback(new Error('请输入手机号码'))
       } else if (!reg.test(value)) {
         callback(new Error('手机号格式不正确'))
       } else {
@@ -365,15 +370,15 @@ export default {
     }
 
     return {
+      prefix: '',
+      defAccount: '',
       addWorkForm: {},
       editWorkForm: {},
       ruleWorkForm: {
         workName: [
           { required: true, message: '请输入工作组名称', trigger: 'blur' }
         ],
-        name: [
-          { required: true, message: '请输入工作组名称', trigger: 'blur' }
-        ]
+        name: [{ required: true, message: '请输入工作组名称', trigger: 'blur' }]
       },
       orgTree3: [],
       orgTree2: [],
@@ -387,7 +392,7 @@ export default {
           { required: true, message: '请输入人员密码', trigger: 'blur' }
         ],
         name: [{ required: true, message: '请输入人员名称', trigger: 'blur' }],
-        phone: [{ required: false, validator: validateMobile, trigger: 'blur' }]
+        phone: [{ required: true, validator: validateMobile, trigger: 'blur' }]
       },
       orgEditForm: {
         name: '',
@@ -642,6 +647,15 @@ export default {
       ]
     }
   },
+  created() {
+    // 控制权限
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
+    }
+  },
   watch: {
     basicInfo: function() {
       // 更新部门
@@ -655,12 +669,34 @@ export default {
       if (this.basicInfo.type === 'changePermission') {
         this.getOrgLists()
       }
+      if (this.basicInfo.type === 'example') {
+        this.searchForm.serverType = this.editForm.instType
+        this.getServicePage(this.searchForm)
+      }
+      if (this.basicInfo.type == 'addUser') {
+        // 获取人员号码前缀
+        this.getPrefix()
+      }
     },
     groupForm: function() {
       this.editWorkForm = this.groupForm
     }
   },
   methods: {
+    // 获取前缀信息
+    getPrefix() {
+      let data = {
+        instanceId: this.orgForm2.ip
+      }
+      getNumberPrefix(data).then(res => {
+        let result = JSON.parse(res.data.msg)
+        if (res.data.code === 200) {
+          this.prefix = res.data.data
+        } else {
+          this.$Message.error(result.REASON)
+        }
+      })
+    },
     // 修改工作组
     editWork() {
       let data = {
@@ -674,7 +710,7 @@ export default {
         regName: this.editWorkForm.regName,
         vgcsTel: this.editWorkForm.vgcsTel
       }
-      putGroup(data).then(res =>{
+      putGroup(data).then(res => {
         let result = JSON.parse(res.data.msg)
         if (res.data.code === 200) {
           this.$refs['editWorkForm'].resetFields()
@@ -845,6 +881,10 @@ export default {
     },
     // 添加人员
     saveUser() {
+      if (!this.prefix) {
+        this.$Message.error('人员前缀为空不能添加！')
+        return
+      }
       this.userForm.ip = this.orgForm2.ip
       this.userForm.oid = this.orgForm2.pid
       if (!this.userForm.oid) {
@@ -853,6 +893,7 @@ export default {
       }
       this.$refs['userForm'].validate(valid => {
         if (valid) {
+          this.userForm.tel = this.prefix + '' + this.userForm.tel
           addUser2(this.userForm).then(res => {
             let result = JSON.parse(res.data.msg)
             if (res.data.code === 200) {
@@ -869,6 +910,9 @@ export default {
     },
     // 更新部门
     updateOrgs() {
+      if (this.orgEditForm.top === 1) {
+        this.orgEditForm.parentOid = 0
+      }
       this.$refs['orgEditForm'].validate(valid => {
         updateOrg(this.orgEditForm).then(res => {
           let result = JSON.parse(res.data.msg)
@@ -946,13 +990,14 @@ export default {
     changeServicePage(curPage) {
       let search = { ...this.searchForm }
       search.page = curPage
-      this.getAccountPage(searchForm)
+      search.type = this.defAccount
+      this.getAccountPage(search)
     },
     // 服务分页
     changeServicePage(curPage) {
       let search = { ...this.searchForm }
       search.page = curPage
-      this.getServicePage(searchForm)
+      this.getServicePage(search)
     },
     // 账户查询
     searchAccount() {
@@ -968,7 +1013,7 @@ export default {
       this.basicInfo.type = 'normal'
       this.$emit('sendModal', this.basicInfo.type)
     },
-    getServicePage(params = { page: 1, status: 1, capacity: 0 }) {
+    getServicePage(params) {
       params ? params : (params = this.searchForm)
       getServiceList(params).then(res => {
         if (res.data.code === 200 && res.data.data) {
@@ -984,8 +1029,9 @@ export default {
       })
     },
     // 获取账户列表
-    getAccountPage(params = {}) {
+    getAccountPage(params) {
       params ? params : (params = this.searchForm)
+      this.searchForm.type = this.defAccount
       getAccountList(params).then(res => {
         if (res.status === 200 && res.data.data) {
           if (!res.data.data.data) {

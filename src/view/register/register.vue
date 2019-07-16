@@ -94,7 +94,7 @@ export default {
     }
 
     const validateMobile = (rule, value, callback) => {
-      const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+      const reg = 11 && /^((13|14|15|16|17|18|19)[0-9]{1}\d{8})$/
       let data = {
         mobile: value
       }

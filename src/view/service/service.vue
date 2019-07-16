@@ -3,7 +3,7 @@
     <Row>
       <Button type="primary" @click="add">新增</Button>
       <div style="float: right; margin-bottom: -10px;">
-        <Form ref="searchForm" :model="searchForm" inline>
+        <Form ref="searchForm" :model="searchForm" inline @submit.native.prevent>
           <FormItem>
             <Select
               @on-change="search"
@@ -75,8 +75,12 @@ export default {
       searchForm: {},
       filterList: [
         {
-          name: 'name',
-          value: 'val'
+          name: '服务ID',
+          value: 'serviceId'
+        },
+        {
+          name: '服务名称',
+          value: 'serverName'
         }
       ],
       columns: [

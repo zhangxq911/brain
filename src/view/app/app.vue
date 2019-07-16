@@ -4,14 +4,14 @@
       <Button type="primary" @click="add">新建</Button>
     </Row>
     <Table :loading="loading" border :columns="columns" :data="dataList"></Table>
-    <!-- <div class="footerPage">
+    <div class="footerPage">
       <Page
         :current="dataList.pageNumber"
         :page-size="dataList.pageSize"
         :total="dataList.count"
         @on-change="changePage"
       />
-    </div>-->
+    </div>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default {
             let appName = params.row.appName
             switch (appName) {
               case 'center':
-                appName = '联络中心'
+                appName = '云上会面pad版'
                 break
               case 'call':
                 appName = '远程会议'
@@ -45,7 +45,7 @@ export default {
                 appName = '网络直播'
                 break
               case 'meeting':
-                appName = '云会议'
+                appName = '云上会面手机版'
                 break
               case 'remote':
                 appName = '云Remote'
@@ -180,6 +180,13 @@ export default {
     }
   },
   methods: {
+    // 分页
+    changePage(curPage) {
+      let search = { ...this.searchForm }
+      search.page = curPage
+      this.loading = true
+      this.getPage(searchForm)
+    },
     // 删除
     delete(id) {
       delApp(id).then(res => {

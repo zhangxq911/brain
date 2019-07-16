@@ -1,6 +1,12 @@
 import axios from '@/libs/api.request'
 // import store from '@/store'
 
+export const getCard = () => {
+  return axios.request({
+    url: '/index',
+    method: 'get'
+  })
+}
 /**
  * 验证码获取
  */
@@ -95,9 +101,19 @@ export const getAccountInfo = params => {
   })
 }
 
+// 管理员修改
 export const putAccount = data => {
   return axios.request({
     url: `/account/${data.id}`,
+    data: data,
+    method: 'put'
+  })
+}
+
+// 个人/企业修改
+export const putPersonalAccount = data => {
+  return axios.request({
+    url: `/account/info/${data.id}`,
     data: data,
     method: 'put'
   })
@@ -370,6 +386,13 @@ export const delMsg = data => {
 /**
  * poc接口
  */
+export const getNumberPrefix = data => {
+  return axios.request({
+    url: '/pocuser/getNumberPrefix',
+    data: data,
+    method: 'post'
+  })
+}
 
 export const delUserGroup = data => {
   return axios.request({

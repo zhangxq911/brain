@@ -1,7 +1,7 @@
 <template>
   <div style="width: 100vw; height: 100vh; overflow: auto;">
     <div style="width: 100vw; height: 100vh; overflow: hidden; background: #333333;" v-if="isWx">
-      <img style="width: 96%; float: right;" src="../../assets/images/open-wx.png" alt="请从浏览器打开">
+      <img style="width: 96%; float: right;" src="../../assets/images/open-wx.png" alt="请从浏览器打开" />
     </div>
     <div class="h5-wrap" v-if="!isWx">
       <div class="header">
@@ -12,8 +12,8 @@
           <div style="width: 106px; height: 106px;">
             <img
               style="width: 100%; height: 100%;"
-              src="../../assets/images/logo-call.png"
-              v-if="item.app === 'call'"
+              src="../../assets/images/logo-meeting.png"
+              v-if="item.app === 'meeting'"
               alt="图标"
             />
             <img
@@ -48,7 +48,9 @@
           <div class="tips">长按二维码下载</div>
           <div style="display: flex; padding: 10px 0;">
             <div class="qr-box" v-for="(child, i) in item.child" :key="i">
-              <div class="qrcode"></div>
+              <div class="qrcode">
+                <VueQrcode tag="img" :value="child.url" :options="{ size: 158 }"></VueQrcode>
+              </div>
               <div class="qr-btn" v-if="child.type === 'android'">
                 <Icon type="logo-android" class="h5-icon" />
                 <span @click="jump(child.url)">安卓下载</span>
@@ -67,15 +69,17 @@
 
 <script>
 import { getLatestInfo } from '@/api/data'
+import VueQrcode from '@xkeshi/vue-qrcode'
 
 export default {
+  components: { VueQrcode },
   data() {
     return {
       isWx: false,
       basicInfo: [
         {
-          app: 'call',
-          name: '美播云会议',
+          app: 'meeting',
+          name: '云上会面手机版',
           description: '随时随地进行高清视频通话、视频会 议、多人聊天。',
           icon: '../../assets/images/logo-call.png',
           device: 1, // 1 两个 2 android 3 ios
@@ -113,7 +117,7 @@ export default {
     const u = navigator.userAgent
     let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1
     let wx = this.isWeiXin()
-    if(wx && isAndroid) {
+    if (wx && isAndroid) {
       this.isWx = true
     }
   },

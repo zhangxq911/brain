@@ -55,6 +55,7 @@ export default {
         {
           title: '通话时间',
           align: 'center',
+          width: 160,
           render: (h, params) => {
             return h('div', params.row.callTime + ' - ' + params.row.endTime)
           }

@@ -49,6 +49,8 @@
         v-if="curMode === 'add'"
       >
         <Col span="12">
+          <input type="text" name="userName" style="position: absolute;z-index: -99" />
+          <input type="password" name="userPsw" style="position: absolute;z-index: -99" />
           <FormItem prop="userName" label="用户名称">
             <Input type="text" v-model="addForm.userName" placeholder="请输入用户名称"></Input>
           </FormItem>
@@ -106,6 +108,8 @@
           :label-width="120"
           style="min-width: 500px;"
         >
+          <input type="text" name="userName" style="position: absolute;z-index: -99" />
+          <input type="password" name="userPsw" style="position: absolute;z-index: -99" />
           <FormItem prop="userName" label="用户名称">
             <Input type="text" v-model="editForm.userName" placeholder="请输入用户名称"></Input>
           </FormItem>
@@ -115,15 +119,16 @@
           <FormItem prop="repeatPsw" label="重复密码">
             <Input type="password" v-model="editForm.repeatPsw" placeholder="请再次输入密码"></Input>
           </FormItem>
-          <FormItem label="昵称">
+          <FormItem prop="nickName" label="昵称">
             <Input type="text" v-model="editForm.nickName" placeholder="请输入昵称"></Input>
           </FormItem>
-          <FormItem label="用户类型">
+          <FormItem v-if="defAccount === 'super_admin'" label="用户类型">
             <RadioGroup v-model="editForm.userType">
               <Radio :label="0">查看者</Radio>
               <Radio :label="1">子用户</Radio>
             </RadioGroup>
           </FormItem>
+          <FormItem v-if="defAccount === 'unit'" label="用户类型">{{addForm.userType ? '子用户': '查看者'}}</FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="editForm.mobile" placeholder="请输入手机号码"></Input>
           </FormItem>
@@ -136,7 +141,7 @@
               <Radio :label="0">停用</Radio>
             </RadioGroup>
           </FormItem>
-          <FormItem label="用户描述">
+          <FormItem prop="description" label="用户描述">
             <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入用户描述"></Input>
           </FormItem>
           <FormItem>
@@ -175,7 +180,7 @@ export default {
     const validateName = (rule, value, callback) => {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
       if (!value) {
-        callback(new Error('这是必填字段'))
+        callback(new Error('请输入用户名称'))
       } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
         callback(new Error('长度为 2~16 个英文或中文字符'))
       } else {
@@ -184,7 +189,10 @@ export default {
     }
 
     const validatePwd2 = (rule, value, callback) => {
-      if (!value && this.editForm.userPsw) {
+      if (
+        (!value && this.addForm.userPsw) ||
+        (!value && this.editForm.userPsw)
+      ) {
         callback(new Error('密码确认不能为空'))
       } else if (
         value === this.addForm.userPsw ||
@@ -197,8 +205,10 @@ export default {
     }
 
     const validateMobile = (rule, value, callback) => {
-      const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
-      if (value && !reg.test(value)) {
+      const reg = 11 && /^((13|14|15|16|17|18|19)[0-9]{1}\d{8})$/
+      if (!value) {
+        callback(new Error('请输入手机号码'))
+      } else if (!reg.test(value)) {
         callback(new Error('手机号格式不正确'))
       } else {
         callback()
@@ -217,7 +227,30 @@ export default {
       }
     }
 
+    const validatePwd = (rule, value, callback) => {
+      const reg = /^[a-zA-Z0-9_@]+$/
+      if (!value) {
+        callback(new Error('请输入账户密码'))
+      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
+        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else {
+        callback()
+      }
+    }
+
+    const validatePwd3 = (rule, value, callback) => {
+      const reg = /^[a-zA-Z0-9_@]+$/
+      if (!value) {
+        callback()
+      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
+        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else {
+        callback()
+      }
+    }
+
     return {
+      defAccount: '',
       accontContent: '',
       basicInfo: {},
       editForm: {},
@@ -233,24 +266,29 @@ export default {
         userName: [
           { required: true, validator: validateName, trigger: 'blur' }
         ],
-        userPsw: [
-          { required: true, message: '请输入用户密码', trigger: 'blur' }
-        ],
+        userPsw: [{ required: true, validator: validatePwd, trigger: 'blur' }],
         repeatPsw: [
           { required: true, validator: validatePwd2, trigger: 'blur' }
         ],
         nickName: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
-        mobile: [{ validator: validateMobile, trigger: 'blur' }],
-        email: [{ validator: validateEmail, trigger: 'blur' }]
+        mobile: [
+          { required: true, validator: validateMobile, trigger: 'blur' }
+        ],
+        email: [{ validator: validateEmail, trigger: 'blur' }],
+        description: [{ max: 100, message: '最多为100个字符', trigger: 'blur' }]
       },
       rulesValidate2: {
         userName: [
           { required: true, validator: validateName, trigger: 'blur' }
         ],
-        userPsw: [{ message: '请输入用户密码', trigger: 'blur' }],
+        userPsw: [{ validator: validatePwd3, trigger: 'blur' }],
         repeatPsw: [{ validator: validatePwd2, trigger: 'blur' }],
-        mobile: [{ validator: validateMobile, trigger: 'blur' }],
-        email: [{ validator: validateEmail, trigger: 'blur' }]
+        nickName: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
+        mobile: [
+          { required: true, validator: validateMobile, trigger: 'blur' }
+        ],
+        email: [{ validator: validateEmail, trigger: 'blur' }],
+        description: [{ max: 100, message: '最多为100个字符', trigger: 'blur' }]
       },
       accountColumns: [
         {
@@ -465,7 +503,7 @@ export default {
     },
     // 新增提交
     save() {
-      if(this.defAccount !== 'super_admin') {
+      if (this.defAccount !== 'super_admin') {
         this.addForm.userType = 0
       }
       this.$refs['addForm'].validate(valid => {
@@ -489,11 +527,11 @@ export default {
     },
     // 修改信息
     update() {
-      if(this.defAccount !== 'super_admin') {
+      if (this.defAccount !== 'super_admin') {
         this.editForm.userType = 0
       }
-      this.rulesValidate.userPsw[0].required = false
-      this.rulesValidate.repeatPsw[0].required = false
+      this.rulesValidate2.userPsw[0].required = false
+      this.rulesValidate2.repeatPsw[0].required = false
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           putUser(this.editForm).then(res => {

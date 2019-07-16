@@ -60,7 +60,7 @@
 import { parseTime } from '@/libs/tools'
 import InforCard from '_c/info-card'
 import Example from './example.vue'
-import { getMsgList } from '@/api/data'
+import { getMsgList, getCard } from '@/api/data'
 
 export default {
   components: {
@@ -111,6 +111,15 @@ export default {
     }
   },
   methods: {
+    // 获取卡片数据
+    getCardData() {
+      getCard().then(res => {
+        if(res.data.code === 200) {
+          this.cardData[0].count = res.data.data.userOnlineCount
+          this.cardData[1].count = res.data.data.userMaxOnlineCount
+        }
+      })
+    },
     // 跳转更多
     showMore() {
       this.$router.push({
@@ -133,6 +142,7 @@ export default {
   },
   mounted() {
     this.getMsgLists()
+    this.getCardData()
   }
 }
 </script>

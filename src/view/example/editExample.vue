@@ -40,7 +40,7 @@
                       class="editBtn"
                       href="javascript:void(0)"
                       @click="curMode = 'edit'"
-                      v-show="curMode === 'view'"
+                      v-show="curMode === 'view' && defAccount === 'super_admin'"
                     >
                       编辑
                       <Icon type="md-create" />
@@ -106,9 +106,7 @@
               </div>
             </Row>
             <div style="display: flex; height: 100%;">
-              <div
-                style="width: 200px; background: #F1F3F6; padding: 0 10px; max-height: 460px; overflow: auto;"
-              >
+              <div class="left-content">
                 <!-- 左侧组织树 -->
                 <Tree :data="orgList" :render="renderContent"></Tree>
               </div>
@@ -191,7 +189,7 @@
             </Row>
             <div style="display: flex; height: 100%;">
               <div
-                style="width: 200px; background: #F1F3F6; padding: 0 10px; max-height: 460px; overflow: auto;"
+                style="width: 200px; background: #F1F3F6; padding: 0 10px; height: 100%; overflow: auto;"
               >
                 <!-- 左侧组织树 -->
                 <Tree :data="groupList" :render="renderContent2"></Tree>
@@ -238,7 +236,7 @@
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="addForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
-          <FormItem label="实例描述">
+          <FormItem prop="description" label="实例描述">
             <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入实例描述"></Input>
           </FormItem>
           <FormItem prop="instType" label="实例类型">
@@ -251,12 +249,13 @@
           <FormItem prop="capacity" label="实例容量">
             <InputNumber style="width: 100%;" :min="1" v-model="addForm.capacity"></InputNumber>
           </FormItem>
-          <FormItem v-if="defAccount === 'super_admin'" label="到期时间">
+          <FormItem prop="expirationTime" v-if="defAccount === 'super_admin'" label="到期时间">
             <DatePicker
               v-model="addForm.expirationTime"
               type="date"
               placeholder="请选择到期时间"
               style="width: 100%"
+              :options="options"
             ></DatePicker>
           </FormItem>
           <FormItem prop="serverId" label="实例">
@@ -301,16 +300,15 @@
           <FormItem prop="instName" label="实例名称">
             <Input type="text" v-model="editForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
-          <FormItem label="实例描述">
+          <FormItem prop="description" label="实例描述">
             <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入实例描述"></Input>
           </FormItem>
-          <FormItem label="实例类型">
-            <Input readonly :value="remoteType"></Input>
-          </FormItem>
-          <FormItem prop="capacity" label="实例容量">
+          <FormItem label="实例类型">{{remoteType}}</FormItem>
+          <FormItem v-if="defAccount === 'super_admin'" prop="capacity" label="实例容量">
             <InputNumber style="width: 100%;" :min="1" v-model="editForm.capacity"></InputNumber>
           </FormItem>
-          <FormItem v-if="defAccount === 'super_admin'" label="到期时间">
+          <FormItem v-if="defAccount !== 'super_admin'" label="实例容量">{{editForm.capacity}}</FormItem>
+          <FormItem prop="expirationTime" v-if="defAccount === 'super_admin'" label="到期时间">
             <DatePicker
               v-model="editForm.expirationTime"
               type="date"
@@ -318,6 +316,7 @@
               style="width: 100%"
             ></DatePicker>
           </FormItem>
+          <FormItem v-if="defAccount !== 'super_admin'" label="到期时间">{{editForm.expirationTime}}</FormItem>
           <FormItem label="实例">
             <Input readonly :rows="7" type="textarea" :value="serverContent2"></Input>
           </FormItem>
@@ -407,7 +406,7 @@ export default {
     }
 
     const validateMobile = (rule, value, callback) => {
-      const reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+      const reg = 11 && /^((13|14|15|16|17|18|19)[0-9]{1}\d{8})$/
       if (!value) {
         callback()
       } else if (!reg.test(value)) {
@@ -442,6 +441,11 @@ export default {
     }
 
     return {
+      options: {
+        disabledDate(date) {
+          return date && date.valueOf() < Date.now() - 86400000 // 限制只能选择当前及之后的时间
+        }
+      },
       selectWorkUserStr: '',
       groupForm: {},
       modifyArr: [],
@@ -705,6 +709,14 @@ export default {
             trigger: 'blur'
           }
         ],
+        expirationTime: [
+          {
+            type: 'date',
+            required: true,
+            message: '请选择到期时间',
+            trigger: 'change'
+          }
+        ],
         accountId: [
           {
             type: 'number',
@@ -718,7 +730,8 @@ export default {
         ],
         accountName: [
           { required: true, message: '请选择账户', trigger: 'change' }
-        ]
+        ],
+        description: [{ max: 100, message: '最多为100个字符', trigger: 'blur' }]
       },
       rulesValidate2: {
         instName: [
@@ -727,6 +740,14 @@ export default {
         instType: [
           { required: true, message: '请选择实例类型', trigger: 'change' }
         ],
+        expirationTime: [
+          {
+            type: 'date',
+            required: true,
+            message: '请选择到期时间',
+            trigger: 'change'
+          }
+        ],
         capacity: [
           {
             type: 'number',
@@ -734,7 +755,8 @@ export default {
             message: '请输入实例容量',
             trigger: 'blur'
           }
-        ]
+        ],
+        description: [{ max: 100, message: '最多为100个字符', trigger: 'blur' }]
       },
       btntxt: '发送验证码',
       codeType: false,
@@ -873,11 +895,9 @@ export default {
         'span',
         {
           style: {
-            display: 'inline-block',
-            width: '100%',
-            background: this.activeOrg === data.oid ? '#2d8cf0' : 'none',
-            color: this.activeOrg === data.oid ? '#FFF' : '#515a6e'
+            'font-size': '14px'
           },
+          class: this.activeOrg === data.oid ? 'tree-active' : '',
           on: {
             click: () => {
               this.searchForm.oid = data.oid
@@ -904,8 +924,7 @@ export default {
               },
               style: {
                 display: 'inline-block',
-                float: 'right',
-                marginRight: '32px'
+                float: 'right'
               },
               on: {
                 'on-click': name => {
@@ -931,7 +950,12 @@ export default {
               }
             },
             [
-              h('span', '···'),
+              h('Icon', {
+                props: {
+                  type: 'ios-more'
+                },
+                class: 'show-more'
+              }),
               h(
                 'DropdownMenu',
                 {
@@ -943,6 +967,9 @@ export default {
                     {
                       props: {
                         name: 'edit'
+                      },
+                      style: {
+                        color: '#2d8cf0'
                       }
                     },
                     '编辑'
@@ -952,6 +979,9 @@ export default {
                     {
                       props: {
                         name: 'del'
+                      },
+                      style: {
+                        color: '#ed4014'
                       }
                     },
                     '删除'
@@ -968,14 +998,11 @@ export default {
         'span',
         {
           style: {
-            display: 'inline-block',
-            width: '100%',
-            background: this.activeOrg2 === data.gid ? '#2d8cf0' : 'none',
-            color: this.activeOrg2 === data.gid ? '#FFF' : '#515a6e'
+            'font-size': '14px'
           },
+          class: this.activeOrg2 === data.gid ? 'tree-active' : '',
           on: {
             click: () => {
-              // this.searchForm.vgcsTel = data.vgcsTel
               this.searchForm.gid = data.gid
               this.searchForm.page = 1
               this.getGroupPage()
@@ -983,23 +1010,24 @@ export default {
                 this.activeOrg2 = ''
               } else {
                 this.activeOrg2 = data.gid
-                // this.orgForm2.pid = data.gid
-                // this.orgForm2.ptitle = data.title
               }
             }
           }
         },
         [
-          // <Icon type="md-people" />
-          h('Icon', {
-            props: {
-              type: 'md-people'
-            },
-            style: {
-              color: '#76AAFF'
-            }
-          }),
-          h('span', data.title + '(' + data.vgcsTel + ')'), // + '/' + data.gid),
+          h('span', [
+            h('Icon', {
+              props: {
+                type: 'md-people'
+              },
+              style: {
+                color: '#2d8cf0',
+                'font-size': '14px',
+                'padding-right': '4px'
+              }
+            }),
+            h('span', data.title + '(' + data.vgcsTel + ')')
+          ]), // + '/' + data.gid),
           h(
             'Dropdown',
             {
@@ -1008,8 +1036,7 @@ export default {
               },
               style: {
                 display: 'inline-block',
-                float: 'right',
-                marginRight: '32px'
+                float: 'right'
               },
               on: {
                 'on-click': name => {
@@ -1035,7 +1062,12 @@ export default {
               }
             },
             [
-              h('span', '···'),
+              h('Icon', {
+                props: {
+                  type: 'ios-more'
+                },
+                class: 'show-more'
+              }),
               h(
                 'DropdownMenu',
                 {
@@ -1047,6 +1079,9 @@ export default {
                     {
                       props: {
                         name: 'edit'
+                      },
+                      style: {
+                        color: '#2d8cf0'
                       }
                     },
                     '编辑'
@@ -1056,6 +1091,9 @@ export default {
                     {
                       props: {
                         name: 'del'
+                      },
+                      style: {
+                        color: '#ed4014'
                       }
                     },
                     '删除'
@@ -1088,7 +1126,9 @@ export default {
           ip: this.id,
           instanceId: this.id
         }
-        this.getOrgLists()
+        if (this.orgList.length === 0) {
+          this.getOrgLists()
+        }
         if (this.groupList.length === 0) {
           this.getGroupLists()
         }
@@ -1126,6 +1166,7 @@ export default {
       return tree
     },
     handleList(list) {
+      if(!list) {return}
       let newList = []
       list.forEach((item, index) => {
         let obj = {}
@@ -1167,6 +1208,7 @@ export default {
       let params = { instanceId: this.id }
       getOrgList(params).then(res => {
         if (res.data.code === 200) {
+          if(!res.data.data) {return}
           this.orgList = this.listToTree(this.handleList(res.data.data))
         }
       })
@@ -1176,7 +1218,9 @@ export default {
       let params = { instanceId: this.id }
       getGroupList(params).then(res => {
         if (res.data.code === 200) {
+          this.groupList = []
           let data = res.data.data
+          if(!data) {return}
           data.forEach((item, index) => {
             let obj = item
             obj.id = item.gid
@@ -1362,7 +1406,7 @@ export default {
               break
           }
           let data = this.editForm
-          this.serverContent2 = `实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost}\n定位服务端口号：${data.gpsPort}`
+          this.serverContent2 = `服务：${data.serverName}\n实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost}\n定位服务端口号：${data.gpsPort}\n总量：${data.totalCapacity}`
         } else {
           this.$Message.error(res.data.msg)
         }
@@ -1393,5 +1437,16 @@ export default {
   font-weight: bold;
   background: #86a1c1;
   color: #fff;
+}
+.left-content {
+  width: 200px;
+  background: #f1f3f6;
+  padding: 0 10px;
+  /* max-height: 460px; */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.left-content .ivu-tree ul li {
+  font-size: 14px;
 }
 </style>

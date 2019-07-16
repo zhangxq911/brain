@@ -48,8 +48,8 @@
           </FormItem>
           <FormItem prop="serverType" label="服务类型">
             <Select v-model="addForm.serverType" @on-change="ifShowGps">
-              <Option value="call">及时通信</Option>
-              <Option value="gis">GIS地图</Option>
+              <Option value="call">远程会议</Option>
+              <Option value="gis">联情指挥</Option>
               <Option value="live">网络直播</Option>
             </Select>
           </FormItem>
@@ -60,6 +60,7 @@
             <InputNumber
               style="width: 100%;"
               :min="1"
+              :max="65535"
               v-model="addForm.serverPort"
               placeholder="请输入服务端口"
             ></InputNumber>
@@ -68,26 +69,27 @@
             <InputNumber
               style="width: 100%;"
               :min="1"
+              :max="10000"
               v-model="addForm.totalCapacity"
               placeholder="请输入服务总容量"
             ></InputNumber>
           </FormItem>
-          <FormItem v-show="showGps" label="定位服务域名或IP地址">
+          <FormItem prop="gpsHost" v-show="showGps" label="定位服务域名或IP地址">
             <Input type="text" v-model="addForm.gpsHost" placeholder="请输入定位服务域名或IP地址"></Input>
           </FormItem>
           <FormItem v-show="showGps" label="定位服务端口">
-            <Input type="text" v-model="addForm.gpsPort" placeholder="请输入定位服务端口"></Input>
-          </FormItem>
-          <FormItem prop="numberPrefix" label="编号前缀">
             <InputNumber
               style="width: 100%;"
-              :min="0"
-              :max="99999999"
-              v-model="addForm.numberPrefix"
-              placeholder="请输入编号前缀"
+              :min="1"
+              :max="65535"
+              v-model="addForm.gpsPort"
+              placeholder="请输入定位服务端口"
             ></InputNumber>
           </FormItem>
-          <FormItem label="服务描述">
+          <FormItem prop="numberPrefix" label="编号前缀">
+            <Input type="text" v-model="addForm.numberPrefix" placeholder="请输入编号前缀"></Input>
+          </FormItem>
+          <FormItem prop="description" label="服务描述">
             <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入服务描述"></Input>
           </FormItem>
           <FormItem>
@@ -121,25 +123,25 @@
             <InputNumber
               style="width: 100%;"
               :min="1"
+              :max="65535"
               v-model="editForm.serverPort"
               placeholder="请输入服务端口"
             ></InputNumber>
           </FormItem>
-          <FormItem label="服务总容量">
-            <InputNumber
-              style="width: 100%;"
-              :min="1"
-              :value="editForm.totalCapacity"
-              :disabled="true"
-            ></InputNumber>
-          </FormItem>
-          <FormItem v-if="showGps" label="定位服务域名或IP地址">
+          <FormItem label="服务总容量">{{editForm.totalCapacity}}</FormItem>
+          <FormItem prop="gpsHost" v-if="showGps" label="定位服务域名或IP地址">
             <Input type="text" v-model="editForm.gpsHost" placeholder="请输入定位服务域名或IP地址"></Input>
           </FormItem>
           <FormItem v-if="showGps" label="定位服务端口">
-            <Input type="text" v-model="editForm.gpsPort" placeholder="请输入定位服务端口"></Input>
+            <InputNumber
+              style="width: 100%;"
+              :min="1"
+              :max="65535"
+              v-model="editForm.gpsPort"
+              placeholder="请输入定位服务端口"
+            ></InputNumber>
           </FormItem>
-          <FormItem label="服务描述">
+          <FormItem prop="description" label="服务描述">
             <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入服务描述"></Input>
           </FormItem>
           <FormItem>
@@ -152,19 +154,53 @@
 </template>
 
 <script>
-import { addServer, getServiceInfo, putService } from '@/api/data'
+import { addServer, getServiceInfo, putService, delExample } from '@/api/data'
 
 export default {
   props: ['id', 'mode'],
   data() {
+    const validatePrefix = (rule, value, callback) => {
+      const reg = /^[0-9]*$/
+      if (!value) {
+        callback(new Error('请输入编号前缀'))
+      } else if (!reg.test(value) || value.length < 1 || value.length > 10) {
+        callback(new Error('长度为 1~10 个数字'))
+      } else {
+        callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
+      }
+    }
+
+    const validateHost = (rule, value, callback) => {
+      const regHost = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/
+      const regIp4 = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+      if (!value) {
+        callback(new Error('请输入服务域名或IP'))
+      } else if (!regHost.test(value) && !regIp4.test(value)) {
+        callback(new Error('请输入正确的域名或IP'))
+      } else {
+        callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
+      }
+    }
+
+    const validateHost2 = (rule, value, callback) => {
+      const regHost = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/
+      const regIp4 = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+      if (!value) {
+        callback()
+      } else if (!regHost.test(value) && !regIp4.test(value)) {
+        callback(new Error('请输入正确的域名或IP'))
+      } else {
+        callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
+      }
+    }
+
     return {
       remoteType: '',
       showGps: false,
       curMode: this.mode,
       addForm: {
         serverPort: 1,
-        totalCapacity: 1,
-        numberPrefix: 0
+        totalCapacity: 1000
       },
       editForm: {},
       rulesValidate: {
@@ -175,8 +211,9 @@ export default {
           { required: true, message: '请选择服务类型', trigger: 'change' }
         ],
         serverHost: [
-          { required: true, message: '请输入服务域名或IP', trigger: 'blur' }
+          { required: true, validator: validateHost, trigger: 'blur' }
         ],
+        gpsHost: [{ validator: validateHost2, trigger: 'blur' }],
         serverPort: [
           {
             type: 'number',
@@ -187,19 +224,22 @@ export default {
         ],
         numberPrefix: [
           {
-            type: 'number',
             required: true,
-            message: '请输入编号前缀',
+            validator: validatePrefix,
             trigger: 'blur'
           }
         ],
         totalCapacity: [
           {
             type: 'number',
+            min: 100,
             required: true,
-            message: '请输入服务总容量',
+            message: '服务总容量值区间为100-10000',
             trigger: 'blur'
           }
+        ],
+        description: [
+          { max: 100, message: '服务描述最多输入100个字符', trigger: 'blur' }
         ]
       },
       columns: [
@@ -339,20 +379,40 @@ export default {
           title: '操作',
           align: 'center',
           render: (h, params) => {
-            return h('div', {
-              // porps: {
-              //   size: 'small'
-              // }
-            },'释放实例')
+            return h(
+              'Button',
+              {
+                props: {
+                  type: 'error',
+                  size: 'small'
+                },
+                on: {
+                  click: () => {
+                    this.delete(params.row.id)
+                  }
+                }
+              },
+              '释放'
+            )
           }
         }
       ]
     }
   },
   methods: {
+    // 释放
+    delete(id) {
+      delExample(id).then(res => {
+        if (res.data.code === 200) {
+          this.$Message.success(res.data.msg)
+          this.getPage()
+        } else {
+          this.$Message.error(res.data.msg)
+        }
+      })
+    },
     // 更新
     update() {
-      console.log(this.editForm)
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           putService(this.editForm).then(res => {

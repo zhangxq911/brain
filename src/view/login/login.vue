@@ -4,7 +4,7 @@
 
 <template>
   <div class="login">
-    <img class="login-logo" src="../../assets/images/logo.png" alt="智能中心">
+    <img class="login-logo" src="../../assets/images/logo.png" alt="智能中心" />
     <div class="login-con">
       <Card icon="log-in" title="账号登录" :bordered="false">
         <div class="form-con">

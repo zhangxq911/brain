@@ -2,7 +2,7 @@
   <div>
     <div class="card-box">
       <Row style>
-        <Button type="primary" @click="add()">新增</Button>
+        <Button v-if="defAccount === 'super_admin'" type="primary" @click="add()">新增</Button>
         <div style="float: right; margin-bottom: -10px;">
           <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
             <FormItem prop="status">
@@ -85,9 +85,12 @@ import { getExampleList, delExample, operateExample } from '@/api/data'
 import { parse } from 'path'
 import { callbackify } from 'util'
 import { loadavg } from 'os'
+import { parseTime } from '@/libs/tools'
+
 export default {
   data() {
     return {
+      defAccount: '',
       loading: false,
       searchForm: {
         accountId: null,
@@ -150,6 +153,7 @@ export default {
                         name: 'edit_example',
                         params: {
                           id: params.row.id,
+                          // aId: params.row.accountId,
                           mode: 'view',
                           title: '实例详情'
                         }
@@ -307,7 +311,12 @@ export default {
                 {
                   props: {
                     type: 'error',
-                    size: 'small'
+                    size: 'small',
+                    disabled:
+                      parseTime(new Date(), '{y}-{m}-{d}') >
+                      params.row.expirationTime
+                        ? false
+                        : true
                   },
                   on: {
                     click: () => {
@@ -315,12 +324,20 @@ export default {
                     }
                   }
                 },
-                '删除'
+                '释放'
               )
             ])
           }
         }
       ]
+    }
+  },
+  created() {
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {

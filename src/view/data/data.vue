@@ -1,3 +1,3 @@
 <template>
-  <div>统计数据</div>
+  <div>暂无数据</div>
 </template>

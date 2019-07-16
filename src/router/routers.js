@@ -121,6 +121,7 @@ export default [
         name: 'account_page',
         meta: {
           icon: 'md-people',
+          access: ['super_admin'],
           title: '账户管理'
         },
         component: () => import('@/view/account/account')
