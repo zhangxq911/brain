@@ -117,7 +117,8 @@ router.beforeEach((to, from, next) => {
       if (res.data.code === 200) {
         // 返回成功，重新插入数据
         store.commit('setUserName', res.data.data.accountName)
-        store.commit('setUserId', res.data.data.accountId)
+        store.commit('setUserId', res.data.data.id)
+        store.commit('setSource', res.data.data.accountSource)
         switch (res.data.data.accountType) {
           case 0:
             store.commit('setAccess', ['super_admin', 'company', 'personal'])
