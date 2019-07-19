@@ -59,7 +59,9 @@ export default {
       loading: false,
       rangeTime: '',
       dataList: [],
-      searchForm: {},
+      searchForm: {
+        filter: 'object'
+      },
       filterList: [
         {
           name: '操作对象',
@@ -138,7 +140,7 @@ export default {
       this.getPage(search)
     },
     refresh() {
-      this.searchForm.content = ''
+      this.searchForm.detail = ''
       this.search()
     },
     // 分页

@@ -192,7 +192,7 @@ export default {
         endTime: new Date(),
         page: 1,
         order: 'call_time|desc',
-        filter: 'calledTel',
+        filter: 'calledName',
         callType: 0
       },
       filterList: [
