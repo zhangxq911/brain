@@ -9,8 +9,8 @@
         <FormItem label="通话号码">{{editForm.calledTel }}</FormItem>
         <FormItem label="通话对象">{{editForm.calledName }}</FormItem>
         <FormItem label="通话类型">{{editForm.callType }}</FormItem>
-        <FormItem label="用户名称">{{editForm.calledName }}</FormItem>
-        <FormItem label="账户名称">{{editForm.accountName }}</FormItem>
+        <FormItem label="用户">{{editForm.callerId }} / {{editForm.callerName }}</FormItem>
+        <FormItem v-if="defAccount === 'super_admin'" label="账户">{{editForm.accountId }} / {{editForm.accountName }}</FormItem>
         </Form>
       </Col>
       <Col span="8" v-show="curMode === 'view'">
@@ -36,6 +36,15 @@ export default {
     return {
       curMode: this.mode,
       editForm: {},
+    }
+  },
+  created() {
+    // 控制权限
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {

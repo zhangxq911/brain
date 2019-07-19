@@ -77,7 +77,8 @@
             </Upload>
           </FormItem>
           <FormItem prop="content" label="更新内容">
-            <Input :rows="7" type="textarea" v-model="addForm.content" placeholder="请输入更新内容"></Input>
+            <Input :rows="7" :maxlength="100" type="textarea" v-model="addForm.content" placeholder="请输入更新内容"></Input>
+            <span class="font-tips">已输入 {{addForm.content.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button :loading="loading" type="primary" @click="save">保存</Button>
@@ -124,7 +125,8 @@
             </Upload>
           </FormItem>
           <FormItem label="更新内容">
-            <Input :rows="7" type="textarea" v-model="editForm.content"></Input>
+            <Input :rows="7" :maxlength="100" type="textarea" v-model="editForm.content"></Input>
+            <span class="font-tips">已输入 {{editForm.content ? editForm.content.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -153,9 +155,12 @@ export default {
       file: null,
       curMode: this.mode,
       curStatus: '',
-      editForm: {},
+      editForm: {
+        content: ''
+      },
       addForm: {
-        type: 'android'
+        type: 'android',
+        content: ''
       },
       rulesValidate: {
         appName: [

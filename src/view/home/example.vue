@@ -1,5 +1,5 @@
 <template>
-    <div ref="dom"></div>
+  <div ref="dom"></div>
 </template>
 
 <script>
@@ -7,17 +7,17 @@ import echarts from 'echarts'
 import { on, off } from '@/libs/tools'
 export default {
   name: 'serviceRequests',
-  data () {
+  data() {
     return {
       dom: null
     }
   },
   methods: {
-    resize () {
+    resize() {
       this.dom.resize()
     }
   },
-  mounted () {
+  mounted() {
     const option = {
       tooltip: {
         trigger: 'axis',
@@ -28,10 +28,12 @@ export default {
           }
         }
       },
+      legend: {
+        data: ['用户在线', '通话数量']
+      },
       grid: {
-        top: '3%',
-        left: '1.2%',
-        right: '1%',
+        left: '3%',
+        right: '4%',
         bottom: '3%',
         containLabel: true
       },
@@ -39,7 +41,20 @@ export default {
         {
           type: 'category',
           boundaryGap: false,
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          data: [
+            '0:00',
+            '2:00',
+            '4:00',
+            '6:00',
+            '8:00',
+            '10:00',
+            '12:00',
+            '14:00',
+            '16:00',
+            '18:00',
+            '20:00',
+            '24:00'
+          ]
         }
       ],
       yAxis: [
@@ -48,56 +63,31 @@ export default {
         }
       ],
       series: [
-        // {
-        //   name: '运营商/网络服务',
-        //   type: 'line',
-        //   stack: '总量',
-        //   areaStyle: { normal: {
-        //     color: '#2d8cf0'
-        //   } },
-        //   data: [820, 645, 546, 745, 872, 624, 258]
-        // },
         {
-          name: '银行/证券',
+          name: '用户在线',
           type: 'line',
-          stack: '总量',
-          areaStyle: { normal: {
-            color: '#10A6FF'
-          } },
-          data: []
-        },
-        {
-          name: '游戏/视频',
-          type: 'line',
-          stack: '总量',
-          areaStyle: { normal: {
-            color: '#0C17A6'
-          } },
-          data: []
-        },
-        {
-          name: '餐饮/外卖',
-          type: 'line',
-          stack: '总量',
-          areaStyle: { normal: {
-            color: '#4608A6'
-          } },
-          data: []
-        },
-        {
-          name: '快递/电商',
-          type: 'line',
-          stack: '总量',
-          label: {
+          areaStyle: {
+            opacity: 0.3
+          },
+          itemStyle: {
             normal: {
-              show: true,
-              position: 'top'
+              color: '#ADC4FF'
             }
           },
-          areaStyle: { normal: {
-            color: '#398DBF'
-          } },
-          data: []
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        {
+          name: '通话数量',
+          type: 'line',
+          areaStyle: {
+            opacity: 0.3
+          },
+          itemStyle: {
+            normal: {
+              color: '#7728CE'
+            }
+          },
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
       ]
     }
@@ -107,7 +97,7 @@ export default {
       on(window, 'resize', this.resize)
     })
   },
-  beforeDestroy () {
+  beforeDestroy() {
     off(window, 'resize', this.resize)
   }
 }

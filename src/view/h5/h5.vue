@@ -8,56 +8,58 @@
         <img class="head-img" src="../../assets/images/head-logo.png" alt="logo" />
       </div>
       <div class="h5-card" v-for="(item, index) in basicInfo" :key="index">
-        <div class="card-top">
-          <div style="width: 106px; height: 106px;">
-            <img
-              style="width: 100%; height: 100%;"
-              src="../../assets/images/logo-meeting.png"
-              v-if="item.app === 'meeting'"
-              alt="图标"
-            />
-            <img
-              style="width: 100%; height: 100%;"
-              src="../../assets/images/logo-remote.png"
-              v-if="item.app === 'remote'"
-              alt="图标"
-            />
-            <img
-              style="width: 100%; height: 100%;"
-              src="../../assets/images/logo-tv.png"
-              v-if="item.app === 'tv'"
-              alt="图标"
-            />
-            <img
-              style="width: 100%; height: 100%;"
-              src="../../assets/images/logo-live.png"
-              v-if="item.app === 'live'"
-              alt="图标"
-            />
+        <div style="height: 420px;" v-if="item.child.length > 0">
+          <div class="card-top">
+            <div style="width: 106px; height: 106px;">
+              <img
+                style="width: 100%; height: 100%;"
+                src="../../assets/images/logo-meeting.png"
+                v-if="item.app === 'meeting'"
+                alt="图标"
+              />
+              <img
+                style="width: 100%; height: 100%;"
+                src="../../assets/images/logo-remote.png"
+                v-if="item.app === 'remote'"
+                alt="图标"
+              />
+              <img
+                style="width: 100%; height: 100%;"
+                src="../../assets/images/logo-tv.png"
+                v-if="item.app === 'tv'"
+                alt="图标"
+              />
+              <img
+                style="width: 100%; height: 100%;"
+                src="../../assets/images/logo-live.png"
+                v-if="item.app === 'live'"
+                alt="图标"
+              />
+            </div>
+            <div style="flex: 1; padding-left: 10px;">
+              <h2 style="color: #333333;">{{item.name}}</h2>
+              <div class="description">{{item.description}}</div>
+              <div class="device" v-if="item.device === 1">支持iOS/Android设备</div>
+              <div class="device" v-if="item.device === 2">支持Android设备</div>
+              <div class="device" v-if="item.device === 3">支持iOS设备</div>
+            </div>
           </div>
-          <div style="flex: 1; padding-left: 10px;">
-            <h2 style="color: #333333;">{{item.name}}</h2>
-            <div class="description">{{item.description}}</div>
-            <div class="device" v-if="item.device === 1">支持iOS/Android设备</div>
-            <div class="device" v-if="item.device === 2">支持Android设备</div>
-            <div class="device" v-if="item.device === 3">支持iOS设备</div>
-          </div>
-        </div>
-        <Divider style="margin: 16px 0;" dashed />
-        <div class="card-content">
-          <div class="tips">长按二维码下载</div>
-          <div style="display: flex; padding: 10px 0;">
-            <div class="qr-box" v-for="(child, i) in item.child" :key="i">
-              <div class="qrcode">
-                <VueQrcode tag="img" :value="child.url" :options="{ size: 158 }"></VueQrcode>
-              </div>
-              <div class="qr-btn" v-if="child.type === 'android'">
-                <Icon type="logo-android" class="h5-icon" />
-                <span @click="jump(child.url)">安卓下载</span>
-              </div>
-              <div class="qr-btn" v-if="child.type === 'ios'">
-                <Icon type="logo-ios" class="h5-icon" />
-                <span @click="jump(child.url)">苹果下载</span>
+          <Divider style="margin: 16px 0;" dashed />
+          <div class="card-content">
+            <div class="tips">长按二维码下载</div>
+            <div style="display: flex; padding: 10px 0;">
+              <div class="qr-box" v-for="(child, i) in item.child" :key="i">
+                <div class="qrcode">
+                  <VueQrcode tag="img" :value="child.url" :options="{ size: 158 }"></VueQrcode>
+                </div>
+                <div class="qr-btn" v-if="child.type === 'android'">
+                  <Icon type="logo-android" class="h5-icon" />
+                  <span @click="jump(child.url)">安卓下载</span>
+                </div>
+                <div class="qr-btn" v-if="child.type === 'ios'">
+                  <Icon type="logo-ios" class="h5-icon" />
+                  <span @click="jump(child.url)">苹果下载</span>
+                </div>
               </div>
             </div>
           </div>
@@ -80,7 +82,7 @@ export default {
         {
           app: 'meeting',
           name: '云上会面手机版',
-          description: '随时随地进行高清视频通话、视频会 议、多人聊天。',
+          description: '随时随地进行高清视频通话、视频会议、多人聊天。',
           icon: '../../assets/images/logo-call.png',
           device: 1, // 1 两个 2 android 3 ios
           child: []
@@ -96,7 +98,7 @@ export default {
         {
           app: 'tv',
           name: '美播云视听',
-          description: '实时直播观看，聊天评论、回放观 看、直播分享。',
+          description: '实时直播观看，聊天评论、回放观看、直播分享。',
           icon: '../../assets/images/logo-listen.png',
           device: 1,
           child: []
@@ -183,7 +185,7 @@ export default {
 .h5-card {
   margin-bottom: 10px;
   background: #fff;
-  height: 420px;
+  /* height: 420px; */
 }
 .card-top {
   padding: 16px 16px 0px;
@@ -206,6 +208,7 @@ export default {
   padding-top: 10px;
 }
 .card-content {
+  /* text-align: center; */
   padding: 0px 16px 16px;
 }
 .tips {

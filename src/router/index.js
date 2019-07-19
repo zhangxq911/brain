@@ -5,7 +5,7 @@ import store from '@/store'
 import iView from 'iview'
 import { setToken, getToken, canTurnTo, setTitle } from '@/libs/util'
 import config from '@/config'
-import { tokenLogin } from '@/api/user'
+import { tokenLogin, getAccount } from '@/api/user'
 const { homeName } = config
 
 Vue.use(Router)
@@ -111,6 +111,35 @@ router.beforeEach((to, from, next) => {
     } else {
       next() // 跳转
     }
+  } else if (token && !to.name) {
+    // 请求操作
+    getAccount(token).then(res => {
+      if (res.data.code === 200) {
+        // 返回成功，重新插入数据
+        store.commit('setUserName', res.data.data.accountName)
+        store.commit('setUserId', res.data.data.accountId)
+        switch (res.data.data.accountType) {
+          case 0:
+            store.commit('setAccess', ['super_admin', 'company', 'personal'])
+            break;
+          case 1:
+            store.commit('setAccess', ['company', 'personal'])
+            break;
+          case 2:
+            store.commit('setAccess', ['personal'])
+            break;
+          default:
+            return
+        }
+        next({
+          name: homeName // 跳转到homeName页
+        })
+      } else {
+        // 跳转失败，返回页面，后续要修改
+        location.hash = ''
+        next() // 跳转
+      }
+    })
   } else if (token && to.name === LOGIN_PAGE_NAME) {
     // 已登录且要跳转的页面是登录页
     // 判断是否带token参数，如果带token参数带话直接加入 token， 获取权限后跳转主页
@@ -159,10 +188,17 @@ router.beforeEach((to, from, next) => {
       })
     }
   } else {
+    // 当token 存在但是tab页关闭时，store中的权限已删除，所以重新清除token 在跳转到登录页
+    // if (to.name === 'error_401') {
+    //   store.commit('setToken', '')
+    //   next({
+    //     name: LOGIN_PAGE_NAME // 跳转到登录页
+    //   })
+    // }
     if (!store.state.user.hasGetInfo) {
       turnTo(to, store.state.user.access, next)
     } else {
-      console.log('获取用户信息，正常来说这里是不进的')
+      // console.log('获取用户信息，正常来说这里是不进的')
       if (store.state.user.access != '') {
         turnTo(to, store.state.user.access, next)
       } else {

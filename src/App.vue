@@ -60,8 +60,14 @@ body {
   margin-bottom: 20px;
 }
 .footerPage {
+  position: relative;
   padding-top: 20px;
   text-align: center;
+}
+.pageMsg {
+  position: absolute;
+  left: 0;
+  bottom: 12px;
 }
 .ivu-form .ivu-form-item-label {
   font-weight: bold;
@@ -161,10 +167,10 @@ body {
 .tree-active {
   display: inline-block;
   width: 100%;
-  color: #FFF;
+  color: #fff;
   font-size: 14px;
   margin-left: -12px;
-  background:#a7a7a7;
+  background: #a7a7a7;
 }
 .tree-active:hover {
   cursor: pointer;
@@ -172,11 +178,16 @@ body {
 .tree-active ~ .ivu-tree-arrow {
   color: #fff;
 }
-.tree-active>span,
-.tree-active>i {
+.tree-active > span,
+.tree-active > i {
   margin-left: 12px;
 }
-.tree-active>div {
+.tree-active > div {
   margin-right: 3px;
-} 
+}
+.font-tips {
+  position: absolute;
+  right: -132px;
+  bottom: -6px;
+}
 </style>

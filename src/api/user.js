@@ -38,6 +38,16 @@ export const tokenLogin = data => {
   })
 }
 
+export const getAccount = data => {
+  return axios.request({
+    url: '/account/getAccount',
+    method: 'get',
+    headers: {
+      'token': data
+    }
+  })
+}
+
 export const logout = (token) => {
   return axios.request({
     url: 'logout',

@@ -5,20 +5,24 @@
     </Row>
     <Table :loading="loading" border :columns="columns" :data="dataList"></Table>
     <div class="footerPage">
-      <Page
+      <span
+        style="float: left;"
+      >当前 {{dataList ? dataList.length : 0}} 条记录，共 {{dataList ? dataList.length : 0}} 条记录。</span>
+    </div>
+    <!--<Page
         :current="dataList.pageNumber"
         :page-size="dataList.pageSize"
         :total="dataList.count"
         @on-change="changePage"
       />
-    </div>
+    </div>-->
   </div>
 </template>
 
 <script>
 import { getAppList, delApp } from '@/api/data'
 import { parseTime } from '@/libs/tools'
-import { stat } from 'fs';
+import { stat } from 'fs'
 
 export default {
   data() {
@@ -88,21 +92,25 @@ export default {
         {
           title: '应用类型',
           align: 'center',
+          sortable: true,
           key: 'type'
         },
         {
           title: '更新内容',
           align: 'center',
+          sortable: true,
           key: 'content'
         },
         {
           title: '更新版本',
           align: 'center',
+          sortable: true,
           key: 'version'
         },
         {
           title: '更新状态',
           align: 'center',
+          sortable: true,
           render: (h, params) => {
             let status = params.row.status
             switch (status) {
@@ -124,6 +132,7 @@ export default {
         {
           title: '更新时间',
           align: 'center',
+          sortable: true,
           key: 'updateTime'
         },
         {
@@ -163,7 +172,7 @@ export default {
                     click: () => {
                       this.$Modal.confirm({
                         title: '信息',
-                        content: '<p>确定删除吗？</p>',
+                        content: `<p>确定删除 ${params.row.appName} 应用吗？</p>`,
                         onOk: () => {
                           this.delete(params.row.id)
                         }
@@ -223,11 +232,12 @@ export default {
     // 获取列表
     getPage() {
       getAppList().then(res => {
-        if (res.status === 200 && res.data.data !== '') {
-          if (res.data.data === null) {
-            return (this.dataList.data = [])
+        if (res.status === 200 && res.data) {
+          if (!res.data.data) {
+            this.dataList.data = []
+          } else {
+            this.dataList = res.data.data
           }
-          this.dataList = res.data.data
         } else {
           console.log('应用列表获取失败')
         }

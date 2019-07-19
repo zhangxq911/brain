@@ -30,7 +30,7 @@
           :label-width="0"
         >
           <FormItem>账号： {{formData.accountName}}</FormItem>
-          <FormItem>手机号码： {{formData.mobile}}</FormItem>
+          <FormItem>手机号码： {{curMobile}}</FormItem>
           <FormItem prop="identityCode">
             <Row>
               <Col span="16">
@@ -78,6 +78,7 @@ export default {
         if (res.data.code === 200) {
           this.formData.accountName = res.data.data.accountName
           this.formData.mobile = res.data.data.mobile
+          this.curMobile = this.formData.mobile.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2")
           callback()
         } else {
           callback(new Error(res.data.msg))
@@ -114,6 +115,7 @@ export default {
       },
       type: 'step1',
       formData: {},
+      curMobile: '',
       ruleValidate: {
         identityCode: [
           { required: true, message: '请输入验证码', trigger: 'blur' }

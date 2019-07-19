@@ -38,10 +38,14 @@
           <TimelineItem v-for="(item, index) in timeLineData" :key="index">
             <div style="padding-left: 20px;">
               <div class="title">
-                <span v-if="index === 0" style=" color: red; position: absolute; left: 24px;">新</span>
+                <span v-if="item.isTop" style=" color: #ff9900; position: absolute; left: 16px;">置顶</span>
+                <span
+                  v-if="!item.isTop && item.showNew"
+                  style=" color: #ed4014; position: absolute; left: 24px;"
+                >新</span>
                 <span class="pot"></span>
                 <h5 class="nowrap-content">
-                  {{item.title}}
+                  <span class="left-title" @click="view(item.id)">{{item.title}}</span>
                   <span
                     style="float: right; font-size: 10px; color: #333333; font-weight: 400;"
                   >{{item.updateTime}}</span>
@@ -69,6 +73,8 @@ export default {
   },
   data() {
     return {
+      topArr: [],
+      normalArr: [],
       searchForm: { pageNumber: 1 },
       basicInfo: {
         userName: '',
@@ -111,10 +117,22 @@ export default {
     }
   },
   methods: {
+    // 详情查看
+    view(id) {
+      this.$router.push({
+        name: 'edit_msg',
+        params: {
+          id: id,
+          mode: 'view',
+          title: '消息详情',
+          to: 'home'
+        }
+      })
+    },
     // 获取卡片数据
     getCardData() {
       getCard().then(res => {
-        if(res.data.code === 200) {
+        if (res.data.code === 200) {
           this.cardData[0].count = res.data.data.userOnlineCount
           this.cardData[1].count = res.data.data.userMaxOnlineCount
         }
@@ -132,10 +150,26 @@ export default {
         if (res.data.code === 200) {
           let arr = res.data.data
           arr.forEach(item => {
+            // 最新15天数据显示新
+            let now = new Date()
+            let ago = new Date(now.getTime() - 15 * 24 * 3600 * 1000).getTime()
+            let updateTime = new Date(item.updateTime).getTime()
+            if (ago > updateTime) {
+              item.showNew = false
+            } else {
+              item.showNew = true
+            }
+            item.content = item.content.replace(/<[^>]+>/g,"")
             item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
+            if (item.isTop) {
+              this.topArr.push(item)
+            } else {
+              this.normalArr.push(item)
+            }
           })
           // this.dataList.concat(arr) 该方法每次合并后豆薯保留原来的对象，造成空间浪费
-          this.timeLineData.push.apply(this.timeLineData, arr)
+          // this.timeLineData.push.apply(this.timeLineData, arr)
+          this.timeLineData = this.topArr.concat(this.normalArr)
         }
       })
     }
@@ -170,5 +204,16 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+.left-title {
+  display: inline-block;
+  width: 70%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.left-title:hover {
+  cursor: pointer;
+  color: rgb(45, 140, 240);
 }
 </style>

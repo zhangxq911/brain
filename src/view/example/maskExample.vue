@@ -44,7 +44,7 @@
           </div>
           <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何服务</div>
           <div style="display: flex; justify-content: center;">
-            <Button type="primary" @click="saveService">确定</Button>
+            <Button :disabled="selectExmpArr.length === 0" type="primary" @click="saveService">确定</Button>
           </div>
         </div>
       </div>
@@ -94,9 +94,9 @@
               <span class="del-select" @click="delSelect2">删除</span>
             </span>
           </div>
-          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length === 0">当前未选中任何服务</div>
+          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length === 0">当前未选中任何账户</div>
           <div style="display: flex; justify-content: center;">
-            <Button type="primary" @click="saveAccount">确定</Button>
+            <Button :disabled="selectExmpArr2.length === 0" type="primary" @click="saveAccount">确定</Button>
           </div>
         </div>
       </div>

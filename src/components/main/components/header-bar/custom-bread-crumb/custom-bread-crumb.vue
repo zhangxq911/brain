@@ -54,9 +54,6 @@ export default {
     getCustomIconName(iconName) {
       return iconName.slice(1)
     }
-  },
-  mounted() {
-    // 处理顶部条，如果是二级及以上的话，显示返回按钮
   }
 }
 </script>

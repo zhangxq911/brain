@@ -11,6 +11,7 @@
               style="width: 100px;"
               placeholder="服务状态"
             >
+              <Option value>所有状态</Option>
               <Option :value="0">已停止</Option>
               <Option :value="1">运行中</Option>
             </Select>
@@ -22,6 +23,7 @@
               style="width: 100px; "
               placeholder="服务类型"
             >
+              <Option value>所有类型</Option>
               <Option value="call">远程会议</Option>
               <Option value="gis">联情指挥</Option>
               <Option value="live">网络直播</Option>
@@ -46,13 +48,22 @@
             ></Input>
           </FormItem>
           <FormItem>
-            <Button @click="search">刷新</Button>
+            <Button @click="refresh">刷新</Button>
           </FormItem>
         </Form>
       </div>
     </Row>
-    <Table :loading="loading" border :columns="columns" :data="dataList.data"></Table>
+    <Table
+      @on-sort-change="sortChange"
+      :loading="loading"
+      border
+      :columns="columns"
+      :data="dataList.data"
+    ></Table>
     <div class="footerPage">
+      <span
+        class="pageMsg"
+      >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
       <Page
         :current="dataList.pageNumber"
         :page-size="dataList.pageSize"
@@ -71,22 +82,30 @@ export default {
     return {
       btnStatus: '上线',
       loading: false,
-      dataList: [],
-      searchForm: {},
+      dataList: [{ data: [] }],
+      searchForm: {
+        page: 1,
+        filter: 'serverName'
+      },
       filterList: [
         {
           name: '服务ID',
-          value: 'serviceId'
+          value: 'serverId'
         },
         {
           name: '服务名称',
           value: 'serverName'
+        },
+        {
+          name: '服务地址',
+          value: 'serverHost'
         }
       ],
       columns: [
         {
           title: '服务ID/服务名称',
           align: 'center',
+          width: 130,
           render: (h, params) => {
             return h('div', [
               h(
@@ -120,6 +139,9 @@ export default {
         {
           title: '服务类型',
           align: 'center',
+          width: 120,
+          sortable: 'custom',
+          key: 'serverType',
           render: (h, params) => {
             let curinstType = params.row.serverType
             switch (curinstType) {
@@ -141,7 +163,9 @@ export default {
         {
           title: '状态',
           key: 'status',
+          width: 80,
           align: 'center',
+          sortable: 'custom',
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
@@ -175,16 +199,27 @@ export default {
         {
           title: '服务地址',
           key: 'serverHost',
-          align: 'center'
+          align: 'center',
+          sortable: 'custom'
         },
         {
           title: '端口号',
           key: 'serverPort',
+          width: 100,
+          sortable: 'custom',
+          align: 'center'
+        },
+        {
+          title: '号码前缀',
+          key: 'numberPrefix',
+          sortable: 'custom',
           align: 'center'
         },
         {
           title: '创建时间',
           align: 'center',
+          width: 150,
+          sortable: 'custom',
           key: 'createTime'
         },
         {
@@ -265,7 +300,13 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.remove(params.row.id)
+                      this.$Modal.confirm({
+                        title: '信息',
+                        content: `<p>确定删除 ${params.row.serverName} 实例吗？</p>`,
+                        onOk: () => {
+                          this.remove(params.row.id)
+                        }
+                      })
                     }
                   }
                 },
@@ -278,6 +319,19 @@ export default {
     }
   },
   methods: {
+    // 刷新
+    refresh() {
+      this.searchForm.content = ''
+      this.search()
+    },
+    // 排序改变
+    sortChange(res) {
+      let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
+      let search = { ...this.searchForm }
+      search.sort = key + ',' + res.order
+      res.order === 'normal' ? (search.sort = '') : ''
+      this.getPage(search)
+    },
     // 上下线
     operate(data) {
       operateService(data).then(res => {
@@ -321,6 +375,7 @@ export default {
     },
     // 触发查询
     search() {
+      this.searchForm.page = 1
       if (!this.searchForm.content) {
         this.searchForm.content = null
       }
@@ -337,8 +392,9 @@ export default {
     getPage(params = { page: 1 }) {
       params ? params : (params = this.searchForm)
       getServiceList(params).then(res => {
-        if (res.data.code === 200 && res.data.data) {
+        if (res.data.code === 200 && res.data) {
           if (!res.data.data.data) {
+            this.dataList = res.data.data
             this.dataList.data = []
           } else {
             this.dataList = res.data.data

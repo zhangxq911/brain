@@ -12,6 +12,7 @@
                 style="width: 100px;"
                 placeholder="实例状态"
               >
+                <Option value>所有状态</Option>
                 <Option :value="0">停止</Option>
                 <Option :value="1">运行</Option>
               </Select>
@@ -23,6 +24,7 @@
                 style="width: 100px; "
                 placeholder="实例类型"
               >
+                <Option value>所有类型</Option>
                 <Option value="call">远程会议</Option>
                 <Option value="gis">联情指挥</Option>
                 <Option value="live">网络直播</Option>
@@ -55,7 +57,7 @@
               <Button type="primary" @click="search">查询</Button>
             </FormItem>-->
             <FormItem>
-              <Button @click="search">刷新</Button>
+              <Button @click="refresh">刷新</Button>
             </FormItem>
             <!-- <FormItem></FormItem> -->
           </Form>
@@ -69,6 +71,9 @@
         @on-sort-change="sortChange"
       ></Table>
       <div class="footerPage">
+        <span
+          class="pageMsg"
+        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
         <Page
           :current="dataList.pageNumber"
           :page-size="dataList.pageSize"
@@ -100,7 +105,8 @@ export default {
         description: null,
         instType: null,
         serverHost: null,
-        status: null
+        status: null,
+        filter: 'instName'
       },
       filterList: [
         {
@@ -136,6 +142,7 @@ export default {
         {
           title: '实例ID/实例名称',
           align: 'center',
+          // width: 140,
           render: (h, params) => {
             return h('div', [
               h(
@@ -170,6 +177,9 @@ export default {
         {
           title: '实例类型',
           align: 'center',
+          width: 120,
+          sortable: 'custom',
+          key: 'instType',
           render: (h, params) => {
             let curinstType = params.row.instType
             switch (curinstType) {
@@ -191,6 +201,9 @@ export default {
         {
           title: '状态',
           align: 'center',
+          width: 100,
+          sortable: 'custom',
+          key: 'status',
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
@@ -224,22 +237,33 @@ export default {
         {
           title: '实例地址',
           key: 'serverHost',
+          sortable: 'custom',
           align: 'center'
         },
         {
           title: '端口号',
           align: 'center',
+          width: 100,
+          sortable: 'custom',
           key: 'serverPort'
         },
         {
           title: '创建时间',
           align: 'center',
+          width: 150,
+          sortable: 'custom',
           key: 'createTime'
         },
         {
           title: '到期时间',
           align: 'center',
-          key: 'expirationTime'
+          width: 150,
+          sortable: 'custom',
+          key: 'expirationTime',
+          render: (h, params) => {
+            let time = params.row.expirationTime + ' 23:59:59'
+            return h('div', time)
+          }
         },
         {
           title: '账户ID/账户名称',
@@ -314,13 +338,20 @@ export default {
                     size: 'small',
                     disabled:
                       parseTime(new Date(), '{y}-{m}-{d}') >
-                      params.row.expirationTime
+                        params.row.expirationTime ||
+                      this.defAccount === 'super_admin'
                         ? false
                         : true
                   },
                   on: {
                     click: () => {
-                      this.delete(params.row.id)
+                      this.$Modal.confirm({
+                        title: '信息',
+                        content: `<p>确定释放 ${params.row.instName} 实例吗？</p>`,
+                        onOk: () => {
+                          this.delete(params.row.id)
+                        }
+                      })
                     }
                   }
                 },
@@ -342,6 +373,10 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.searchForm.content = ''
+      this.search()
+    },
     // 空方法，阻止表单刷新
     searchN() {},
     // 处理查询条件
@@ -359,6 +394,7 @@ export default {
     },
     // 搜索
     search() {
+      this.searchForm.page = 1
       if (!this.searchForm.content) {
         this.searchForm.content = null
       }
@@ -395,10 +431,11 @@ export default {
     },
     // 排序
     sortChange(res) {
-      let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
-      let search = { ...this.search }
-      search.order = 'i.' + key + ',' + res.order
-      res.order === 'normal' ? (search.order = '') : ''
+      // let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
+      let search = { ...this.searchForm }
+      search.sort = res.key + ',' + res.order
+      res.order === 'normal' ? (search.sort = '') : ''
+      this.loading = true
       this.getPage(search)
     },
     // 分页查询
@@ -412,8 +449,9 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getExampleList(params).then(res => {
-        if (res.status === 200 && res.data) {
-          if (res.data.data.data === null) {
+        if (res.data.code === 200 && res.data) {
+          if (!res.data.data.data) {
+            this.dataList = res.data.data
             this.dataList.data = []
           } else {
             this.dataList = res.data.data

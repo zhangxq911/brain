@@ -26,7 +26,7 @@
           <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
           <FormItem label="运行状态">{{editForm.status ? '运行中': '已停止' }}</FormItem>
           <FormItem label="用户容量">{{editForm.totalCapacity }}</FormItem>
-          <FormItem label="编号前缀">{{editForm.numberPrefix }}</FormItem>
+          <FormItem label="号码前缀">{{editForm.numberPrefix }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <Row style="margin-top: 20px;">
@@ -86,11 +86,12 @@
               placeholder="请输入定位服务端口"
             ></InputNumber>
           </FormItem>
-          <FormItem prop="numberPrefix" label="编号前缀">
-            <Input type="text" v-model="addForm.numberPrefix" placeholder="请输入编号前缀"></Input>
+          <FormItem prop="numberPrefix" label="号码前缀">
+            <Input type="text" v-model="addForm.numberPrefix" placeholder="请输入号码前缀"></Input>
           </FormItem>
           <FormItem prop="description" label="服务描述">
-            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入服务描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入服务描述"></Input>
+            <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
@@ -129,6 +130,7 @@
             ></InputNumber>
           </FormItem>
           <FormItem label="服务总容量">{{editForm.totalCapacity}}</FormItem>
+          <FormItem label="号码前缀">{{editForm.numberPrefix}}</FormItem>
           <FormItem prop="gpsHost" v-if="showGps" label="定位服务域名或IP地址">
             <Input type="text" v-model="editForm.gpsHost" placeholder="请输入定位服务域名或IP地址"></Input>
           </FormItem>
@@ -142,7 +144,8 @@
             ></InputNumber>
           </FormItem>
           <FormItem prop="description" label="服务描述">
-            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入服务描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入服务描述"></Input>
+            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -162,7 +165,7 @@ export default {
     const validatePrefix = (rule, value, callback) => {
       const reg = /^[0-9]*$/
       if (!value) {
-        callback(new Error('请输入编号前缀'))
+        callback(new Error('请输入号码前缀'))
       } else if (!reg.test(value) || value.length < 1 || value.length > 10) {
         callback(new Error('长度为 1~10 个数字'))
       } else {
@@ -200,9 +203,12 @@ export default {
       curMode: this.mode,
       addForm: {
         serverPort: 1,
-        totalCapacity: 1000
+        totalCapacity: 1000,
+        description: ''
       },
-      editForm: {},
+      editForm: {
+        description: ''
+      },
       rulesValidate: {
         serverName: [
           { required: true, message: '请输入服务名称', trigger: 'blur' }
@@ -251,25 +257,27 @@ export default {
               h(
                 'div',
                 {
-                  // style: {
-                  //   color: '#2d8cf0'
-                  // },
-                  // attrs: {
-                  //   class: 'hoverAccount'
-                  // },
-                  // on: {
-                  //   click: () => {
-                  //     this.$router.push({
-                  //       name: 'edit_example',
-                  //       params: {
-                  //         id: params.row.id,
-                  //         mode: 'view',
-                  //         title: '实例详情',
-                  //         to: 'edit_service'
-                  //       }
-                  //     })
-                  //   }
-                  // }
+                  style: {
+                    color: '#2d8cf0'
+                  },
+                  attrs: {
+                    class: 'hoverAccount'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'edit_example',
+                        // 服务id没办法带过来刷新，就直接跳到原页面
+                        params: {
+                          id: params.row.id,
+                          mode: 'view',
+                          title: '实例详情'
+                          // serverId: this.id,
+                          // to: 'edit_service'
+                        }
+                      })
+                    }
+                  }
                 },
                 params.row.id
               ),
@@ -348,27 +356,26 @@ export default {
             return h('div', [
               h(
                 'div',
-                // {
-                //   style: {
-                //     color: '#2d8cf0'
-                //   },
-                //   attrs: {
-                //     class: 'hoverAccount'
-                //   },
-                //   on: {
-                //     click: () => {
-                //       this.$router.push({
-                //         name: 'edit_account',
-                //         params: {
-                //           id: params.row.accountId,
-                //           mode: 'view',
-                //           title: '账户详情',
-                //           to: 'service_page'
-                //         }
-                //       })
-                //     }
-                //   }
-                // },
+                {
+                  style: {
+                    color: '#2d8cf0'
+                  },
+                  attrs: {
+                    class: 'hoverAccount'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'edit_account',
+                        params: {
+                          id: params.row.accountId,
+                          mode: 'view',
+                          title: '账户详情'
+                        }
+                      })
+                    }
+                  }
+                },
                 params.row.accountId
               ),
               h('div', {}, params.row.accountName)
@@ -388,7 +395,13 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.delete(params.row.id)
+                    this.$Modal.confirm({
+                      title: '信息',
+                      content: `<p>确定释放 ${params.row.accountName} 实例吗？</p>`,
+                      onOk: () => {
+                        this.delete(params.row.id)
+                      }
+                    })
                   }
                 }
               },

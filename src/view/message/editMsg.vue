@@ -7,15 +7,10 @@
         <div style="text-align: center; line-height: 30px;">
           <h3>{{editForm.title}}</h3>
           <div style="color: #999999;">{{editForm.updateTime}}</div>
-          <pre style="text-align: justify; white-space: pre-wrap; padding: 0 200px;">
-            {{editForm.content}}
-          <Button
-            type="primary"
-            style="float: right; margin-top: 20px;"
-            @click="curMode = 'edit'"
-            v-if="defAccount === 'super_admin'"
-          >编辑</Button>  
-          </pre>
+          <pre
+            v-html="editForm.content"
+            style="text-align: justify; white-space: pre-wrap; padding: 0 200px;"
+          ></pre>
         </div>
       </Col>
       <!-- 新增 -->
@@ -30,8 +25,14 @@
           <FormItem prop="title" label="标题">
             <Input type="text" v-model="addForm.title" placeholder="请输入标题"></Input>
           </FormItem>
-          <FormItem prop="content" label="内容">
-            <Input :rows="20" type="textarea" v-model="addForm.content" placeholder="请输入内容"></Input>
+          <FormItem label="内容">
+            <div id="menuEditor" style="width: 600px;"></div>
+          </FormItem>
+          <FormItem label="置顶">
+            <RadioGroup v-model="addForm.isTop">
+              <Radio :label="0">否</Radio>
+              <Radio :label="1">是</Radio>
+            </RadioGroup>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
@@ -51,7 +52,15 @@
             <Input type="text" v-model="editForm.title" placeholder="请输入标题"></Input>
           </FormItem>
           <FormItem prop="content" label="内容">
-            <Input :rows="20" type="textarea" v-model="editForm.content" placeholder="请输入内容"></Input>
+            <div id="menuEditor2" style="width: 600px;"></div>
+
+            <!-- <Input :rows="20" type="textarea" v-model="editForm.content" placeholder="请输入内容"></Input> -->
+          </FormItem>
+          <FormItem label="置顶">
+            <RadioGroup v-model="editForm.isTop">
+              <Radio :label="0">否</Radio>
+              <Radio :label="1">是</Radio>
+            </RadioGroup>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -64,18 +73,23 @@
 
 <script>
 import { saveMsg, getMsgInfo, putMsg } from '@/api/data'
+import Editor from 'wangeditor'
 
 export default {
   props: ['id', 'mode'],
+  components: {
+    Editor
+  },
   data() {
     return {
       defAccount: '',
       curMode: this.mode,
-      addForm: {},
+      addForm: {
+        isTop: 0
+      },
       editForm: {},
       rulesValidate: {
-        title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
-        content: [{ required: true, message: '请输入内容', trigger: 'blur' }]
+        title: [{ required: true, message: '请输入标题', trigger: 'blur' }]
       }
     }
   },
@@ -107,6 +121,11 @@ export default {
       })
     },
     save() {
+      // 判断content 是否为空
+      if(this.editor.txt.text().length === 0) {
+        this.$Message.error('请填写内容！')
+        return
+      }
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           saveMsg(this.addForm).then(res => {
@@ -131,6 +150,7 @@ export default {
       getMsgInfo(this.id).then(res => {
         if (res.data.code === 200) {
           this.editForm = res.data.data
+          this.editor2.txt.html(this.editForm.content)
         } else {
           this.$Message.error(res.data.msg)
         }
@@ -139,6 +159,55 @@ export default {
   },
   mounted() {
     this.getInfo()
+    // 初始化 wangeditor
+    this.editor = new Editor('#menuEditor')
+    this.editor.customConfig.menus = [
+      'head', // 标题
+      'bold', // 粗体
+      'fontSize', // 字号
+      'fontName', // 字体
+      'italic', // 斜体
+      'underline', // 下划线
+      'strikeThrough', // 删除线
+      'foreColor', // 文字颜色
+      'backColor', // 背景颜色
+      'link', // 插入链接
+      'list', // 列表
+      'justify', // 对齐方式
+      'quote', // 引用
+      'table', // 表格
+      'code', // 插入代码
+      'undo', // 撤销
+      'redo' // 重复
+    ]
+    this.editor.customConfig.onchange = html => {
+      this.addForm.content = html
+    }
+    this.editor.create()
+    this.editor2 = new Editor('#menuEditor2')
+    this.editor2.customConfig.menus = [
+      'head', // 标题
+      'bold', // 粗体
+      'fontSize', // 字号
+      'fontName', // 字体
+      'italic', // 斜体
+      'underline', // 下划线
+      'strikeThrough', // 删除线
+      'foreColor', // 文字颜色
+      'backColor', // 背景颜色
+      'link', // 插入链接
+      'list', // 列表
+      'justify', // 对齐方式
+      'quote', // 引用
+      'table', // 表格
+      'code', // 插入代码
+      'undo', // 撤销
+      'redo' // 重复
+    ]
+    this.editor2.customConfig.onchange = html => {
+      this.editForm.content = html
+    }
+    this.editor2.create()
   }
 }
 </script>

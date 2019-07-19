@@ -22,7 +22,7 @@ export default {
       console.log(html, text)
     },
     changeContent () {
-      this.$refs.editor.setHtml('<p>powered by wangeditor</p>')
+      this.$refs.editor.setHtml('')
     }
   }
 }

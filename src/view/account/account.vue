@@ -24,7 +24,7 @@
               ></Input>
             </FormItem>
             <FormItem>
-              <Button @click="search">刷新</Button>
+              <Button @click="refresh">刷新</Button>
             </FormItem>
           </Form>
         </div>
@@ -37,6 +37,9 @@
         @on-sort-change="sortChange"
       ></Table>
       <div class="footerPage">
+        <span
+          class="pageMsg"
+        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
         <Page
           :current="dataList.pageNumber"
           :page-size="dataList.pageSize"
@@ -64,7 +67,8 @@ export default {
         accountName: '',
         companyName: '',
         mobile: '',
-        content: ''
+        content: '',
+        filter: 'accountName'
       },
       filterList: [
         {
@@ -129,6 +133,8 @@ export default {
         {
           title: '账户类型',
           align: 'center',
+          sortable: 'custom',
+          key: 'accountType',
           render: (h, params) => {
             let curaccountType = params.row.accountType
             switch (curaccountType) {
@@ -151,6 +157,7 @@ export default {
           title: '状态',
           align: 'center',
           key: 'status',
+          sortable: 'custom',
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
@@ -185,12 +192,14 @@ export default {
           title: '企业名称',
           align: 'center',
           key: 'companyName',
+          sortable: 'custom',
           ellipsis: true
         },
         {
           title: '描述',
           align: 'center',
           key: 'description',
+          sortable: 'custom',
           ellipsis: true
         },
         {
@@ -202,6 +211,7 @@ export default {
         {
           title: '操作',
           align: 'center',
+          width: 140,
           render: (h, params) => {
             return h('div', [
               h(
@@ -236,8 +246,7 @@ export default {
                     click: () => {
                       this.$Modal.confirm({
                         title: '信息',
-                        content:
-                          '<p>删除账户信息会一同删除其他关联项，确定删除吗？</p>',
+                        content: `<p>删除 ${params.row.accountName} 会一同删除其他关联项，确定删除吗？</p>`,
                         onOk: () => {
                           this.delete(params.row.id)
                         }
@@ -254,6 +263,10 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.searchForm.content = ''
+      this.search()
+    },
     // 处理查询条件
     clearSearch() {
       this.searchForm.accountName = null
@@ -269,6 +282,7 @@ export default {
     searchN() {},
     // 搜索
     search() {
+      this.searchForm.page = 1
       if (!this.searchForm.content) {
         this.searchForm.content = null
       }
@@ -306,9 +320,10 @@ export default {
     // 排序
     sortChange(res) {
       let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
-      let search = { ...this.search }
+      let search = { ...this.searchForm }
       search.sort = key + ',' + res.order
       res.order === 'normal' ? (search.sort = '') : ''
+      this.loading = true
       this.getPage(search)
     },
     // 分页查询
@@ -321,8 +336,9 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getAccountList(params).then(res => {
-        if (res.status === 200 && res.data.data) {
+        if (res.status === 200 && res.data) {
           if (!res.data.data.data) {
+            this.dataList = res.data.data
             this.dataList.data = []
           } else {
             this.dataList = res.data.data

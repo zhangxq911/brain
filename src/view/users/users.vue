@@ -24,7 +24,7 @@
               ></Input>
             </FormItem>
             <FormItem>
-              <Button @click="search">刷新</Button>
+              <Button @click="refresh">刷新</Button>
               <!-- <Icon @click="refresh" class="refreshBtn" type="md-refresh-circle"/> -->
             </FormItem>
           </Form>
@@ -38,6 +38,9 @@
         @on-sort-change="sortChange"
       ></Table>
       <div class="footerPage">
+        <span
+          class="pageMsg"
+        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
         <Page
           :current="dataList.pageNumber"
           :page-size="dataList.pageSize"
@@ -68,7 +71,8 @@ export default {
         page: 1,
         description: '',
         userName: '',
-        nickName: ''
+        nickName: '',
+        filter: 'userName'
       },
       filterList: [
         {
@@ -133,19 +137,22 @@ export default {
         {
           title: '昵称',
           align: 'center',
+          sortable: 'custom',
           key: 'nickName'
         },
         {
-          title: '用户类型',
+          title: '会议角色',
           align: 'center',
+          sortable: 'custom',
+          key: 'userType',
           render: (h, params) => {
             let userType = params.row.userType
             switch (userType) {
               case 0:
-                userType = '查看者'
+                userType = '参会者'
                 break
               case 1:
-                userType = '子用户'
+                userType = '主持人'
                 break
             }
             return h('div', userType)
@@ -154,6 +161,7 @@ export default {
         {
           title: '状态',
           key: 'status',
+          sortable: 'custom',
           align: 'center',
           render: (h, params) => {
             let curStatus = params.row.status
@@ -186,13 +194,15 @@ export default {
           }
         },
         {
-          title: '描述',
+          title: '已开通实例',
           align: 'center',
-          key: 'description'
+          sortable: 'custom',
+          key: 'instanceTypeNames'
         },
         {
           title: '创建时间',
           align: 'center',
+          sortable: 'custom',
           key: 'createTime'
           // sortable: 'custom'
         },
@@ -287,7 +297,7 @@ export default {
                     click: () => {
                       this.$Modal.confirm({
                         title: '信息',
-                        content: '<p>确定删除吗？</p>',
+                        content: `<p>确定删除 ${params.row.userName} 用户吗？</p>`,
                         onOk: () => {
                           this.delete(params.row.id)
                         }
@@ -338,6 +348,7 @@ export default {
     },
     // 搜索
     search() {
+      this.searchForm.page = 1
       if (!this.searchForm.content) {
         this.searchForm.content = null
       }
@@ -346,13 +357,14 @@ export default {
         return
       } else {
         this.searchForm[this.searchForm.filter] = this.searchForm.content
+        this.loading = true
         this.getPage(this.searchForm)
       }
     },
     // 刷新
     refresh() {
-      this.loading = true
-      this.getPage(this.searchForm)
+      this.searchForm.content = ''
+      this.search()
     },
     // 编辑
     edit(id) {
@@ -378,10 +390,11 @@ export default {
     },
     // 排序
     sortChange(res) {
-      let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
-      let search = { ...this.search }
-      search.sort = key + ',' + res.order
+      // let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
+      let search = { ...this.searchForm }
+      search.sort = res.key + ',' + res.order
       res.order === 'normal' ? (search.sort = '') : ''
+      this.loading = true
       this.getPage(search)
     },
     // 分页查询
@@ -395,8 +408,9 @@ export default {
     getPage(params = {}) {
       params ? params : (params = this.searchForm)
       getUserList(params).then(res => {
-        if (res.status === 200) {
+        if (res.status === 200 && res.data) {
           if (!res.data.data.data) {
+            this.dataList = res.data.data
             this.dataList.data = []
           } else {
             this.dataList = res.data.data

@@ -62,7 +62,8 @@
             <Input type="text" v-model="addForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
           <FormItem prop="description" label="账户描述">
-            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入账户描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入账户描述"></Input>
+            <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="save">保存</Button>
@@ -81,12 +82,12 @@
           <input type="text" name="accountName" style="position: absolute;z-index: -99" />
           <input type="password" name="accountPsw" style="position: absolute;z-index: -99" />
           <FormItem prop="accountName" label="账户名称">
-            <Input type="text" v-model="editForm.accountName" placeholder="请输入账户名称"></Input>
+            <Input :disabled="editForm.accountName === 'admin' ? true : false" type="text" v-model="editForm.accountName" placeholder="请输入账户名称"></Input>
           </FormItem>
           <FormItem prop="accountPsw" label="账户密码">
             <Input type="password" v-model="editForm.accountPsw" placeholder="不修改账户密码请留空"></Input>
           </FormItem>
-          <FormItem v-if="defAccount === 'unit'" prop="confirmAccountPsw" label="重复密码">
+          <FormItem prop="confirmAccountPsw" label="重复密码">
             <Input type="password" v-model="editForm.confirmAccountPsw" placeholder="修改密码需再次输入"></Input>
           </FormItem>
           <FormItem v-if="defAccount === 'super_admin'" prop="accountType" label="账户类型">
@@ -104,7 +105,8 @@
             <Input v-model="editForm.companyName" placeholder="请输入企业名称"></Input>
           </FormItem>
           <FormItem prop="description" label="账户描述">
-            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入账户描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入账户描述"></Input>
+            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <!-- 预留功能 -->
           <!-- <FormItem label="自定义头像">
@@ -257,8 +259,12 @@ export default {
         type: false
       },
       defAccount: '',
-      editForm: {},
-      addForm: {},
+      editForm: {
+        description: ''
+      },
+      addForm: {
+        description: ''
+      },
       remoteType: '', // 详细展示账号类型
       curMode: this.mode,
       rulesValidate: {

@@ -46,9 +46,9 @@
               <span class="del-select" @click="delSelect2">删除</span>
             </span>
           </div>
-          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length === 0">当前未选中任何服务</div>
+          <div style="padding: 20px 60px;" v-show="selectExmpArr2.length === 0">当前未选中任何实例</div>
           <div style="display: flex; justify-content: center;">
-            <Button :disabled="!isDisabled2" type="primary" @click="saveAccount">确定</Button>
+            <Button :disabled="selectExmpArr2.length === 0" type="primary" @click="saveAccount">确定</Button>
           </div>
         </div>
       </div>
@@ -95,9 +95,9 @@
               <span class="del-select" @click="delSelect">删除</span>
             </span>
           </div>
-          <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何服务</div>
+          <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何实例</div>
           <div style="display: flex; justify-content: center;">
-            <Button :disabled="!isDisabled" type="primary" @click="saveExample">确定</Button>
+            <Button :disabled="selectExmpArr.length === 0" type="primary" @click="saveExample">确定</Button>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default {
                     }
                     let data = {
                       id: params.row.id,
-                      name: params.row.instName,
+                      name: params.row.instName
                     }
                     this.selectExmpArr.push(data)
                     this.isDisabled = true
@@ -345,12 +345,13 @@ export default {
           instId: this.selectExmpArr[0].id
         }
         startUser(data).then(res => {
-          if(res.data.code === 200) {
+          if (res.data.code === 200) {
             this.$Message.success(res.data.msg)
             this.selectExmpArr = []
             this.isDisabled = false
+            this.$emit('refreshExample', true)
             this.closeMask()
-          }else {
+          } else {
             this.$Message.error(res.data.msg)
           }
         })
@@ -398,7 +399,7 @@ export default {
     getAccountPage(params = {}) {
       params ? params : (params = this.searchForm)
       getAccountList(params).then(res => {
-        if (res.status === 200) {
+        if (res.data.code === 200) {
           if (!res.data.data.data) {
             this.dataAccountList.data = []
           } else {

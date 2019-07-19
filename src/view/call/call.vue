@@ -11,7 +11,21 @@
         style="width: 300px"
       ></DatePicker>
       <div style="float: right;">
-        <Select v-model="searchForm.filter" style="width: 100px;">
+        <Select
+          @on-change="search"
+          v-model="searchForm.callType"
+          style="width: 100px; "
+          placeholder="通话类型"
+        >
+          <Option :value="0">所有类型</Option>
+          <Option :value="1">语音通话</Option>
+          <Option :value="2">视频通话</Option>
+          <Option :value="3">语音对讲</Option>
+          <Option :value="4">视频对讲</Option>
+          <Option :value="5">语音会议</Option>
+          <Option :value="6">视频会议</Option>
+        </Select>
+        <Select v-model="searchForm.filter" style="width: 100px; margin-left: 10px;">
           <Option
             v-for="(item, index) in filterList"
             :value="item.value"
@@ -25,11 +39,20 @@
           style="width: 200px; margin-left: 10px;"
           @on-search="search"
         ></Input>
-        <Button @click="search" style="margin-left: 10px;">刷新</Button>
+        <Button @click="refresh" style="margin-left: 10px;">刷新</Button>
       </div>
     </Row>
-    <Table :loading="loading" border :columns="columns" :data="dataList.data"></Table>
+    <Table
+      @on-sort-change="sortChange"
+      :loading="loading"
+      border
+      :columns="columns"
+      :data="dataList.data"
+    ></Table>
     <div class="footerPage">
+      <span
+        class="pageMsg"
+      >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
       <Page
         :current="dataList.pageNumber"
         :page-size="dataList.pageSize"
@@ -61,23 +84,10 @@ export default {
           }
         },
         {
-          title: '通话号码',
-          align: 'center',
-          key: 'calledTel'
-        },
-        {
-          title: '通话对象',
-          align: 'center',
-          key: 'calledName'
-        },
-        {
-          title: '通话时长',
-          align: 'center',
-          key: 'length'
-        },
-        {
           title: '通话类型',
           align: 'center',
+          sortable: 'custom',
+          key: 'callType',
           render: (h, params) => {
             let curType = ''
             switch (params.row.callType) {
@@ -106,11 +116,29 @@ export default {
           }
         },
         {
-          title: '用户IP/用户名称',
+          title: '通话号码',
+          align: 'center',
+          sortable: 'custom',
+          key: 'calledTel'
+        },
+        {
+          title: '通话对象',
+          align: 'center',
+          sortable: 'custom',
+          key: 'calledName'
+        },
+        {
+          title: '通话时长',
+          align: 'center',
+          sortable: 'custom',
+          key: 'length'
+        },
+        {
+          title: '用户ID/用户名称',
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('div', params.row.sourceIpAddr),
+              h('div', params.row.callerId),
               h('div', params.row.callerName)
             ])
           }
@@ -163,12 +191,26 @@ export default {
         startTime: '2009-06-21 11:07:33',
         endTime: new Date(),
         page: 1,
-        order: 'call_time|desc'
+        order: 'call_time|desc',
+        filter: 'calledTel',
+        callType: 0
       },
       filterList: [
         {
-          name: '主叫号码',
-          value: 'callerTel'
+          name: '通话号码',
+          value: 'calledTel'
+        },
+        {
+          name: '通话对象',
+          value: 'calledName'
+        },
+        {
+          name: '用户ID',
+          value: 'callerId'
+        },
+        {
+          name: '用户名称',
+          value: 'callerName'
         }
       ]
     }
@@ -183,16 +225,27 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.searchForm.content = ''
+      this.search()
+    },
+    sortChange(res) {
+      // let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
+      let search = { ...this.searchForm }
+      search.sort = res.key + ',' + res.order
+      res.order === 'normal' ? (search.sort = '') : ''
+      this.getPage(search)
+    },
     // 改变时间
     selectTime() {
       this.searchForm.startTime = parseTime(this.rangeTime[0])
       this.searchForm.endTime = parseTime(this.rangeTime[1])
       let searchForm = { ...this.searchForm }
       searchForm.page = '1'
-      if (searchForm.filter && searchForm.detail) {
-        searchForm[searchForm.filter] = searchForm.detail
+      if (searchForm.filter && searchForm.content) {
+        searchForm[searchForm.filter] = searchForm.content
         this.getPage(searchForm)
-      } else if (!searchForm.filter && searchForm.detail) {
+      } else if (!searchForm.filter && searchForm.content) {
         this.$Message.error('请先选择查询类型')
       } else {
         this.getPage(searchForm)
@@ -213,16 +266,28 @@ export default {
     },
     // 搜索
     search() {
-      if (this.searchForm.filter === undefined) {
+      this.searchForm.page = 1
+      if (!this.searchForm.content) {
+        this.searchForm.content = null
+      }
+      if (this.searchForm.filter === undefined && this.searchForm.content) {
         this.$Message.error('请先选择查询类型')
         return
       } else {
-        this.searchForm[this.searchForm.filter] = this.searchForm.content
+        if (this.searchForm.content) {
+          this.searchForm[this.searchForm.filter] = this.searchForm.content
+        } else {
+          delete this.searchForm[this.searchForm.filter]
+        }
+        this.loading = true
         this.getPage(this.searchForm)
       }
     },
     // 获取列表
     getPage(params = {}) {
+      if (this.searchForm.callType === 0) {
+        delete this.searchForm.callType
+      }
       params ? params : (params = this.searchForm)
       // 格式化日期
       if (params.startTime) {
@@ -232,8 +297,8 @@ export default {
         params.endTime = parseTime(params.endTime)
       }
       getCdrList(params).then(res => {
-        if (res.data.code === 200 && res.data.data !== null) {
-          if (res.data.data.data === null) {
+        if (res.data.code === 200 && res.data) {
+          if (!res.data.data.data) {
             this.dataList = res.data.data
             this.dataList.data = []
           } else {

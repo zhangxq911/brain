@@ -87,8 +87,7 @@ export default [
         name: 'service_page',
         meta: {
           icon: 'ios-paper',
-          title: '服务管理',
-          access: ['super_admin']
+          title: '服务管理'
         },
         component: () => import('@/view/service/service')
       },
@@ -100,7 +99,6 @@ export default [
           icon: 'ios-paper',
           title: '新增服务',
           hideInMenu: true,
-          access: ['super_admin'],
           to: 'service_page'
         },
         component: () => import('@/view/service/editService')
@@ -121,7 +119,6 @@ export default [
         name: 'account_page',
         meta: {
           icon: 'md-people',
-          access: ['super_admin'],
           title: '账户管理'
         },
         component: () => import('@/view/account/account')

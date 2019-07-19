@@ -23,28 +23,10 @@
                   </FormItem>
                   <FormItem label="实例描述">
                     {{editForm.description }}
-                    <a
-                      class="editBtn"
-                      href="javascript:void(0)"
-                      @click="curMode = 'edit'"
-                      v-show="curMode === 'view' && editForm.description"
-                    >
-                      编辑
-                      <Icon type="md-create" />
-                    </a>
                   </FormItem>
                   <FormItem label="实例类型">{{remoteType }}</FormItem>
                   <FormItem label="实例容量">
                     {{editForm.capacity }}
-                    <a
-                      class="editBtn"
-                      href="javascript:void(0)"
-                      @click="curMode = 'edit'"
-                      v-show="curMode === 'view' && defAccount === 'super_admin'"
-                    >
-                      编辑
-                      <Icon type="md-create" />
-                    </a>
                   </FormItem>
                   <FormItem label="到期时间">{{editForm.expirationTime}}</FormItem>
                   <FormItem label="实例">
@@ -237,7 +219,8 @@
             <Input type="text" v-model="addForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
           <FormItem prop="description" label="实例描述">
-            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入实例描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入实例描述"></Input>
+            <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem prop="instType" label="实例类型">
             <Select v-model="addForm.instType" @on-change="ifShowGps">
@@ -301,7 +284,8 @@
             <Input type="text" v-model="editForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
           <FormItem prop="description" label="实例描述">
-            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入实例描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入实例描述"></Input>
+            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem label="实例类型">{{remoteType}}</FormItem>
           <FormItem v-if="defAccount === 'super_admin'" prop="capacity" label="实例容量">
@@ -634,12 +618,15 @@ export default {
       showGps: false,
       modalAccount: false,
       defAccount: '',
-      editForm: {},
+      editForm: {
+        description: ''
+      },
       orgForm2: {
         ip: this.id
       },
       addForm: {
-        capacity: 1
+        capacity: 1,
+        description: ''
       },
       remoteType: '',
       remoteStatus: '',

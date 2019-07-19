@@ -19,7 +19,7 @@
           <FormItem label="手机号码">{{editForm.mobile }}</FormItem>
           <FormItem label="电子邮箱">{{editForm.email }}</FormItem>
           <FormItem label="用户描述">{{editForm.description }}</FormItem>
-          <FormItem label="用户类型">{{!editForm.userType ? '查看者' : '子用户' }}</FormItem>
+          <FormItem label="会议角色">{{!editForm.userType ? '参会者' : '主持人' }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <!-- 最多三条，每个类型一条 -->
@@ -63,10 +63,10 @@
           <FormItem prop="nickName" label="昵称">
             <Input type="text" v-model="addForm.nickName" placeholder="请输入昵称"></Input>
           </FormItem>
-          <FormItem v-if="defAccount === 'super_admin'" label="用户类型">
+          <FormItem v-if="defAccount === 'super_admin'" label="会议角色">
             <RadioGroup v-model="addForm.userType">
-              <Radio :label="0">查看者</Radio>
-              <Radio :label="1">子用户</Radio>
+              <Radio :label="0">参会者</Radio>
+              <Radio :label="1">主持人</Radio>
             </RadioGroup>
           </FormItem>
           <FormItem prop="mobile" label="手机号码">
@@ -76,7 +76,8 @@
             <Input type="text" v-model="addForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
           <FormItem prop="description" label="用户描述">
-            <Input :rows="7" type="textarea" v-model="addForm.description" placeholder="请输入用户描述"></Input>
+            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入用户描述"></Input>
+            <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <div v-if="defAccount === 'super_admin'">
             <Divider dashed />
@@ -122,13 +123,13 @@
           <FormItem prop="nickName" label="昵称">
             <Input type="text" v-model="editForm.nickName" placeholder="请输入昵称"></Input>
           </FormItem>
-          <FormItem v-if="defAccount === 'super_admin'" label="用户类型">
+          <FormItem v-if="defAccount === 'super_admin'" label="会议角色">
             <RadioGroup v-model="editForm.userType">
-              <Radio :label="0">查看者</Radio>
-              <Radio :label="1">子用户</Radio>
+              <Radio :label="0">参会者</Radio>
+              <Radio :label="1">主持人</Radio>
             </RadioGroup>
           </FormItem>
-          <FormItem v-if="defAccount === 'unit'" label="用户类型">{{addForm.userType ? '子用户': '查看者'}}</FormItem>
+          <FormItem v-if="defAccount === 'unit'" label="会议角色">{{addForm.userType ? '主持人': '参会者'}}</FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="editForm.mobile" placeholder="请输入手机号码"></Input>
           </FormItem>
@@ -142,7 +143,8 @@
             </RadioGroup>
           </FormItem>
           <FormItem prop="description" label="用户描述">
-            <Input :rows="7" type="textarea" v-model="editForm.description" placeholder="请输入用户描述"></Input>
+            <Input :rows="7" :maxlength="100" type="textarea" v-model="editForm.description" placeholder="请输入用户描述"></Input>
+            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -154,6 +156,7 @@
     <MaskUsers
       @sendModal="getModal"
       @sendAccount="getAccount"
+      @refreshExample="refreshEx"
       :editForm="editForm"
       :basicInfo="basicInfo"
     ></MaskUsers>
@@ -253,9 +256,12 @@ export default {
       defAccount: '',
       accontContent: '',
       basicInfo: {},
-      editForm: {},
+      editForm: {
+        description: ''
+      },
       addForm: {
-        userType: 0
+        userType: 0,
+        description: ''
       },
       curMode: this.mode,
       modalAccount: false,
@@ -456,6 +462,10 @@ export default {
     }
   },
   methods: {
+    // 刷新实例列表
+    refreshEx() {
+      this.getExample()
+    },
     // 移除实例
     remove(id) {
       closeUser(id).then(res => {
@@ -604,9 +614,6 @@ export default {
     // 获取用户信息，新增时无id传入，不查询
     getInfo() {
       if (!this.id) {
-        // this.$router.push({
-        //   name: 'users_page'
-        // })
         return
       }
       getUserInfo(this.id).then(res => {
