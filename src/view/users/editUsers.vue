@@ -367,7 +367,7 @@ export default {
                 curinstType = '远程会议'
                 break
               case 'gis':
-                curinstType = '联情指挥'
+                curinstType = '应急一张图'
                 break
               case 'live':
                 curinstType = '网络直播'

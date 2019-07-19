@@ -38,7 +38,7 @@
               </Col>
             </Row>
           </TabPane>
-          <TabPane label="组织机构" name="name2">
+          <TabPane v-if="editForm.instType === 'call'" label="组织机构" name="name2">
             <Row>
               <Button type="primary" @click="showMask('addOrg', 30)">添加部门</Button>
               <Button
@@ -125,7 +125,7 @@
               </div>
             </div>
           </TabPane>
-          <TabPane label="工作组" name="name3">
+          <TabPane v-if="editForm.instType === 'call'" label="工作组" name="name3">
             <Row>
               <Button type="primary" @click="showMask('addWork', 30)">添加</Button>
               <div style="float: right; margin-bottom: -10px;">
@@ -225,7 +225,7 @@
           <FormItem prop="instType" label="实例类型">
             <Select v-model="addForm.instType" @on-change="ifShowGps">
               <Option value="call">远程会议</Option>
-              <Option value="gis">联情指挥</Option>
+              <Option value="gis">应急一张图</Option>
               <Option value="live">网络直播</Option>
             </Select>
           </FormItem>
@@ -1374,7 +1374,7 @@ export default {
               this.remoteType = '远程会议'
               break
             case 'gis':
-              this.remoteType = '联情指挥'
+              this.remoteType = '应急一张图'
               break
             case 'live':
               this.remoteType = '网络直播'

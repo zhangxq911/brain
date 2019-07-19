@@ -26,7 +26,7 @@
               >
                 <Option value>所有类型</Option>
                 <Option value="call">远程会议</Option>
-                <Option value="gis">联情指挥</Option>
+                <Option value="gis">应急一张图</Option>
                 <Option value="live">网络直播</Option>
               </Select>
             </FormItem>
@@ -187,7 +187,7 @@ export default {
                 curinstType = '远程会议'
                 break
               case 'gis':
-                curinstType = '联情指挥'
+                curinstType = '应急一张图'
                 break
               case 'live':
                 curinstType = '网络直播'

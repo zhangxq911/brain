@@ -35,7 +35,7 @@
             <Select v-model="addForm.appName">
               <Option value="center">云上会面pad版</Option>
               <Option value="call">远程会议</Option>
-              <Option value="gis">联情指挥</Option>
+              <Option value="gis">应急一张图</Option>
               <Option value="live">网络直播</Option>
               <Option value="meeting">云上会面手机版</Option>
               <Option value="remote">云Remote</Option>
@@ -285,7 +285,7 @@ export default {
               this.editForm.appName = '远程会议'
               break
             case 'gis':
-              this.editForm.appName = '联情指挥'
+              this.editForm.appName = '应急一张图'
               break
             case 'live':
               this.editForm.appName = '网络直播'

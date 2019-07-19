@@ -134,7 +134,17 @@ export default {
       getCard().then(res => {
         if (res.data.code === 200) {
           this.cardData[0].count = res.data.data.userOnlineCount
+            ? res.data.data.userOnlineCount
+            : 0
           this.cardData[1].count = res.data.data.userMaxOnlineCount
+            ? res.data.data.userMaxOnlineCount
+            : 0
+          this.cardData[2].count = res.data.data.callCount
+            ? res.data.data.callCount
+            : 0
+          this.cardData[3].count = res.data.data.communicateCount
+            ? res.data.data.communicateCount
+            : 0
         }
       })
     },
@@ -159,7 +169,7 @@ export default {
             } else {
               item.showNew = true
             }
-            item.content = item.content.replace(/<[^>]+>/g,"")
+            item.content = item.content.replace(/<[^>]+>/g, '')
             item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
             if (item.isTop) {
               this.topArr.push(item)

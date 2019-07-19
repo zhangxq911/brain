@@ -43,7 +43,7 @@ export default {
                 appName = '远程会议'
                 break
               case 'gis':
-                appName = '联情指挥'
+                appName = '应急一张图'
                 break
               case 'live':
                 appName = '网络直播'
