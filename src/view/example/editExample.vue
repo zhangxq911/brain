@@ -1393,7 +1393,7 @@ export default {
               break
           }
           let data = this.editForm
-          this.serverContent2 = `服务：${data.serverName}\n实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost}\n定位服务端口号：${data.gpsPort}\n总量：${data.totalCapacity}`
+          this.serverContent2 = `服务：${data.serverName}\n实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost ? data.gpsHost : ''}\n定位服务端口号：${data.gpsPort ? data.gpsPort : ''}\n总量：${data.totalCapacity}`
         } else {
           this.$Message.error(res.data.msg)
         }

@@ -190,4 +190,7 @@ body {
   right: -132px;
   bottom: -6px;
 }
+.ivu-select-dropdown {
+  max-height: 230px !important;
+}
 </style>

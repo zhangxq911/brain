@@ -26,7 +26,7 @@
           <FormItem label="创建时间">{{editForm.createTime }}</FormItem>
           <FormItem label="运行状态">{{editForm.status ? '运行中': '已停止' }}</FormItem>
           <FormItem label="用户容量">{{editForm.totalCapacity }}</FormItem>
-          <FormItem label="号码前缀">{{editForm.numberPrefix }}</FormItem>
+          <FormItem v-if="editForm.serverType === 'call'" label="号码前缀">{{editForm.numberPrefix }}</FormItem>
           <Divider dashed />
           <h3 class="detailChildTitle">用户实例开通信息</h3>
           <Row style="margin-top: 20px;">
@@ -86,11 +86,17 @@
               placeholder="请输入定位服务端口"
             ></InputNumber>
           </FormItem>
-          <FormItem prop="numberPrefix" label="号码前缀">
+          <FormItem v-if="addForm.serverType === 'call'" prop="numberPrefix" label="号码前缀">
             <Input type="text" v-model="addForm.numberPrefix" placeholder="请输入号码前缀"></Input>
           </FormItem>
           <FormItem prop="description" label="服务描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入服务描述"></Input>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="addForm.description"
+              placeholder="请输入服务描述"
+            ></Input>
             <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
@@ -130,7 +136,7 @@
             ></InputNumber>
           </FormItem>
           <FormItem label="服务总容量">{{editForm.totalCapacity}}</FormItem>
-          <FormItem label="号码前缀">{{editForm.numberPrefix}}</FormItem>
+          <FormItem v-if="editForm.serverType === 'call'" label="号码前缀">{{editForm.numberPrefix}}</FormItem>
           <FormItem prop="gpsHost" v-if="showGps" label="定位服务域名或IP地址">
             <Input type="text" v-model="editForm.gpsHost" placeholder="请输入定位服务域名或IP地址"></Input>
           </FormItem>
@@ -144,8 +150,16 @@
             ></InputNumber>
           </FormItem>
           <FormItem prop="description" label="服务描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入服务描述"></Input>
-            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="editForm.description"
+              placeholder="请输入服务描述"
+            ></Input>
+            <span
+              class="font-tips"
+            >已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem>
             <Button type="primary" @click="update">保存</Button>
@@ -204,7 +218,8 @@ export default {
       addForm: {
         serverPort: 1,
         totalCapacity: 1000,
-        description: ''
+        description: '',
+        gpsPort: 32025
       },
       editForm: {
         description: ''
@@ -476,7 +491,11 @@ export default {
     // 是否显示填写gps内容
     ifShowGps(val) {
       if (val === 'gis') {
+        this.addForm.serverPort = 9004
         this.showGps = true
+      } else if (val === 'live') {
+        this.addForm.serverPort = 5443
+        this.showGps = false
       } else {
         this.showGps = false
       }

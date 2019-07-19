@@ -77,7 +77,13 @@
             </Upload>
           </FormItem>
           <FormItem prop="content" label="更新内容">
-            <Input :rows="7" :maxlength="100" type="textarea" v-model="addForm.content" placeholder="请输入更新内容"></Input>
+            <Input
+              :rows="7"
+              :maxlength="100"
+              type="textarea"
+              v-model="addForm.content"
+              placeholder="请输入更新内容"
+            ></Input>
             <span class="font-tips">已输入 {{addForm.content.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
@@ -150,6 +156,16 @@ import { stat } from 'fs'
 export default {
   props: ['id', 'mode'],
   data() {
+    const validateVersion = (rule, value, callback) => {
+      const reg = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){2}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+      if (!value) {
+        callback(new Error('请输入更新版本'))
+      } else if (!reg.test(value)) {
+        callback(new Error('请输入正确的版本格式，如 1.0.0'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
       file: null,
@@ -171,7 +187,7 @@ export default {
           { required: true, message: '请输入更新内容', trigger: 'blur' }
         ],
         version: [
-          { required: true, message: '请输入更新版本', trigger: 'blur' }
+          { required: true, validator: validateVersion, trigger: 'blur' }
         ],
         // url: [{ required: true, message: '请输入应用地址', trigger: 'blur' }],
         status: [
@@ -188,7 +204,7 @@ export default {
           { required: true, message: '请输入更新内容', trigger: 'blur' }
         ],
         version: [
-          { required: true, message: '请输入更新版本', trigger: 'blur' }
+          { required: true, validator: validateVersion, trigger: 'blur' }
         ],
         status: [
           {
