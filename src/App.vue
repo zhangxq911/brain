@@ -49,10 +49,15 @@ body {
   background-color: #3d6ee0;
 }
 .card-box {
-  width: 100%;
   background: #fff;
   box-shadow: 0px 4px 10px #cccccc;
   padding: 20px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  min-height: 600px;
+  // display: flex;
+  // flex-direction: column;
 }
 .detailTitle {
   display: inline-block;
@@ -139,12 +144,6 @@ body {
   height: 100%;
   background: rgba(246, 248, 254, 1);
   padding: 100px;
-}
-.card-box {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  min-height: 600px;
 }
 .basic-wrapper .ivu-input {
   border-radius: 0;

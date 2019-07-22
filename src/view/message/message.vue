@@ -1,10 +1,10 @@
 <template>
-  <div class="card-box">
+  <div ref="card" class="card-box">
     <Row>
       <Button v-if="defAccount === 'super_admin'" type="primary" @click="add">新增</Button>
     </Row>
     <div style="margin: 20px 0;">
-      <Scroll :height="520" :on-reach-bottom="handleReachBottom">
+      <Scroll :height="height" :on-reach-bottom="handleReachBottom">
         <Timeline>
           <TimelineItem v-for="(item, index) in dataList" :key="index">
             <div style="padding-left: 20px;">
@@ -55,6 +55,7 @@ import { constants } from 'crypto'
 export default {
   data() {
     return {
+      height: 0,
       topArr: [],
       normalArr: [],
       showBottom: false,
@@ -166,6 +167,7 @@ export default {
     }
   },
   mounted() {
+    this.height = this.$refs.card.offsetHeight - 40
     this.getList()
   }
 }

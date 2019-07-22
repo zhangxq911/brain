@@ -99,6 +99,7 @@ export default {
           title: '更新内容',
           align: 'center',
           sortable: true,
+          ellipsis: true,
           key: 'content'
         },
         {

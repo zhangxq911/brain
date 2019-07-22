@@ -11,8 +11,6 @@
         {{showTitle(list[list.length-1])}}
       </BreadcrumbItem>
     </Breadcrumb>
-
-    <!-- {{ list[list.length-1].meta }} -->
   </div>
 </template>
 <script>

@@ -49,7 +49,12 @@
         />
       </div>
     </div>
-    <MaskUsers @sendModal="getModal" :basicInfo="basicInfo" :editForm="openForm"></MaskUsers>
+    <MaskUsers
+      @refreshExample="refresh"
+      @sendModal="getModal"
+      :basicInfo="basicInfo"
+      :editForm="openForm"
+    ></MaskUsers>
   </div>
 </template>
 
