@@ -37,6 +37,15 @@ export default [
     component: () => import('@/view/register/register')
   },
   {
+    path: '/basicInfo',
+    name: 'basicInfo',
+    meta: {
+      title: '基本信息',
+      hideInMenu: true
+    },
+    component: () => import('@/view/info/info')
+  },
+  {
     path: '/forget',
     name: 'forget',
     meta: {

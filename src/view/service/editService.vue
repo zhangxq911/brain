@@ -180,8 +180,8 @@ export default {
       const reg = /^[0-9]*$/
       if (!value) {
         callback(new Error('请输入号码前缀'))
-      } else if (!reg.test(value) || value.length < 1 || value.length > 10) {
-        callback(new Error('长度为 1~10 个数字'))
+      } else if (!reg.test(value) || value.length < 1 || value.length > 4) {
+        callback(new Error('长度为 1~4 个数字'))
       } else {
         callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
       }

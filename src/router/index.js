@@ -80,13 +80,14 @@ router.beforeEach((to, from, next) => {
       // 请求操作
       tokenLogin(loginToken).then(res => {
         if (res.data.code === 200) {
+          let data = res.data.data
           // 返回成功，重新插入数据
-          store.commit('setToken', res.data.data.token)
-          store.commit('setUserName', res.data.data.accountName)
-          store.commit('setUserId', res.data.data.accountId)
+          store.commit('setToken', data.token)
+          store.commit('setUserName', data.accountName)
+          store.commit('setUserId', data.accountId)
           // 0 系统 1 阿里
-          store.commit('setSource', res.data.data.accountSource)
-          switch (res.data.data.accountType) {
+          store.commit('setSource', data.accountSource)
+          switch (data.accountType) {
             case 0:
               store.commit('setAccess', ['super_admin', 'company', 'personal'])
               break;
@@ -99,14 +100,23 @@ router.beforeEach((to, from, next) => {
             default:
               return
           }
-          next({
-            name: homeName // 跳转到homeName页
-          })
+          // 判断是否首次登录，要完善信息
+          if (data.isPerfectInfo) {
+            next({
+              name: 'basicInfo' // 跳转到完善信息页
+            })
+          } else {
+            next({
+              name: homeName // 跳转到homeName页
+            })
+          }
         } else {
           // 跳转失败，返回页面，后续要修改
           location.hash = ''
           next() // 跳转
         }
+      }).catch(err => {
+        console.log(err)
       })
     } else {
       next() // 跳转
@@ -116,10 +126,11 @@ router.beforeEach((to, from, next) => {
     getAccount(token).then(res => {
       if (res.data.code === 200) {
         // 返回成功，重新插入数据
-        store.commit('setUserName', res.data.data.accountName)
-        store.commit('setUserId', res.data.data.id)
-        store.commit('setSource', res.data.data.accountSource)
-        switch (res.data.data.accountType) {
+        let data = data
+        store.commit('setUserName', data.accountName)
+        store.commit('setUserId', data.id)
+        store.commit('setSource', data.accountSource)
+        switch (data.accountType) {
           case 0:
             store.commit('setAccess', ['super_admin', 'company', 'personal'])
             break;
@@ -156,12 +167,13 @@ router.beforeEach((to, from, next) => {
       tokenLogin(loginToken).then(res => {
         if (res.data.code === 200) {
           // 返回成功，重新插入数据
-          store.commit('setToken', res.data.data.token)
-          store.commit('setUserName', res.data.data.accountName)
-          store.commit('setUserId', res.data.data.accountId)
+          let data = res.data.data
+          store.commit('setToken', data.token)
+          store.commit('setUserName', data.accountName)
+          store.commit('setUserId', data.accountId)
           // 0 系统 1 阿里
-          store.commit('setSource', res.data.data.accountSource)
-          switch (res.data.data.accountType) {
+          store.commit('setSource', data.accountSource)
+          switch (data.accountType) {
             case 0:
               store.commit('setAccess', ['super_admin', 'company', 'personal'])
               break;
@@ -174,9 +186,19 @@ router.beforeEach((to, from, next) => {
             default:
               return
           }
-          next({
-            name: homeName // 跳转到homeName页
-          })
+          // 判断是否首次登录，要完善信息
+          if (data.isPerfectInfo) {
+            next({
+              name: 'basicInfo' // 跳转到完善信息页
+            })
+          } else {
+            next({
+              name: homeName // 跳转到homeName页
+            })
+          }
+          // next({
+          //   name: homeName // 跳转到homeName页
+          // })
         } else {
           // 跳转失败，返回页面，后续要修改
           location.hash = ''

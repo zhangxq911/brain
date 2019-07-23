@@ -84,10 +84,10 @@
           <FormItem prop="accountName" label="账户名称">
             <Input :disabled="editForm.accountName === 'admin' ? true : false" type="text" v-model="editForm.accountName" placeholder="请输入账户名称"></Input>
           </FormItem>
-          <FormItem prop="accountPsw" label="账户密码">
+          <FormItem v-if="!source" prop="accountPsw" label="账户密码">
             <Input type="password" v-model="editForm.accountPsw" placeholder="不修改账户密码请留空"></Input>
           </FormItem>
-          <FormItem prop="confirmAccountPsw" label="重复密码">
+          <FormItem v-if="!source" prop="confirmAccountPsw" label="重复密码">
             <Input type="password" v-model="editForm.confirmAccountPsw" placeholder="修改密码需再次输入"></Input>
           </FormItem>
           <FormItem v-if="defAccount === 'super_admin'" prop="accountType" label="账户类型">
@@ -329,6 +329,8 @@ export default {
     } else if (access.includes('company') || access.includes('personal')) {
       this.defAccount = 'unit'
     }
+    // 判断是注册用户还是阿里用户，阿里用户编辑的时候不用修改密码
+    this.source = this.$store.state.user.source
   },
   methods: {
     // 验证码计时器

@@ -104,7 +104,7 @@ export default {
           child: []
         },
         {
-          app: 'live',
+          app: 'livepush',
           name: '直播推流',
           description: '美播云直播专用推流工具。',
           icon: '../../assets/images/logo-live.png',

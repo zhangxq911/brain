@@ -7,6 +7,17 @@ export const getCard = () => {
     method: 'get'
   })
 }
+/** 
+ * 阿里跳转第一次登录需要填写信息
+*/
+export const savePerfectInfo = data => {
+  return axios.request({
+    url: '/account/accountPerfectInfo',
+    data: data,
+    method: 'post'
+  })
+}
+
 /**
  * 验证码获取
  */

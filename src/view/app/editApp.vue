@@ -40,6 +40,7 @@
               <Option value="meeting">云上会面手机版</Option>
               <Option value="remote">云Remote</Option>
               <Option value="tv">云视听</Option>
+              <Option value="livepush">直播推流</Option>
             </Select>
           </FormItem>
           <FormItem prop="type" label="应用类型">
