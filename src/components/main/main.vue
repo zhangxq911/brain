@@ -175,7 +175,7 @@ export default {
   display: inline-block;
   top: -14px;
   left: 24px;
-  width: 85px;
+  /* width: 85px; ie 超出长度折叠 */
   height: 28px;
   font-size: 20px;
   font-family: Arial-Black;

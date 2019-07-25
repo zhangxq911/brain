@@ -2,7 +2,7 @@
   <div class="basic-wrapper">
     <img class="login-logo" src="../../assets/images/logo.png" alt="智能中心" />
     <div class="card-box">
-      <h2 style="text-align: center;">基本信息</h2>
+      <h2 style="text-align: center;">完善基本信息</h2>
       <Form
         class="basic-form"
         ref="formData"

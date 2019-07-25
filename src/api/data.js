@@ -7,6 +7,7 @@ export const getCard = () => {
     method: 'get'
   })
 }
+
 /** 
  * 阿里跳转第一次登录需要填写信息
 */
@@ -397,6 +398,15 @@ export const delMsg = data => {
 /**
  * poc接口
  */
+
+export const ayncData = data => {
+  return axios.request({
+    url: '/pocorganization/importData',
+    data: data,
+    method: 'post'
+  })
+}
+
 export const getNumberPrefix = data => {
   return axios.request({
     url: '/pocuser/getNumberPrefix',

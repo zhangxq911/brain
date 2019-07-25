@@ -1,5 +1,5 @@
 <template>
-  <div class="card-box">
+  <div ref="box" class="card-box">
     <h3 v-if="curMode === 'add'" class="detailTitle">基本信息</h3>
     <Row>
       <!-- 详情 -->
@@ -26,7 +26,7 @@
             <Input type="text" v-model="addForm.title" placeholder="请输入标题"></Input>
           </FormItem>
           <FormItem label="内容">
-            <div ref="menuEditor" style></div>
+            <div class="editor-height" ref="menuEditor"></div>
           </FormItem>
           <FormItem label="置顶">
             <RadioGroup v-model="addForm.isTop">
@@ -52,7 +52,7 @@
             <Input type="text" v-model="editForm.title" placeholder="请输入标题"></Input>
           </FormItem>
           <FormItem prop="content" label="内容">
-            <div ref="menuEditor2"></div>
+            <div class="editor-height" ref="menuEditor2"></div>
             <!-- <Input :rows="20" type="textarea" v-model="editForm.content" placeholder="请输入内容"></Input> -->
           </FormItem>
           <FormItem label="置顶">
@@ -230,6 +230,8 @@ export default {
       this.editor.customConfig.onchange = html => {
         this.addForm.content = html
       }
+      this.$refs.menuEditor.style.height = (this.$refs.box.clientHeight - 280) + 'px'
+      this.$refs.menuEditor.style['max-height'] = (this.$refs.box.clientHeight - 200) + 'px'
       this.editor.create()
     } else if (this.curMode === 'edit') {
       this.getInfo()
@@ -238,6 +240,8 @@ export default {
       this.editor2.customConfig.onchange = html => {
         this.editForm.content = html
       }
+      this.$refs.menuEditor2.style.height = (this.$refs.box.clientHeight - 240) + 'px'
+      this.$refs.menuEditor2.style['max-height'] = (this.$refs.box.clientHeight - 200) + 'px'
       this.editor2.create()
     } else {
       // 详情
@@ -296,5 +300,11 @@ export default {
   100% {
     -webkit-transform: rotate(360deg);
   }
+}
+.editor-height {
+  min-height: 300px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
 }
 </style>

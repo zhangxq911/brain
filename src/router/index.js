@@ -196,9 +196,6 @@ router.beforeEach((to, from, next) => {
               name: homeName // 跳转到homeName页
             })
           }
-          // next({
-          //   name: homeName // 跳转到homeName页
-          // })
         } else {
           // 跳转失败，返回页面，后续要修改
           location.hash = ''

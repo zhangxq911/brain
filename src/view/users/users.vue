@@ -109,6 +109,7 @@ export default {
         {
           title: '用户ID/用户名称',
           align: 'center',
+          width: 130,
           render: (h, params) => {
             return h('div', [
               h(
@@ -150,6 +151,7 @@ export default {
           align: 'center',
           sortable: 'custom',
           key: 'userType',
+          width: 120,
           render: (h, params) => {
             let userType = params.row.userType
             switch (userType) {
@@ -168,6 +170,7 @@ export default {
           key: 'status',
           sortable: 'custom',
           align: 'center',
+          width: 100,
           render: (h, params) => {
             let curStatus = params.row.status
             if (curStatus === 1) {
@@ -202,6 +205,7 @@ export default {
           title: '已开通实例',
           align: 'center',
           sortable: 'custom',
+          width: 130,
           key: 'instanceTypeNames'
         },
         {
@@ -214,6 +218,7 @@ export default {
         {
           title: '账户ID/账户名称',
           align: 'center',
+          width: 130,
           render: (h, params) => {
             return h('div', [
               h(

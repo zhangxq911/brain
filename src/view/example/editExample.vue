@@ -21,13 +21,9 @@
                       <Icon type="md-create" />
                     </a>
                   </FormItem>
-                  <FormItem label="实例描述">
-                    {{editForm.description }}
-                  </FormItem>
+                  <FormItem label="实例描述">{{editForm.description }}</FormItem>
                   <FormItem label="实例类型">{{remoteType }}</FormItem>
-                  <FormItem label="实例容量">
-                    {{editForm.capacity }}
-                  </FormItem>
+                  <FormItem label="实例容量">{{editForm.capacity }}</FormItem>
                   <FormItem label="到期时间">{{editForm.expirationTime}}</FormItem>
                   <FormItem label="实例">
                     <Input :rows="7" readonly type="textarea" :value="this.serverContent2"></Input>
@@ -82,7 +78,7 @@
                     ></Input>
                   </FormItem>
                   <FormItem>
-                    <Button type="default">同步</Button>
+                    <Button @click="sync" type="default">同步</Button>
                   </FormItem>
                 </Form>
               </div>
@@ -163,9 +159,9 @@
                       style="width: 200px;"
                     ></Input>
                   </FormItem>
-                  <FormItem>
+                  <!-- <FormItem>
                     <Button type="default">同步</Button>
-                  </FormItem>
+                  </FormItem>-->
                 </Form>
               </div>
             </Row>
@@ -219,7 +215,13 @@
             <Input type="text" v-model="addForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
           <FormItem prop="description" label="实例描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入实例描述"></Input>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="addForm.description"
+              placeholder="请输入实例描述"
+            ></Input>
             <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem prop="instType" label="实例类型">
@@ -284,8 +286,16 @@
             <Input type="text" v-model="editForm.instName" placeholder="请输入实例名称"></Input>
           </FormItem>
           <FormItem prop="description" label="实例描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入实例描述"></Input>
-            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="editForm.description"
+              placeholder="请输入实例描述"
+            ></Input>
+            <span
+              class="font-tips"
+            >已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <FormItem label="实例类型">{{remoteType}}</FormItem>
           <FormItem v-if="defAccount === 'super_admin'" prop="capacity" label="实例容量">
@@ -327,6 +337,12 @@
       :modifyArr="modifyArr"
       :groupForm="groupForm"
     ></MaskExample>
+    <div class="mask-loading" v-show="loadingSync">
+      <div class="loading-box">
+        <Icon class="loading-btn" type="ios-loading"></Icon>
+        <span style="padding-top: 20px; font-size: 16px; color: #fff;">同步中，请稍后...</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -345,7 +361,8 @@ import {
   getUser,
   delUsers,
   delGroup,
-  delUserGroup
+  delUserGroup,
+  ayncData
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
 import MaskExample from './maskExample'
@@ -425,6 +442,7 @@ export default {
     }
 
     return {
+      loadingSync: false,
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000 // 限制只能选择当前及之后的时间
@@ -762,6 +780,25 @@ export default {
     }
   },
   methods: {
+    // 同步
+    sync() {
+      this.loadingSync = true
+      let data = {
+        instanceId: this.id
+      }
+      ayncData(data).then(res => {
+        if(res.data.code === 200) {
+          this.$Message.success(res.data.msg)
+          // 选中部门的时候，同步后刷新该部门
+          if(this.searchForm.oid) {
+            this.getOrgPage()
+          }
+        }else {
+          this.$Message.error(res.data.msg)
+        }
+        this.loadingSync = false
+      })
+    },
     // 工作组查询
     searchWork() {
       if (!this.searchForm.filter && !this.searchForm.status) {
@@ -1153,7 +1190,9 @@ export default {
       return tree
     },
     handleList(list) {
-      if(!list) {return}
+      if (!list) {
+        return
+      }
       let newList = []
       list.forEach((item, index) => {
         let obj = {}
@@ -1195,7 +1234,9 @@ export default {
       let params = { instanceId: this.id }
       getOrgList(params).then(res => {
         if (res.data.code === 200) {
-          if(!res.data.data) {return}
+          if (!res.data.data) {
+            return
+          }
           this.orgList = this.listToTree(this.handleList(res.data.data))
         }
       })
@@ -1207,7 +1248,9 @@ export default {
         if (res.data.code === 200) {
           this.groupList = []
           let data = res.data.data
-          if(!data) {return}
+          if (!data) {
+            return
+          }
           data.forEach((item, index) => {
             let obj = item
             obj.id = item.gid
@@ -1393,7 +1436,13 @@ export default {
               break
           }
           let data = this.editForm
-          this.serverContent2 = `服务：${data.serverName}\n实例链接地址：${data.serverHost}\n实例端口号：${data.serverPort}\n定位服务链接地址：${data.gpsHost ? data.gpsHost : ''}\n定位服务端口号：${data.gpsPort ? data.gpsPort : ''}\n总量：${data.totalCapacity}`
+          this.serverContent2 = `服务：${data.serverName}\n实例链接地址：${
+            data.serverHost
+          }\n实例端口号：${data.serverPort}\n定位服务链接地址：${
+            data.gpsHost ? data.gpsHost : ''
+          }\n定位服务端口号：${data.gpsPort ? data.gpsPort : ''}\n总量：${
+            data.totalCapacity
+          }`
         } else {
           this.$Message.error(res.data.msg)
         }
@@ -1435,5 +1484,54 @@ export default {
 }
 .left-content .ivu-tree ul li {
   font-size: 14px;
+}
+.mask-loading {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+.loading-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.loading-btn {
+  font-size: 50px;
+  color: #fff;
+}
+.loading-btn {
+  -webkit-animation: myRotate 1s linear infinite;
+  animation: myRotate 1s linear infinite;
+}
+@-webkit-keyframes myRotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes myRotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 </style>

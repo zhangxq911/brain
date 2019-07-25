@@ -189,7 +189,19 @@ body {
   right: -132px;
   bottom: -6px;
 }
+// 这个样式影响，select 日历
 .ivu-select-dropdown {
-  max-height: 270px !important;
+  max-height: 300px !important;
+}
+.pwd-tips {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  line-height: 1;
+  padding-top: 6px;
+  color: #969696;
+}
+.pwd-tips>span {
+  color: #ed4014;
 }
 </style>

@@ -40,6 +40,10 @@
           </FormItem>
           <FormItem prop="accountPsw" label="账户密码">
             <Input type="password" v-model="addForm.accountPsw" placeholder="请输入账户密码"></Input>
+            <div v-show="pwdTip" class="pwd-tips">
+              <span>弱:</span>
+              试试字母、数字和标点混合
+            </div>
           </FormItem>
           <FormItem prop="accountPsw2" label="重复密码">
             <Input type="password" v-model="addForm.accountPsw2" placeholder="请再次输入密码"></Input>
@@ -62,7 +66,13 @@
             <Input type="text" v-model="addForm.email" placeholder="请输入电子邮箱"></Input>
           </FormItem>
           <FormItem prop="description" label="账户描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="addForm.description" placeholder="请输入账户描述"></Input>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="addForm.description"
+              placeholder="请输入账户描述"
+            ></Input>
             <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
@@ -82,10 +92,19 @@
           <input type="text" name="accountName" style="position: absolute;z-index: -99" />
           <input type="password" name="accountPsw" style="position: absolute;z-index: -99" />
           <FormItem prop="accountName" label="账户名称">
-            <Input :disabled="editForm.accountName === 'admin' ? true : false" type="text" v-model="editForm.accountName" placeholder="请输入账户名称"></Input>
+            <Input
+              :disabled="editForm.accountName === 'admin' ? true : false"
+              type="text"
+              v-model="editForm.accountName"
+              placeholder="请输入账户名称"
+            ></Input>
           </FormItem>
           <FormItem v-if="!source" prop="accountPsw" label="账户密码">
             <Input type="password" v-model="editForm.accountPsw" placeholder="不修改账户密码请留空"></Input>
+            <div v-show="pwdTip" class="pwd-tips">
+              <span>弱:</span>
+              试试字母、数字和标点混合
+            </div>
           </FormItem>
           <FormItem v-if="!source" prop="confirmAccountPsw" label="重复密码">
             <Input type="password" v-model="editForm.confirmAccountPsw" placeholder="修改密码需再次输入"></Input>
@@ -105,8 +124,16 @@
             <Input v-model="editForm.companyName" placeholder="请输入企业名称"></Input>
           </FormItem>
           <FormItem prop="description" label="账户描述">
-            <Input :rows="7" type="textarea" :maxlength="100" v-model="editForm.description" placeholder="请输入账户描述"></Input>
-            <span class="font-tips">已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
+            <Input
+              :rows="7"
+              type="textarea"
+              :maxlength="100"
+              v-model="editForm.description"
+              placeholder="请输入账户描述"
+            ></Input>
+            <span
+              class="font-tips"
+            >已输入 {{editForm.description ? editForm.description.length : 0}}/100 个字符</span>
           </FormItem>
           <!-- 预留功能 -->
           <!-- <FormItem label="自定义头像">
@@ -173,10 +200,16 @@ export default {
     const validatePwd = (rule, value, callback) => {
       const reg = /^[a-zA-Z0-9_@]+$/
       if (!value) {
+        this.pwdTip = false
         callback(new Error('请输入账户密码'))
-      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
-        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else if (!reg.test(value) || value.length < 6 || value.length > 16) {
+        this.pwdTip = false
+        callback(new Error('长度为 6~16 个英文字符、数字、@、_'))
+      } else if (Number.isInteger(+value)) {
+        this.pwdTip = true
+        callback()
       } else {
+        this.pwdTip = false
         callback()
       }
     }
@@ -184,10 +217,16 @@ export default {
     const validatePwd2 = (rule, value, callback) => {
       const reg = /^[a-zA-Z0-9_@]+$/
       if (!value) {
+        this.pwdTip = false
         callback()
-      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
-        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else if (!reg.test(value) || value.length < 6 || value.length > 16) {
+        this.pwdTip = false
+        callback(new Error('长度为 6~16 个英文字符、数字、@、_'))
+      } else if (Number.isInteger(+value)) {
+        this.pwdTip = true
+        callback()
       } else {
+        this.pwdTip = false
         callback()
       }
     }
@@ -253,6 +292,7 @@ export default {
     }
 
     return {
+      pwdTip: false,
       time: 60,
       btnAttr: {
         btntxt: '发送验证码',
@@ -272,7 +312,7 @@ export default {
           { required: true, validator: validateName, trigger: 'blur' }
         ],
         accountPsw: [
-          { required: true, validator: validatePwd, trigger: 'blur' }
+          { required: true, validator: validatePwd, trigger: 'change' }
         ],
         accountPsw2: [
           { required: true, validator: validatePass2, trigger: 'blur' }
@@ -295,7 +335,7 @@ export default {
         accountName: [
           { required: true, validator: validateName, trigger: 'blur' }
         ],
-        accountPsw: [{ validator: validatePwd2, trigger: 'blur' }],
+        accountPsw: [{ validator: validatePwd2, trigger: 'change' }],
         confirmAccountPsw: [{ validator: validatePwd3, trigger: 'blur' }],
         mobile: [
           { required: true, validator: validateMobile, trigger: 'blur' }

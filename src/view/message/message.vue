@@ -129,6 +129,10 @@ export default {
         }
       })
     },
+    // ios 时间格式不能new date xxxx-xx-xx类型，需要转换下
+    getDateDiff(time) {
+      return time.replace(/\-/g, '/')
+    },
     // 获取数据
     getList() {
       getMsgList(this.searchForm).then(res => {
@@ -152,7 +156,7 @@ export default {
               item.showNew = true
             }
             item.content = item.content.replace(/<[^>]+>/g, '')
-            item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
+            item.updateTime = parseTime(this.getDateDiff(item.updateTime), '{y}.{m}.{d}')
             // 判断是否置顶，置顶扔到置顶数组，普通扔到普通数组
             if (item.isTop) {
               this.topArr.push(item)

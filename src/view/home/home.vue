@@ -26,7 +26,7 @@
             <p>{{ infor.title }}</p>
           </infor-card>
         </i-col>
-        <example style="height: 380px; margin-top: 130px; padding: 0px;" />
+        <example :online="online" :call="call" style="height: 380px; margin-top: 130px; padding: 0px;" />
       </div>
       <div class="card-box" style="flex: 1; height: 600px; overflow: auto;">
         <div style="border-bottom: .5px solid #ccc; margin-bottom: 20px;">
@@ -73,6 +73,8 @@ export default {
   },
   data() {
     return {
+      online: [],
+      call: [],
       topArr: [],
       normalArr: [],
       searchForm: { pageNumber: 1 },
@@ -129,7 +131,7 @@ export default {
         }
       })
     },
-    // 获取卡片数据
+    // 获取卡片数据，包括图表数据
     getCardData() {
       getCard().then(res => {
         if (res.data.code === 200) {
@@ -145,6 +147,8 @@ export default {
           this.cardData[3].count = res.data.data.communicateCount
             ? res.data.data.communicateCount
             : 0
+          this.online = res.data.data.userOnlineVOS
+          this.call = res.data.data.logCallStatisticsVOS
         }
       })
     },
@@ -153,6 +157,10 @@ export default {
       this.$router.push({
         name: 'msg_page'
       })
+    },
+    // ios 时间格式不能new date xxxx-xx-xx类型，需要转换下
+    getDateDiff(time) {
+      return time.replace(/\-/g, '/')
     },
     // 获取消息数据
     getMsgLists() {
@@ -170,7 +178,7 @@ export default {
               item.showNew = true
             }
             item.content = item.content.replace(/<[^>]+>/g, '')
-            item.updateTime = parseTime(item.updateTime, '{y}.{m}.{d}')
+            item.updateTime = parseTime(this.getDateDiff(item.updateTime), '{y}.{m}.{d}')
             if (item.isTop) {
               this.topArr.push(item)
             } else {

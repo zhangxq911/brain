@@ -57,7 +57,10 @@ export default {
   data() {
     return {
       loading: false,
-      rangeTime: '',
+      rangeTime: [
+        parseTime(new Date(), '{y}-{m}-{d}') + '0:0:0',
+        parseTime(new Date(), '{y}-{m}-{d}') + '23:59:59'
+      ],
       dataList: [],
       searchForm: {
         filter: 'object'
@@ -206,6 +209,8 @@ export default {
     }
   },
   mounted() {
+    this.searchForm.startTime = parseTime(this.rangeTime[0])
+    this.searchForm.endTime = parseTime(this.rangeTime[1])
     this.getPage(this.searchForm)
   }
 }

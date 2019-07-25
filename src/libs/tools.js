@@ -220,7 +220,7 @@ export const objEqual = (obj1, obj2) => {
  * @param cFormat
  * @return {*}
  */
-export function parseTime(time, cFormat) {
+export function parseTime (time, cFormat) {
   if (arguments.length === 0) {
     return null;
   }
@@ -250,4 +250,51 @@ export function parseTime(time, cFormat) {
     return value || 0;
   });
   return time_str;
+}
+
+// ios 时间格式不能new date xxxx-xx-xx类型，需要转换下
+export function getDateDiff (time) {
+  //将xxxx-xx-xx的时间格式，转换为 xxxx/xx/xx的格式
+  return time.replace(/\-/g, '/')
+}
+
+// 获取一段时间内每隔几分钟的时间数据
+export function getDateArray (startDate, endDate, space, type) {
+  let endTime, mod;
+  if (!endDate) {
+    endDate = new Date();
+  }
+  if (!startDate) {
+    // 开始时间没有的话，处理为当前日期的0点
+    startDate = new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+    // startDate = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
+  }
+  console.log(startDate)
+  if (!space) {
+    // 默认值5分钟
+    space = 5 * 60 * 1000;
+  } else {
+    space = space * 60 * 1000;
+  }
+  if (type === 'before' || !type) {
+    endTime = endDate.getTime();
+  } else if (type === 'end') {
+    endTime = endDate.getTime() + space * 60 * 1000;
+  }
+  mod = endTime - startDate;
+  if (mod <= space) {
+    return;
+    console.log("时间太短");
+  }
+  // 返回值
+  let dateArray = [];
+  dateArray.push(startDate)
+  while (mod - space > -space) {
+    var d = new Date();
+    d.setTime(startDate + space);
+    dateArray.push(parseTime(d));
+    mod = mod - space;
+    startDate = startDate + space;
+  }
+  return dateArray;
 }

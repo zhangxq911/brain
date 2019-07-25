@@ -46,9 +46,18 @@
           </FormItem>
           <FormItem prop="password">
             <Input type="password" v-model="formData.password" placeholder="设置你的登录密码"></Input>
+            <div v-show="pwdTip" class="pwd-tips">
+              <span>弱:</span>
+              试试字母、数字和标点混合
+            </div>
           </FormItem>
           <FormItem prop="repeatPassword">
-            <Input @on-enter="save" type="password" v-model="formData.repeatPassword" placeholder="请再次输入你的密码"></Input>
+            <Input
+              @on-enter="save"
+              type="password"
+              v-model="formData.repeatPassword"
+              placeholder="请再次输入你的密码"
+            ></Input>
           </FormItem>
           <FormItem>
             <Button @click="save" style="width: 100%;" type="primary">确认</Button>
@@ -78,7 +87,10 @@ export default {
         if (res.data.code === 200) {
           this.formData.accountName = res.data.data.accountName
           this.formData.mobile = res.data.data.mobile
-          this.curMobile = this.formData.mobile.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2")
+          this.curMobile = this.formData.mobile.replace(
+            /(\d{3})\d{4}(\d{4})/,
+            '$1****$2'
+          )
           callback()
         } else {
           callback(new Error(res.data.msg))
@@ -89,10 +101,16 @@ export default {
     const validatePwd = (rule, value, callback) => {
       const reg = /^[a-zA-Z0-9_@]+$/
       if (!value) {
+        this.pwdTip = false
         callback()
-      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
-        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else if (!reg.test(value) || value.length < 6 || value.length > 16) {
+        this.pwdTip = false
+        callback(new Error('长度为 6~16 个英文字符、数字、@、_'))
+      } else if (Number.isInteger(+value)) {
+        this.pwdTip = true
+        callback()
       } else {
+        this.pwdTip = false
         callback()
       }
     }
@@ -108,6 +126,7 @@ export default {
     }
 
     return {
+      pwdTip: false,
       time: 60,
       btnAttr: {
         btntxt: '发送验证码',
@@ -121,7 +140,7 @@ export default {
           { required: true, message: '请输入验证码', trigger: 'blur' }
         ],
         password: [
-          { required: true, validator: validatePwd, trigger: 'blur' },
+          { required: true, validator: validatePwd, trigger: 'change' },
           { required: true, message: '请输入密码', trigger: 'blur' }
         ],
         repeatPassword: [

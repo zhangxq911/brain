@@ -15,6 +15,10 @@
         </FormItem>
         <FormItem prop="accountPsw">
           <Input type="password" v-model="formData.accountPsw" placeholder="设置你的登录密码"></Input>
+          <div v-show="pwdTip" class="pwd-tips">
+            <span>弱: </span>
+            试试字母、数字和标点混合
+          </div>
         </FormItem>
         <FormItem prop="repeatAccountPsw">
           <Input type="password" v-model="formData.repeatAccountPsw" placeholder="请再次输入你的密码"></Input>
@@ -78,10 +82,16 @@ export default {
     const validatePwd = (rule, value, callback) => {
       const reg = /^[a-zA-Z0-9_@]+$/
       if (!value) {
+        this.pwdTip = false
         callback(new Error('请输入账户密码'))
-      } else if (!reg.test(value) || value.length < 2 || value.length > 16) {
-        callback(new Error('长度为 2~16 个英文字符、数字、@、_'))
+      } else if (!reg.test(value) || value.length < 6 || value.length > 16) {
+        this.pwdTip = false
+        callback(new Error('长度为 6~16 个英文字符、数字、@、_'))
+      } else if (Number.isInteger(+value)) {
+        this.pwdTip = true
+        callback()
       } else {
+        this.pwdTip = false
         callback()
       }
     }
@@ -120,6 +130,7 @@ export default {
     }
 
     return {
+      pwdTip: false,
       time: 60,
       btnAttr: {
         btntxt: '发送验证码',
@@ -130,7 +141,7 @@ export default {
           { required: true, validator: validateAccount, trigger: 'blur' }
         ],
         accountPsw: [
-          { required: true, validator: validatePwd, trigger: 'blur' }
+          { required: true, validator: validatePwd, trigger: 'change' }
         ],
         repeatAccountPsw: [
           { required: true, validator: validatePwd2, trigger: 'blur' }
