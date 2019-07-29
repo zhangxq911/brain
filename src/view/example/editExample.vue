@@ -176,7 +176,7 @@
                   border
                   ref="selection"
                   :columns="groupColumns"
-                  :data="groupData.data[0].pocUserList"
+                  :data="groupData"
                   @on-selection-change="selectWorkUser"
                 ></Table>
                 <div>
@@ -190,11 +190,11 @@
                 <div style="text-align: center; position: relative;">
                   <span
                     style="position: absolute; left: 10px; top: 8px;"
-                  >当前 {{groupData.data[0].pocUserList ? groupData.data[0].pocUserList.length : 0}} 条记录，共 {{groupData.data[0].pocUserList.length ? groupData.data[0].pocUserList.length : 0}} 条记录。</span>
+                  >当前 {{groupData.length}} 条记录，共 {{groupPage.count}} 条记录。</span>
                   <Page
-                    :current="groupData.pageNumber"
-                    :page-size="groupData.pageSize"
-                    :total="groupData.count"
+                    :current="groupPage.pageNumber"
+                    :page-size="groupPage.pageSize"
+                    :total="groupPage.count"
                     @on-change="changeGroupPage"
                   />
                 </div>
@@ -622,7 +622,8 @@ export default {
       ],
       orgData: [],
       orgPage: { count: 0 },
-      groupData: { data: [{ pocUserList: [] }] },
+      groupData: [],
+      groupPage: { count: 0 },
       orgList: [],
       groupList: [],
       activeId: '',
@@ -1059,7 +1060,13 @@ export default {
               if (this.activeOrg2 === data.gid) {
                 this.activeOrg2 = ''
                 // 清空分页数据
-                this.groupData = { data: [{ pocUserList: [] }] }
+                this.groupPage = {
+                  count: 0,
+                  pageNumber: 1,
+                  pageSize: 20,
+                  totalPage: 0
+                }
+                this.groupData = []
               } else {
                 this.activeOrg2 = data.gid
                 this.searchForm.gid = data.gid
@@ -1267,9 +1274,21 @@ export default {
       let params = this.searchForm
       getGroupData(params).then(res => {
         if (!res.data.data.data) {
-          this.groupData = { data: [{ pocUserList: [] }] }
+          this.groupData = []
+          this.groupPage = {
+            count: 0,
+            pageNumber: 1,
+            pageSize: 20,
+            totalPage: 0
+          }
         } else {
-          this.groupData = res.data.data
+          this.groupData = res.data.data.data
+          this.groupPage = {
+            count: res.data.data.count,
+            pageNumber: res.data.data.pageNumber,
+            pageSize: res.data.data.pageSize,
+            totalPage: res.data.data.totalPage
+          }
         }
         this.loading = false
       })
