@@ -39,7 +39,7 @@
       <div class="footerPage">
         <span
           class="pageMsg"
-        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count}} 条记录。</span>
+        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count ? dataList.count : 0}} 条记录。</span>
         <Page
           :current="dataList.pageNumber"
           :page-size="dataList.pageSize"

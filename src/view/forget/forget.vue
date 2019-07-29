@@ -1,6 +1,6 @@
 <template>
   <div class="basic-wrapper">
-    <img class="login-logo" src="../../assets/images/logo.png" alt="智能中心" />
+    <img class="login-logo" src="../../assets/images/logo.png" alt="云上会面" />
     <div class="card-box">
       <div class="content-area" v-if="type === 'step1'">
         <h2 style="text-align: center;">忘记密码</h2>

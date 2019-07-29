@@ -145,7 +145,7 @@
               <Radio :label="1">主持人</Radio>
             </RadioGroup>
           </FormItem>
-          <FormItem v-if="defAccount === 'unit'" label="会议角色">{{addForm.userType ? '主持人': '参会者'}}</FormItem>
+          <FormItem v-if="defAccount === 'unit'" label="会议角色">{{editForm.userType ? '主持人': '参会者'}}</FormItem>
           <FormItem prop="mobile" label="手机号码">
             <Input type="text" v-model="editForm.mobile" placeholder="请输入手机号码"></Input>
           </FormItem>
@@ -576,9 +576,6 @@ export default {
     },
     // 修改信息
     update() {
-      if (this.defAccount !== 'super_admin') {
-        this.editForm.userType = 0
-      }
       this.rulesValidate2.userPsw[0].required = false
       this.rulesValidate2.repeatPsw[0].required = false
       this.$refs['editForm'].validate(valid => {

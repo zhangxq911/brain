@@ -1,6 +1,6 @@
 <template>
   <div class="basic-wrapper">
-    <img class="login-logo" src="../../assets/images/logo.png" alt="智能中心" />
+    <img class="login-logo" src="../../assets/images/logo.png" alt="云上会面" />
     <div class="card-box">
       <h2 style="text-align: center;">完善基本信息</h2>
       <Form

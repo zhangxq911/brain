@@ -140,6 +140,7 @@ export default {
           type: 'cross'
         },
         formatter: params => {
+          if(params.length < 2) return
           let str = ''
           str += `<div><p>${params[0].axisValueLabel.substring(0, 6)}</p><p>${
             params[0].marker

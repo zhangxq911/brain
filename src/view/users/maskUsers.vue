@@ -392,8 +392,19 @@ export default {
       this.getExamplePage(this.searchForm)
     },
     closeMask() {
+      if (this.searchForm.accountInfo) {
+        this.searchForm.accountInfo = ''
+        this.searchAccount()
+      }
+      this.delSelect2()
+      if (this.searchForm.instanceInfo) {
+        this.searchForm.instanceInfo = ''
+        this.searchExample()
+      }
+      this.delSelect()
       this.basicInfo.type = 'normal'
       this.$emit('sendModal', this.basicInfo.type)
+      // thhis.
     },
     // 获取用户信息
     getAccountPage(params = {}) {

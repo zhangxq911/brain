@@ -166,10 +166,16 @@ body {
 .tree-active {
   display: inline-block;
   width: 100%;
-  color: #fff;
-  font-size: 14px;
+  // color: #fff;
+  // font-size: 14px;
+  height: 32px;
+  line-height: 32px;
   margin-left: -12px;
-  background: #a7a7a7;
+  background: #D8E1EF;
+}
+.tree-padding {
+  height: 32px;
+  line-height: 32px;
 }
 .tree-active:hover {
   cursor: pointer;

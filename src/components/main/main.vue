@@ -20,7 +20,7 @@
         <!-- 需要放在菜单上面的内容，如Logo，写在side-menu标签内部，如下 -->
         <div class="logo-con">
           <img class="logo" v-show="!collapsed" :src="maxLogo" key="max-logo">
-          <div class="logo-title">智能中心</div>
+          <div class="logo-title">云上会面</div>
           <!-- <img v-show="collapsed" :src="minLogo" key="min-logo"> -->
         </div>
       </side-menu>

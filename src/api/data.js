@@ -511,6 +511,14 @@ export const getUser = params => {
   })
 }
 
+export const getAllPocUser = params => {
+  return axios.request({
+    url: '/pocorganization/getAllPocUser',
+    params: params,
+    method: 'get'
+  })
+}
+
 export const getOrgList = params => {
   return axios.request({
     url: '/pocorganization/selectallorg',

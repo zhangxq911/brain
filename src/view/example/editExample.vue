@@ -37,11 +37,7 @@
           <TabPane v-if="editForm.instType === 'call'" label="组织机构" name="name2">
             <Row>
               <Button type="primary" @click="showMask('addOrg', 30)">添加部门</Button>
-              <Button
-                type="primary"
-                style="margin-left: 10px;"
-                @click="showMask('addUser', 30)"
-              >添加人员</Button>
+              <Button type="primary" style="margin-left: 10px;" @click="addUserMask">添加人员</Button>
               <div style="float: right; margin-bottom: -10px;">
                 <Form inline @submit.native.prevent>
                   <FormItem>
@@ -93,7 +89,7 @@
                   border
                   ref="selection"
                   :columns="orgColumns"
-                  :data="orgData.data[0].pocUserList"
+                  :data="orgData"
                   @on-selection-change="selectUser"
                 ></Table>
                 <div>
@@ -110,11 +106,14 @@
                     @click="showMask('addToWork', 30)"
                   >添加至工作组</Button>
                 </div>
-                <div style="text-align: center;">
+                <div style="text-align: center; position: relative;">
+                  <span
+                    style="position: absolute; left: 10px; top: 8px;"
+                  >当前 {{orgData.length}} 条记录，共 {{orgPage.count}} 条记录。</span>
                   <Page
-                    :current="orgData.pageNumber"
-                    :page-size="orgData.pageSize"
-                    :total="orgData.count"
+                    :current="orgPage.pageNumber"
+                    :page-size="orgPage.pageSize"
+                    :total="orgPage.count"
                     @on-change="changeOrgPage"
                   />
                 </div>
@@ -123,7 +122,7 @@
           </TabPane>
           <TabPane v-if="editForm.instType === 'call'" label="工作组" name="name3">
             <Row>
-              <Button type="primary" @click="showMask('addWork', 30)">添加</Button>
+              <Button type="primary" @click="showMask('addWork', 50)">添加</Button>
               <div style="float: right; margin-bottom: -10px;">
                 <Form inline @submit.native.prevent>
                   <FormItem>
@@ -188,7 +187,10 @@
                     @click="delWorkUser"
                   >删除用户</Button>
                 </div>
-                <div style="text-align: center;">
+                <div style="text-align: center; position: relative;">
+                  <span
+                    style="position: absolute; left: 10px; top: 8px;"
+                  >当前 {{groupData.data[0].pocUserList ? groupData.data[0].pocUserList.length : 0}} 条记录，共 {{groupData.data[0].pocUserList.length ? groupData.data[0].pocUserList.length : 0}} 条记录。</span>
                   <Page
                     :current="groupData.pageNumber"
                     :page-size="groupData.pageSize"
@@ -327,6 +329,7 @@
       @refreshOrg="getRefreshOrg"
       @refreshUser="getRefrechUser"
       @refreshWork="getWork"
+      @refreshWorkUser="getRefreshWork"
       :selectUserStr="selectUserStr"
       :groupTree="groupList"
       :orgTree="orgList"
@@ -348,6 +351,7 @@
 
 <script>
 import {
+  getAllPocUser,
   getExampleInfo,
   getIdentityCode,
   putExample,
@@ -616,7 +620,8 @@ export default {
           }
         }
       ],
-      orgData: { data: [{ pocUserList: [] }] },
+      orgData: [],
+      orgPage: { count: 0 },
       groupData: { data: [{ pocUserList: [] }] },
       orgList: [],
       groupList: [],
@@ -780,6 +785,14 @@ export default {
     }
   },
   methods: {
+    addUserMask() {
+      // 判断是否选中部门
+      if (this.searchForm.oid) {
+        this.showMask('addUser', 30)
+      } else {
+        this.$Message.warning('请先选择部门！')
+      }
+    },
     // 同步
     sync() {
       this.loadingSync = true
@@ -787,13 +800,13 @@ export default {
         instanceId: this.id
       }
       ayncData(data).then(res => {
-        if(res.data.code === 200) {
+        if (res.data.code === 200) {
           this.$Message.success(res.data.msg)
           // 选中部门的时候，同步后刷新该部门
-          if(this.searchForm.oid) {
+          if (this.searchForm.oid) {
             this.getOrgPage()
           }
-        }else {
+        } else {
           this.$Message.error(res.data.msg)
         }
         this.loadingSync = false
@@ -868,7 +881,9 @@ export default {
         if (result.RES === 'OK') {
           this.loading = true
           this.getOrgPage()
+          // 刷新工作组，主持人删除的话树要刷新
           this.$Message.success('删除成功')
+          this.getGroupLists()
         } else {
           this.$Message.error(result.REASON)
         }
@@ -904,6 +919,10 @@ export default {
     getWork() {
       this.getGroupLists()
     },
+    // 工作组人员刷新
+    getRefreshWork() {
+      this.getGroupPage()
+    },
     // 组织分页
     changeOrgPage(curPage) {
       this.searchForm.page = curPage
@@ -921,20 +940,30 @@ export default {
           style: {
             'font-size': '14px'
           },
-          class: this.activeOrg === data.oid ? 'tree-active' : '',
+          class: this.activeOrg === data.oid ? 'tree-active' : 'tree-padding',
           on: {
             click: () => {
-              this.searchForm.oid = data.oid
-              this.searchForm.page = 1
-              this.getOrgPage()
               if (this.activeOrg === data.oid) {
                 this.activeOrg = ''
+                this.searchForm.oid = ''
+                // 清空分页数据
+                this.orgPage = {
+                  count: 0,
+                  pageNumber: 1,
+                  pageSize: 20,
+                  totalPage: 0
+                }
+                this.orgData = []
               } else {
+                this.searchForm.oid = data.oid
                 this.activeOrg = data.oid
                 this.orgForm2.pid = data.oid
                 this.orgForm2.realPid = data.parentOid
                 this.orgForm2.ptitle = data.title
+                this.searchForm.page = 1
+                this.getOrgPage()
               }
+              this.orgForm2.activeOrg = this.activeOrg
             }
           }
         },
@@ -991,10 +1020,10 @@ export default {
                     {
                       props: {
                         name: 'edit'
-                      },
-                      style: {
-                        color: '#2d8cf0'
                       }
+                      // style: {
+                      //   color: '#2d8cf0'
+                      // }
                     },
                     '编辑'
                   ),
@@ -1003,10 +1032,10 @@ export default {
                     {
                       props: {
                         name: 'del'
-                      },
-                      style: {
-                        color: '#ed4014'
                       }
+                      // style: {
+                      //   color: '#ed4014'
+                      // }
                     },
                     '删除'
                   )
@@ -1024,16 +1053,18 @@ export default {
           style: {
             'font-size': '14px'
           },
-          class: this.activeOrg2 === data.gid ? 'tree-active' : '',
+          class: this.activeOrg2 === data.gid ? 'tree-active' : 'tree-padding',
           on: {
             click: () => {
-              this.searchForm.gid = data.gid
-              this.searchForm.page = 1
-              this.getGroupPage()
               if (this.activeOrg2 === data.gid) {
                 this.activeOrg2 = ''
+                // 清空分页数据
+                this.groupData = { data: [{ pocUserList: [] }] }
               } else {
                 this.activeOrg2 = data.gid
+                this.searchForm.gid = data.gid
+                this.searchForm.page = 1
+                this.getGroupPage()
               }
             }
           }
@@ -1103,10 +1134,10 @@ export default {
                     {
                       props: {
                         name: 'edit'
-                      },
-                      style: {
-                        color: '#2d8cf0'
                       }
+                      // style: {
+                      //   color: '#2d8cf0'
+                      // }
                     },
                     '编辑'
                   ),
@@ -1115,10 +1146,10 @@ export default {
                     {
                       props: {
                         name: 'del'
-                      },
-                      style: {
-                        color: '#ed4014'
                       }
+                      // style: {
+                      //   color: '#ed4014'
+                      // }
                     },
                     '删除'
                   )
@@ -1166,6 +1197,8 @@ export default {
         if (this.groupList.length === 0) {
           this.getGroupLists()
         }
+        // 清空选择样式
+        this.activeOrg = ''
       }
     },
     // 处理组织树数据，原数据格式 【】list pid id 关联
@@ -1208,11 +1241,23 @@ export default {
     // 组织表格数据, 人员
     getOrgPage() {
       let params = this.searchForm
-      getUser(params).then(res => {
+      getAllPocUser(params).then(res => {
         if (!res.data.data.data) {
-          this.orgData = { data: [{ pocUserList: [] }] }
+          this.orgData = []
+          this.orgPage = {
+            count: 0,
+            pageNumber: 1,
+            pageSize: 20,
+            totalPage: 0
+          }
         } else {
-          this.orgData = res.data.data
+          this.orgData = res.data.data.data
+          this.orgPage = {
+            count: res.data.data.count,
+            pageNumber: res.data.data.pageNumber,
+            pageSize: res.data.data.pageSize,
+            totalPage: res.data.data.totalPage
+          }
         }
         this.loading = false
       })
