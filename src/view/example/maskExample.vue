@@ -306,7 +306,6 @@
         </div>
         <Table border :columns="workColumns" :data="orgUsersData" style="margin: 10px 60px;"></Table>
         <Page
-          v-show="dataAccountList.length !== 0"
           :current.sync="orgUsersPage.pageNumber"
           :page-size="orgUsersPage.pageSize"
           :total="orgUsersPage.count"
@@ -350,11 +349,11 @@
 
 <script>
 import {
+  getAllPocUser,
   getServiceList,
   getAccountList,
   addOrg,
   updateOrg,
-  getUser,
   addUser2,
   addToGroup,
   updateUsers,
@@ -838,18 +837,18 @@ export default {
       } else {
         delete data.nameAndTel
       }
-      getUser(data).then(res => {
+      getAllPocUser(data).then(res => {
         if (!res.data.data.data) {
           this.orgUsersData = []
         } else {
-          let tempArr = []
-          res.data.data.data.forEach(item => {
-            item.pocUserList.forEach(item2 => {
-              item2.orgName = item.name
-            })
-            tempArr.push.apply(tempArr, item.pocUserList)
-          })
-          this.orgUsersData = tempArr
+          // let tempArr = []
+          // res.data.data.data.forEach(item => {
+          //   item.pocUserList.forEach(item2 => {
+          //     item2.orgName = item.name
+          //   })
+          //   tempArr.push.apply(tempArr, item.pocUserList)
+          // })
+          this.orgUsersData = res.data.data.data
           this.orgUsersPage = {
             pageNumber: res.data.data.pageNumber,
             pageSize: res.data.data.pageSize,

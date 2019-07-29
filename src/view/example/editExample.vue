@@ -362,7 +362,6 @@ import {
   getGroupList,
   getGroupData,
   delOrg,
-  getUser,
   delUsers,
   delGroup,
   delUserGroup,
@@ -805,8 +804,19 @@ export default {
           this.$Message.success(res.data.msg)
           // 选中部门的时候，同步后刷新该部门
           if (this.searchForm.oid) {
+            this.getOrgLists()
             this.getOrgPage()
+          } else {
+            this.getOrgLists()
+            this.orgData = []
+            this.orgPage = {
+              count: 0,
+              pageNumber: 1,
+              pageSize: 20,
+              totalPage: 0
+            }
           }
+          this.selectUserStr = ''
         } else {
           this.$Message.error(res.data.msg)
         }
@@ -885,6 +895,7 @@ export default {
           // 刷新工作组，主持人删除的话树要刷新
           this.$Message.success('删除成功')
           this.getGroupLists()
+          this.selectUserStr = ''
         } else {
           this.$Message.error(result.REASON)
         }
@@ -1273,24 +1284,29 @@ export default {
     getGroupPage() {
       let params = this.searchForm
       getGroupData(params).then(res => {
-        if (!res.data.data.data) {
-          this.groupData = []
-          this.groupPage = {
-            count: 0,
-            pageNumber: 1,
-            pageSize: 20,
-            totalPage: 0
+        if (res.data.code === 200) {
+          if (!res.data.data.data) {
+            this.groupData = []
+            this.groupPage = {
+              count: 0,
+              pageNumber: 1,
+              pageSize: 20,
+              totalPage: 0
+            }
+          } else {
+            this.groupData = res.data.data.data
+            this.groupPage = {
+              count: res.data.data.count,
+              pageNumber: res.data.data.pageNumber,
+              pageSize: res.data.data.pageSize,
+              totalPage: res.data.data.totalPage
+            }
           }
+          this.loading = false
         } else {
-          this.groupData = res.data.data.data
-          this.groupPage = {
-            count: res.data.data.count,
-            pageNumber: res.data.data.pageNumber,
-            pageSize: res.data.data.pageSize,
-            totalPage: res.data.data.totalPage
-          }
+          this.loading = false
+          console.log('获取工作组人员失败')
         }
-        this.loading = false
       })
     },
     // 组织菜单数据
