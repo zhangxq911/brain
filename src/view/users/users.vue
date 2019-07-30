@@ -91,7 +91,15 @@ export default {
         {
           name: '描述',
           value: 'description'
-        }
+        },
+        {
+          name: '账户名称',
+          value: 'accountName'
+        },
+        {
+          name: '手机号码',
+          value: 'mobile'
+        },
       ],
       modal: false,
       accountForm: {
@@ -145,6 +153,12 @@ export default {
           align: 'center',
           sortable: 'custom',
           key: 'nickName'
+        },
+        {
+          title: '手机号码',
+          align: 'center',
+          sortable: 'custom',
+          key: 'mobile'
         },
         {
           title: '会议角色',
