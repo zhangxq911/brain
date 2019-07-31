@@ -76,7 +76,7 @@
             <span class="font-tips">已输入 {{addForm.description.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
-            <Button type="primary" @click="save">保存</Button>
+            <Button :disabled="disabledNew" type="primary" @click="save">保存</Button>
           </FormItem>
         </Form>
       </Col>
@@ -292,6 +292,7 @@ export default {
     }
 
     return {
+      disabledNew: false,
       pwdTip: false,
       time: 60,
       btnAttr: {
@@ -388,9 +389,11 @@ export default {
     },
     // 新增提交
     save() {
+      this.disabledNew = true
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           addAccount(this.addForm).then(res => {
+            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -405,6 +408,7 @@ export default {
         } else {
           console.log('校验失败')
         }
+        this.disabledNew = false
       })
     },
     // 修改账户信息

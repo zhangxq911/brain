@@ -18,7 +18,7 @@ class HttpRequest {
     this.baseUrl = baseUrl
     this.queue = {}
   }
-  getInsideConfig() {
+  getInsideConfig () {
     const config = {
       baseURL: this.baseUrl,
       headers: {
@@ -27,19 +27,20 @@ class HttpRequest {
     }
     return config
   }
-  destroy(url) {
+  destroy (url) {
     delete this.queue[url]
     if (!Object.keys(this.queue).length) {
       // Spin.hide()
     }
   }
-  interceptors(instance, url) {
+  interceptors (instance, url) {
     // 请求拦截
     instance.interceptors.request.use(config => {
-      if(store.state.user.token) {
+      if (store.state.user.token) {
         config.headers.token = store.state.user.token
       }
       if (config.method === 'post' && !config.upload) {
+        // 处理post 数据类型转为 formdata
         const formData = new FormData()
         Object.keys(config.data).forEach(key => formData.append(key, config.data[key]))
         config.data = formData
@@ -56,9 +57,9 @@ class HttpRequest {
     // 响应拦截
     instance.interceptors.response.use(res => {
       // token 失效拦截
-      if(res.data.code === -10086) {
+      if (res.data.code === -10086) {
         store.commit('setToken', '')
-        router.push({name: 'login'})
+        router.push({ name: 'login' })
         // window.location.href = '/console/login'
       }
       this.destroy(url)
@@ -79,7 +80,7 @@ class HttpRequest {
       return Promise.reject(error)
     })
   }
-  request(options) {
+  request (options) {
     const instance = axios.create()
     options = Object.assign(this.getInsideConfig(), options)
     this.interceptors(instance, options.url)

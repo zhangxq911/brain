@@ -125,7 +125,7 @@
               <Input disabled v-model="orgForm2.ptitle"></Input>
             </FormItem>
             <FormItem>
-              <Button type="primary" @click="saveOrg">保存</Button>
+              <Button :disabled="disabledOrg" type="primary" @click="saveOrg">保存</Button>
             </FormItem>
           </Form>
         </div>
@@ -191,7 +191,7 @@
               <Input v-model="userForm.position"></Input>
             </FormItem>
             <FormItem>
-              <Button type="primary" @click="saveUser">保存</Button>
+              <Button :disabled="disabledUser" type="primary" @click="saveUser">保存</Button>
             </FormItem>
           </Form>
         </div>
@@ -321,7 +321,7 @@
         </div>
         <div style="padding: 20px 60px;" v-show="selectExmpArr3.length === 0">当前未选中任何账户</div>
         <div style="display: flex; justify-content: center;">
-          <Button :disabled="selectExmpArr3.length === 0" type="primary" @click="addWork">确定</Button>
+          <Button :disabled="selectExmpArr3.length === 0 || disabledAdd" type="primary" @click="addWork">确定</Button>
         </div>
       </div>
     </div>
@@ -401,7 +401,6 @@ export default {
 
     const validateTel = (rule, value, callback) => {
       const reg = /^[0-9]*$/
-      console.log(value)
       if (!value) {
         callback(new Error('请输入人员号码'))
       } else if (!reg.test(value)) {
@@ -412,6 +411,9 @@ export default {
     }
 
     return {
+      disabledAdd: false,
+      disabledOrg: false,
+      disabledUser: false,
       orgUsersData: [],
       orgUsersPage: {},
       prefix: '',
@@ -900,6 +902,7 @@ export default {
     },
     // 添加工作组
     addWork() {
+      this.disabledAdd = true
       let data = {
         ip: this.orgForm2.ip,
         name: this.addWorkForm.workName
@@ -907,10 +910,12 @@ export default {
       // 判断是否有选择主持人
       if (this.selectExmpArr3.length === 0) {
         this.$Message.error('请选择主持人后提交')
+        this.disabledAdd = false
         return
       }
       data.uid = this.selectExmpArr3[0].id
       addGroop(data).then(res => {
+        this.disabledAdd = false
         let result = JSON.parse(res.data.msg)
         if (result.RES === 'OK') {
           this.$refs['addWorkForm'].resetFields()
@@ -1076,6 +1081,8 @@ export default {
     },
     // 添加人员
     saveUser() {
+      // 马上关闭弹窗，防止点击过快
+      this.disabledUser = true
       if (!this.prefix) {
         this.$Message.error('人员前缀为空不能添加！')
         return
@@ -1106,7 +1113,10 @@ export default {
             } else {
               this.$Message.error(result.REASON)
             }
+            this.disabledUser = false
           })
+        } else {
+          this.disabledUser = false
         }
       })
     },
@@ -1139,6 +1149,7 @@ export default {
     // },
     // 添加部门
     saveOrg() {
+      this.disabledOrg = true
       this.orgForm.ip = this.orgForm2.ip
       if (this.orgForm.top === 0) {
         this.orgForm.parentOid = this.orgForm2.pid
@@ -1157,7 +1168,10 @@ export default {
             } else {
               this.$Message.error(result.REASON)
             }
+            this.disabledOrg = false
           })
+        }else {
+          this.disabledOrg = false
         }
       })
     },

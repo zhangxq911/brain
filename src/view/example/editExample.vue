@@ -271,7 +271,7 @@
             </FormItem>
           </div>
           <FormItem>
-            <Button type="primary" @click="save">保存</Button>
+            <Button :disabled="disabledNew" type="primary" @click="save">保存</Button>
           </FormItem>
         </Form>
       </Col>
@@ -445,6 +445,7 @@ export default {
     }
 
     return {
+      disabledNew: false,
       loadingSync: false,
       options: {
         disabledDate(date) {
@@ -824,8 +825,12 @@ export default {
       })
     },
     // 工作组查询
-    searchWork() {
-      if (!this.searchForm.filter && !this.searchForm.status) {
+    searchWork(val) {
+      if (!val) {
+        // tab 切换时不触发 on-change
+        return
+      }
+      if (!this.searchForm.filter && this.searchForm.content) {
         this.$Message.error('请先选择查询类型')
         return
       } else {
@@ -902,8 +907,13 @@ export default {
       })
     },
     // 搜索组织结构
-    search() {
-      if (!this.searchForm.filter && !this.searchForm.status) {
+    search(val) {
+      // 判断是否选中部门，没有选中的话提示
+      if (!val) {
+        // tab 切换时不触发 on-change
+        return
+      }
+      if (!this.searchForm.filter && this.searchForm.content) {
         this.$Message.error('请先选择查询类型')
         return
       } else {
@@ -1194,11 +1204,11 @@ export default {
     getOrg(name) {
       if (name === 'name2') {
         // 组织结构
-        this.searchForm = {
-          page: 1,
-          ip: this.id,
-          instanceId: this.id
-        }
+        this.searchForm.page = 1
+        // this.searchForm.status = ''
+        delete this.searchForm.status
+        delete this.searchForm.filter
+        delete this.searchForm.content
         if (this.orgList.length === 0) {
           this.getOrgLists()
         }
@@ -1207,16 +1217,16 @@ export default {
         }
       } else if (name === 'name3') {
         // 工作组
-        this.searchForm = {
-          page: 1,
-          ip: this.id,
-          instanceId: this.id
-        }
+        this.searchForm.page = 1
+        // this.searchForm.status = ''
+        delete this.searchForm.status
+        delete this.searchForm.filter
+        delete this.searchForm.content
         if (this.groupList.length === 0) {
           this.getGroupLists()
         }
         // 清空选择样式
-        this.activeOrg = ''
+        // this.activeOrg = ''
       }
     },
     // 处理组织树数据，原数据格式 【】list pid id 关联
@@ -1258,6 +1268,13 @@ export default {
     },
     // 组织表格数据, 人员
     getOrgPage() {
+      if (!this.searchForm.oid) {
+        this.$Message.error('请先选择部门')
+        return
+      }
+      // if(this.searchForm.status === 'all') {
+      //   this.searchForm.status = ''
+      // }
       let params = this.searchForm
       getAllPocUser(params).then(res => {
         if (!res.data.data.data) {
@@ -1282,6 +1299,11 @@ export default {
     },
     // 工作组数据
     getGroupPage() {
+      if (!this.searchForm.gid) {
+        this.$Message.error('请先选择工作组')
+        return
+      }
+
       let params = this.searchForm
       getGroupData(params).then(res => {
         if (res.data.code === 200) {
@@ -1390,12 +1412,14 @@ export default {
     },
     // 新增提交
     save() {
+      this.disabledNew = true
       if (this.defAccount !== 'super_admin') {
         this.addForm.expirationTime = null
       }
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           addExample(this.addForm).then(res => {
+            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -1410,6 +1434,7 @@ export default {
         } else {
           console.log('校验失败')
         }
+        this.disabledNew = false
       })
     },
     // 修改信息

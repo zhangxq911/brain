@@ -88,7 +88,7 @@
             <span class="font-tips">已输入 {{addForm.content.length}}/100 个字符</span>
           </FormItem>
           <FormItem>
-            <Button :loading="loading" type="primary" @click="save">保存</Button>
+            <Button :disabled="disabledNew" :loading="loading" type="primary" @click="save">保存</Button>
           </FormItem>
         </Form>
       </Col>
@@ -168,6 +168,7 @@ export default {
       }
     }
     return {
+      disabledNew: false,
       loading: false,
       file: null,
       curMode: this.mode,
@@ -257,6 +258,7 @@ export default {
     },
     // 保存
     save() {
+      this.disabledNew = true
       let formData = new FormData()
       formData.append('file', this.file)
       formData.append('appName', this.addForm.appName)
@@ -269,6 +271,7 @@ export default {
         if (valid) {
           this.loading = true
           addApp(formData).then(res => {
+            this.disabledNew = false
             if (res.data.code === 200) {
               this.loading = false
               this.$Message.success(res.data.msg)
@@ -283,6 +286,7 @@ export default {
             }
           })
         }
+        this.disabledNew = false
       })
     },
     getInfo() {

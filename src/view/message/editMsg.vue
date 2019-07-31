@@ -35,7 +35,7 @@
             </RadioGroup>
           </FormItem>
           <FormItem>
-            <Button type="primary" @click="save">保存</Button>
+            <Button :disabled="disabledNew" type="primary" @click="save">保存</Button>
           </FormItem>
         </Form>
       </Col>
@@ -88,6 +88,7 @@ export default {
   },
   data() {
     return {
+      disabledNew: false,
       editor: null,
       editor2: null,
       loading: false,
@@ -138,9 +139,11 @@ export default {
         this.$Message.error('请填写内容！')
         return
       }
+      this.disabledNew = true
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           saveMsg(this.addForm).then(res => {
+            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -153,6 +156,7 @@ export default {
             }
           })
         }
+        this.disabledNew = false
       })
     },
     getInfo() {
@@ -230,8 +234,10 @@ export default {
       this.editor.customConfig.onchange = html => {
         this.addForm.content = html
       }
-      this.$refs.menuEditor.style.height = (this.$refs.box.clientHeight - 280) + 'px'
-      this.$refs.menuEditor.style['max-height'] = (this.$refs.box.clientHeight - 200) + 'px'
+      this.$refs.menuEditor.style.height =
+        this.$refs.box.clientHeight - 280 + 'px'
+      this.$refs.menuEditor.style['max-height'] =
+        this.$refs.box.clientHeight - 200 + 'px'
       this.editor.create()
     } else if (this.curMode === 'edit') {
       this.getInfo()
@@ -240,8 +246,10 @@ export default {
       this.editor2.customConfig.onchange = html => {
         this.editForm.content = html
       }
-      this.$refs.menuEditor2.style.height = (this.$refs.box.clientHeight - 240) + 'px'
-      this.$refs.menuEditor2.style['max-height'] = (this.$refs.box.clientHeight - 200) + 'px'
+      this.$refs.menuEditor2.style.height =
+        this.$refs.box.clientHeight - 240 + 'px'
+      this.$refs.menuEditor2.style['max-height'] =
+        this.$refs.box.clientHeight - 200 + 'px'
       this.editor2.create()
     } else {
       // 详情
