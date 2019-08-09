@@ -65,23 +65,27 @@
 
 <script>
 import { getCdrList } from '@/api/data'
-import { parseTime } from '@/libs/tools'
+import { parseTime, formatSeconds } from '@/libs/tools'
 import { parse } from 'path'
 
 export default {
   data() {
     return {
+      rangeTime: [
+        parseTime(new Date(), '{y}-{m}-{d}') + '0:0:0',
+        parseTime(new Date(), '{y}-{m}-{d}') + '23:59:59'
+      ],
       loading: false,
-      rangeTime: '',
       dataList: [],
       columns: [
         {
           title: '通话时间',
           align: 'center',
           width: 160,
-          render: (h, params) => {
-            return h('div', params.row.callTime + ' - ' + params.row.endTime)
-          }
+          key: 'callTime',
+          // render: (h, params) => {
+          //   return h('div', params.row.callTime + ' - ' + params.row.endTime)
+          // }
         },
         {
           title: '通话类型',
@@ -119,26 +123,56 @@ export default {
           title: '通话号码',
           align: 'center',
           sortable: 'custom',
-          key: 'calledTel'
+          key: 'calledTel',
+          ellipsis: true
         },
         {
           title: '通话对象',
           align: 'center',
           sortable: 'custom',
-          key: 'calledName'
+          key: 'calledName',
+          ellipsis: true
         },
         {
           title: '通话时长',
           align: 'center',
           sortable: 'custom',
-          key: 'length'
+          key: 'length',
+          render: (h, params) => {
+            let time = formatSeconds(params.row.length)
+            return h('div', time)
+          }
         },
         {
           title: '用户ID/用户名称',
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('div', params.row.callerId),
+              h(
+                'div',
+                {
+                  style: {
+                    color: '#2d8cf0'
+                  },
+                  attrs: {
+                    class: 'hoverAccount'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'edit_users',
+                        params: {
+                          id: params.row.callerId,
+                          mode: 'view',
+                          title: '用户详情',
+                          to: 'call_page'
+                        }
+                      })
+                    }
+                  }
+                },
+                params.row.callerId
+              ),
               h('div', params.row.callerName)
             ])
           }
@@ -148,8 +182,32 @@ export default {
           align: 'center',
           render: (h, params) => {
             return h('div', [
-              h('div', params.row.accountId),
-              h('div', params.row.accountName)
+              h(
+                'div',
+                {
+                  style: {
+                    color: '#2d8cf0'
+                  },
+                  attrs: {
+                    class: 'hoverAccount'
+                  },
+                  on: {
+                    click: () => {
+                      this.$router.push({
+                        name: 'edit_account',
+                        params: {
+                          id: params.row.accountId,
+                          mode: 'view',
+                          title: '账户详情',
+                          to: 'call_page'
+                        }
+                      })
+                    }
+                  }
+                },
+                params.row.accountId
+              ),
+              h('div', {}, params.row.accountName)
             ])
           }
         },
@@ -312,6 +370,8 @@ export default {
     }
   },
   mounted() {
+    this.searchForm.startTime = parseTime(this.rangeTime[0])
+    this.searchForm.endTime = parseTime(this.rangeTime[1])
     this.getPage(this.searchForm)
   }
 }

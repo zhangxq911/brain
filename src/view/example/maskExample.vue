@@ -173,7 +173,7 @@
         </Row>
         <div style="padding: 20px;">
           <Form ref="userForm" :model="userForm" :rules="userValidate" label-position="top">
-            <FormItem label="人员号码">
+            <FormItem prop="tel" label="人员号码">
               <Input placeholder="请输入人员号码" v-model="userForm.tel">
                 <span slot="prepend">{{prefix}}</span>
               </Input>
@@ -321,7 +321,11 @@
         </div>
         <div style="padding: 20px 60px;" v-show="selectExmpArr3.length === 0">当前未选中任何账户</div>
         <div style="display: flex; justify-content: center;">
-          <Button :disabled="selectExmpArr3.length === 0 || disabledAdd" type="primary" @click="addWork">确定</Button>
+          <Button
+            :disabled="selectExmpArr3.length === 0 || disabledAdd"
+            type="primary"
+            @click="addWork"
+          >确定</Button>
         </div>
       </div>
     </div>
@@ -431,9 +435,11 @@ export default {
       modifyArr: [],
       modifyForm: {},
       groupEditForm: {},
-      userForm: {},
+      userForm: {
+        tel: ''
+      },
       userValidate: {
-        // tel: [{ required: true, validator: validateTel, trigger: 'blur' }],
+        tel: [{ required: true, message: '号码最大为12位', max: 12, trigger: 'blur' }],
         name: [{ required: true, validator: validateName, trigger: 'blur' }],
         phone: [{ required: true, validator: validateMobile, trigger: 'blur' }]
       },
@@ -1102,8 +1108,16 @@ export default {
       }
       this.$refs['userForm'].validate(valid => {
         if (valid) {
-          this.userForm.tel = this.prefix + '' + this.userForm.tel
-          addUser2(this.userForm).then(res => {
+          let data = {
+            ip: this.orgForm2.ip,
+            oid: this.orgForm2.pid,
+            tel: this.prefix + '' + this.userForm.tel,
+            name: this.userForm.name,
+            phone: this.userForm.phone,
+            position: this.userForm.position
+          }
+          // this.userForm.tel = this.prefix + '' + this.userForm.tel
+          addUser2(data).then(res => {
             let result = JSON.parse(res.data.msg)
             if (res.data.code === 200) {
               this.$refs['userForm'].resetFields()
@@ -1170,7 +1184,7 @@ export default {
             }
             this.disabledOrg = false
           })
-        }else {
+        } else {
           this.disabledOrg = false
         }
       })

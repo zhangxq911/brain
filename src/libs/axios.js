@@ -1,6 +1,8 @@
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'
+import { setToken } from '@/libs/util'
+import { getToken } from './util';
 // import { Spin } from 'iview'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
@@ -11,6 +13,33 @@ const addErrorLog = errorInfo => {
     url: responseURL
   }
   if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
+}
+
+// 获取url中token参数值,适用于 hash 模式
+const getQueryStringHistory = name => {
+  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+  let r = window.location.search.substr(1).match(reg);
+  if (r != null) return r[2]; return '';
+}
+
+const getHashParameters = () => {
+  let arr = (location.hash || '').split('?')[1]
+  if (!arr) { return '' } else {
+    arr = arr.split('&')
+  }
+  let params = {}
+  for (let i = 0; i < arr.length; i++) {
+    let data = arr[i].split('=')
+    if (data.length === 2) {
+      params[data[0]] = data[1]
+    }
+  }
+  return params
+}
+
+const getQueryStringHash = key => {
+  let params = getHashParameters()
+  return params[key]
 }
 
 class HttpRequest {
@@ -36,6 +65,13 @@ class HttpRequest {
   interceptors (instance, url) {
     // 请求拦截
     instance.interceptors.request.use(config => {
+      var loginToken = ''
+      if (router.mode === 'hash') {
+        loginToken = getQueryStringHash('token')
+      } else if (router.mode === 'history') {
+        loginToken = getQueryStringHistory('token')
+      }
+      // 初始化页面未加载时候，token 值为空
       if (store.state.user.token) {
         config.headers.token = store.state.user.token
       }
@@ -59,9 +95,24 @@ class HttpRequest {
       // token 失效拦截
       if (res.data.code === -10086) {
         store.commit('setToken', '')
-        router.push({ name: 'login' })
-        // window.location.href = '/console/login'
+        // 判断是系统过来的还是阿里过来的，通过是否有token判断
+        var loginToken = ''
+        if (router.mode === 'hash') {
+          loginToken = getQueryStringHash('token')
+        } else if (router.mode === 'history') {
+          loginToken = getQueryStringHistory('token')
+        }
+        if (loginToken) {
+          router.push({ name: 'error' })
+        } else {
+          router.push({ name: 'login' })
+        }
       }
+      // else {
+      //   if(res.data.data.token) {
+      //     store.commit('setToken', res.data.data.token)
+      //   }
+      // }
       this.destroy(url)
       const { data, status } = res
       return { data, status }

@@ -56,10 +56,11 @@ router.beforeEach((to, from, next) => {
     to.meta.title = to.params.title
   }
   iView.LoadingBar.start()
-  const token = getToken()
+  let token = getToken()
+
   if (!token && to.name !== LOGIN_PAGE_NAME) {
     // 未登录且要跳转的页面不是登录页
-    if (to.name === 'register' || to.name === 'forget' || to.name === 'h5') {
+    if (to.name === 'register' || to.name === 'forget' || to.name === 'h5' || to.name === 'error') {
       turnTo(to, store.state.user.access, next)
     } else {
       next({
@@ -110,13 +111,7 @@ router.beforeEach((to, from, next) => {
               name: homeName // 跳转到homeName页
             })
           }
-        } else {
-          // 跳转失败，返回页面，后续要修改
-          location.hash = ''
-          next() // 跳转
         }
-      }).catch(err => {
-        console.log(err)
       })
     } else {
       next() // 跳转
@@ -125,7 +120,7 @@ router.beforeEach((to, from, next) => {
     // 请求操作
     getAccount(token).then(res => {
       if (res.data.code === 200) {
-        // 返回成功，重新插入数据
+        // 返回成功，重新插入数据, 在axios 拦截错误请求-10086 token过期，跳转error 或 login
         let data = res.data.data
         store.commit('setUserName', data.accountName)
         store.commit('setUserId', data.id)
@@ -168,6 +163,7 @@ router.beforeEach((to, from, next) => {
         if (res.data.code === 200) {
           // 返回成功，重新插入数据
           let data = res.data.data
+          console.log(data.token)
           store.commit('setToken', data.token)
           store.commit('setUserName', data.accountName)
           store.commit('setUserId', data.accountId)
@@ -196,10 +192,6 @@ router.beforeEach((to, from, next) => {
               name: homeName // 跳转到homeName页
             })
           }
-        } else {
-          // 跳转失败，返回页面，后续要修改
-          location.hash = ''
-          next() // 跳转
         }
       })
     } else {
@@ -208,13 +200,33 @@ router.beforeEach((to, from, next) => {
       })
     }
   } else {
-    // 当token 存在但是tab页关闭时，store中的权限已删除，所以重新清除token 在跳转到登录页
-    // if (to.name === 'error_401') {
-    //   store.commit('setToken', '')
-    //   next({
-    //     name: LOGIN_PAGE_NAME // 跳转到登录页
-    //   })
-    // }
+    // 重新获取数据
+    getAccount(token).then(res => {
+      if (res.data.code === 200) {
+        // 返回成功，重新插入数据
+        let data = res.data.data
+        store.commit('setUserName', data.accountName)
+        store.commit('setUserId', data.id)
+        store.commit('setSource', data.accountSource)
+        switch (data.accountType) {
+          case 0:
+            store.commit('setAccess', ['super_admin', 'company', 'personal'])
+            break;
+          case 1:
+            store.commit('setAccess', ['company', 'personal'])
+            break;
+          case 2:
+            store.commit('setAccess', ['personal'])
+            break;
+          default:
+            return
+        }
+        next()
+      } else {
+        // 跳转失败，返回页面
+        next() // 跳转
+      }
+    })
     if (!store.state.user.hasGetInfo) {
       turnTo(to, store.state.user.access, next)
     } else {

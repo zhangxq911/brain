@@ -49,7 +49,10 @@ export default {
     }
   },
   created() {
-    this.source = this.$store.state.user.source
+    this.source = this.$store.state.user.source ? this.$store.state.user.source : 0
+    if(window.location.search) {
+      this.source = 1
+    }
   },
   methods: {
     ...mapActions(['handleLogOut']),

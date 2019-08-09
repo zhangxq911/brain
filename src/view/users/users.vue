@@ -99,7 +99,7 @@ export default {
         {
           name: '手机号码',
           value: 'mobile'
-        },
+        }
       ],
       modal: false,
       accountForm: {
@@ -124,10 +124,14 @@ export default {
                 'div',
                 {
                   style: {
-                    color: '#2d8cf0'
+                    color: '#2d8cf0',
+                    'overflow': 'hidden',
+                    'text-overflow': 'ellipsis',
+                    'white-space': 'nowrap'
                   },
                   attrs: {
-                    class: 'hoverAccount'
+                    class: 'hoverAccount',
+                    title: params.row.id
                   },
                   on: {
                     click: () => {

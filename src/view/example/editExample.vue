@@ -990,7 +990,23 @@ export default {
           }
         },
         [
-          h('span', data.title), // + '/' + data.oid),
+          h(
+            'span',
+            {
+              props: {
+                title: data.title
+              },
+              style: {
+                overflow: 'hidden',
+                'text-overflow': 'ellipsis',
+                'white-space': 'nowrap',
+                display: 'inline-block',
+                'vertical-align': 'top',
+                width: '126px'
+              }
+            },
+            data.title
+          ), // + '/' + data.oid),
           h(
             'Dropdown',
             {
@@ -1041,7 +1057,8 @@ export default {
                     'DropdownItem',
                     {
                       props: {
-                        name: 'edit'
+                        name: 'edit',
+                        transfer: true
                       }
                       // style: {
                       //   color: '#2d8cf0'
@@ -1109,7 +1126,23 @@ export default {
                 'padding-right': '4px'
               }
             }),
-            h('span', data.title + '(' + data.vgcsTel + ')')
+            h(
+              'span',
+              {
+                props: {
+                  title: data.title + '(' + data.vgcsTel + ')'
+                },
+                style: {
+                  overflow: 'hidden',
+                  'text-overflow': 'ellipsis',
+                  'white-space': 'nowrap',
+                  display: 'inline-block',
+                  'vertical-align': 'top',
+                  width: '126px'
+                }
+              },
+              data.title + '(' + data.vgcsTel + ')'
+            )
           ]), // + '/' + data.gid),
           h(
             'Dropdown',
@@ -1161,7 +1194,8 @@ export default {
                     'DropdownItem',
                     {
                       props: {
-                        name: 'edit'
+                        name: 'edit',
+                        transfer: true
                       }
                       // style: {
                       //   color: '#2d8cf0'

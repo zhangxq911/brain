@@ -64,6 +64,15 @@ export default [
     component: () => import('@/view/h5/h5')
   },
   {
+    path: '/error',
+    name: 'error',
+    meta: {
+      title: '错误',
+      hideInMenu: true
+    },
+    component: () => import('@/view/error-page/error-token')
+  },
+  {
     path: '/main',
     name: '_home',
     redirect: '/home',
@@ -317,12 +326,12 @@ export default [
     ]
   },
   // {
-  //   path: '/401',
-  //   name: 'error_401',
+  //   path: '/error',
+  //   name: 'error',
   //   meta: {
   //     hideInMenu: true
   //   },
-  //   component: () => import('@/view/error-page/401.vue')
+  //   component: () => import('@/view/error-page/error-token.vue')
   // }
   // {
   //   path: '',
