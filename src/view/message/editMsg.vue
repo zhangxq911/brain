@@ -140,10 +140,12 @@ export default {
         return
       }
       this.disabledNew = true
+      setTimeout(() => {
+        this.disabledNew = false
+      }, 1000)
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           saveMsg(this.addForm).then(res => {
-            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -156,7 +158,6 @@ export default {
             }
           })
         }
-        this.disabledNew = false
       })
     },
     getInfo() {

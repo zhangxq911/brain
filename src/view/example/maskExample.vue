@@ -271,7 +271,7 @@
               </Select>
             </FormItem>
             <FormItem>
-              <Button type="primary" @click="updateToGroup">保存</Button>
+              <Button :disabled="disabledToGroup" type="primary" @click="updateToGroup">保存</Button>
             </FormItem>
           </Form>
         </div>
@@ -418,6 +418,7 @@ export default {
       disabledAdd: false,
       disabledOrg: false,
       disabledUser: false,
+      disabledToGroup: false,
       orgUsersData: [],
       orgUsersPage: {},
       prefix: '',
@@ -909,6 +910,9 @@ export default {
     // 添加工作组
     addWork() {
       this.disabledAdd = true
+      setTimeout(() => {
+        this.disabledAdd = false
+      }, 1000)
       let data = {
         ip: this.orgForm2.ip,
         name: this.addWorkForm.workName
@@ -916,12 +920,10 @@ export default {
       // 判断是否有选择主持人
       if (this.selectExmpArr3.length === 0) {
         this.$Message.error('请选择主持人后提交')
-        this.disabledAdd = false
         return
       }
       data.uid = this.selectExmpArr3[0].id
       addGroop(data).then(res => {
-        this.disabledAdd = false
         let result = JSON.parse(res.data.msg)
         if (result.RES === 'OK') {
           this.$refs['addWorkForm'].resetFields()
@@ -1053,6 +1055,10 @@ export default {
     },
     // 添加至工作组
     updateToGroup() {
+      this.disabledToGroup = true
+      setTimeout(() => {
+        this.disabledToGroup = false
+      }, 1000)
       let data = {
         gid: this.groupEditForm.gid,
         ip: this.orgForm2.ip,
@@ -1089,6 +1095,9 @@ export default {
     saveUser() {
       // 马上关闭弹窗，防止点击过快
       this.disabledUser = true
+      setTimeout(() => {
+        this.disabledUser = false
+      }, 1000)
       if (!this.prefix) {
         this.$Message.error('人员前缀为空不能添加！')
         return
@@ -1127,10 +1136,9 @@ export default {
             } else {
               this.$Message.error(result.REASON)
             }
-            this.disabledUser = false
           })
         } else {
-          this.disabledUser = false
+          console.log('校验失败')
         }
       })
     },
@@ -1164,6 +1172,9 @@ export default {
     // 添加部门
     saveOrg() {
       this.disabledOrg = true
+      setTimeout(() => {
+        this.disabledOrg = false
+      }, 1000)
       this.orgForm.ip = this.orgForm2.ip
       if (this.orgForm.top === 0) {
         this.orgForm.parentOid = this.orgForm2.pid
@@ -1182,10 +1193,9 @@ export default {
             } else {
               this.$Message.error(result.REASON)
             }
-            this.disabledOrg = false
           })
         } else {
-          this.disabledOrg = false
+          console.log('校验失败')
         }
       })
     },

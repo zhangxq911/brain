@@ -1,8 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'
-import { setToken } from '@/libs/util'
-import { getToken } from './util';
 // import { Spin } from 'iview'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
@@ -41,7 +39,6 @@ const getQueryStringHash = key => {
   let params = getHashParameters()
   return params[key]
 }
-
 class HttpRequest {
   constructor(baseUrl = baseURL) {
     this.baseUrl = baseUrl
@@ -65,12 +62,6 @@ class HttpRequest {
   interceptors (instance, url) {
     // 请求拦截
     instance.interceptors.request.use(config => {
-      var loginToken = ''
-      if (router.mode === 'hash') {
-        loginToken = getQueryStringHash('token')
-      } else if (router.mode === 'history') {
-        loginToken = getQueryStringHistory('token')
-      }
       // 初始化页面未加载时候，token 值为空
       if (store.state.user.token) {
         config.headers.token = store.state.user.token
@@ -96,7 +87,7 @@ class HttpRequest {
       if (res.data.code === -10086) {
         store.commit('setToken', '')
         // 判断是系统过来的还是阿里过来的，通过是否有token判断
-        var loginToken = ''
+        let loginToken = ''
         if (router.mode === 'hash') {
           loginToken = getQueryStringHash('token')
         } else if (router.mode === 'history') {
@@ -108,11 +99,6 @@ class HttpRequest {
           router.push({ name: 'login' })
         }
       }
-      // else {
-      //   if(res.data.data.token) {
-      //     store.commit('setToken', res.data.data.token)
-      //   }
-      // }
       this.destroy(url)
       const { data, status } = res
       return { data, status }

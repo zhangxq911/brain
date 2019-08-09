@@ -504,10 +504,12 @@ export default {
     // 保存
     save() {
       this.disabledNew = true
+      setTimeout(() => {
+        this.disabledNew = false
+      }, 1000)
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           addServer(this.addForm).then(res => {
-            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -522,7 +524,6 @@ export default {
         } else {
           console.log('校验失败')
         }
-        this.disabledNew = false
       })
     }
   },

@@ -259,6 +259,9 @@ export default {
     // 保存
     save() {
       this.disabledNew = true
+      setTimeout(() => {
+        this.disabledNew = false
+      }, 1000)
       let formData = new FormData()
       formData.append('file', this.file)
       formData.append('appName', this.addForm.appName)
@@ -271,7 +274,6 @@ export default {
         if (valid) {
           this.loading = true
           addApp(formData).then(res => {
-            this.disabledNew = false
             if (res.data.code === 200) {
               this.loading = false
               this.$Message.success(res.data.msg)
@@ -286,7 +288,6 @@ export default {
             }
           })
         }
-        this.disabledNew = false
       })
     },
     getInfo() {

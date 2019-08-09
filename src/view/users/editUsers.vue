@@ -554,13 +554,15 @@ export default {
     // 新增提交
     save() {
       this.disabledNew = true
+      setTimeout(() => {
+        this.disabledNew = false
+      }, 1000)
       if (this.defAccount !== 'super_admin') {
         this.addForm.userType = 0
       }
       this.$refs['addForm'].validate(valid => {
         if (valid) {
           addUser(this.addForm).then(res => {
-            this.disabledNew = false
             if (res.data.code === 200) {
               this.$Message.success(res.data.msg)
               // 重置表单
@@ -575,7 +577,6 @@ export default {
         } else {
           console.log('校验失败')
         }
-        this.disabledNew = false
       })
     },
     // 修改信息
