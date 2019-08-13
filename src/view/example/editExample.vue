@@ -630,7 +630,8 @@ export default {
       searchForm: {
         instanceId: this.id,
         ip: this.id,
-        page: 1
+        page: 1,
+        filter: 'name'
       },
       selectUserStr: '',
       serverContent2: '', // 详情、编辑实例内容
@@ -1241,7 +1242,7 @@ export default {
         this.searchForm.page = 1
         // this.searchForm.status = ''
         delete this.searchForm.status
-        delete this.searchForm.filter
+        this.searchForm.filter = 'name'
         delete this.searchForm.content
         if (this.orgList.length === 0) {
           this.getOrgLists()
@@ -1254,7 +1255,7 @@ export default {
         this.searchForm.page = 1
         // this.searchForm.status = ''
         delete this.searchForm.status
-        delete this.searchForm.filter
+        this.searchForm.filter = 'name'
         delete this.searchForm.content
         if (this.groupList.length === 0) {
           this.getGroupLists()
