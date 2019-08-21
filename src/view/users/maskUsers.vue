@@ -112,6 +112,7 @@ export default {
   props: ['basicInfo', 'editForm'],
   data() {
     return {
+      accountId: '',
       selectExmpArr2: [], // 账户
       isDisabled2: false,
       selectExmpArr: [], // 实例
@@ -424,6 +425,7 @@ export default {
     },
     getExamplePage(params = {}) {
       params ? params : (params = this.searchForm)
+      params.accountId = this.accountId
       getExampleList(params).then(res => {
         if (res.status === 200) {
           if (!res.data.data.data) {
@@ -440,7 +442,15 @@ export default {
   },
   mounted() {
     this.getAccountPage()
-    this.getExamplePage()
+  },
+  watch: {
+    editForm: {
+      deep: true,
+      handler(nv, ov) {
+        this.accountId = nv.accountId
+        this.getExamplePage()
+      }
+    }
   }
 }
 </script>

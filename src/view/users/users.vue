@@ -70,7 +70,9 @@ export default {
   data() {
     return {
       loading: false,
-      openForm: {},
+      openForm: {
+        accountId: ''
+      },
       basicInfo: {},
       searchForm: {
         page: 1,
@@ -286,6 +288,7 @@ export default {
                   on: {
                     click: () => {
                       this.openForm.id = params.row.id
+                      this.openForm.accountId = params.row.accountId
                       this.openForm.userName = params.row.userName
                       this.showMask('open', 50)
                     }
