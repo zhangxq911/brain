@@ -89,7 +89,7 @@ export default {
         },
         {
           app: 'remote',
-          name: '美播云remote',
+          name: '云上会面Remote',
           description: '远程控制，让APP使用更加方便。',
           icon: '../../assets/images/logo-remote.png',
           device: 1,
