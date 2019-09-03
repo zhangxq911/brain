@@ -52,7 +52,7 @@ export default {
                 appName = '云上会面手机版'
                 break
               case 'remote':
-                appName = '云Remote'
+                appName = '云上会面Remote'
                 break
               case 'tv':
                 appName = '云视听'

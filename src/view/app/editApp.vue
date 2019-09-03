@@ -38,7 +38,7 @@
               <Option value="gis">应急一张图</Option>
               <Option value="live">网络直播</Option>
               <Option value="meeting">云上会面手机版</Option>
-              <Option value="remote">云Remote</Option>
+              <Option value="remote">云上会面Remote</Option>
               <Option value="tv">云视听</Option>
               <Option value="livepush">直播推流</Option>
             </Select>
@@ -316,7 +316,7 @@ export default {
               this.editForm.appName = '云上会面手机版'
               break
             case 'remote':
-              this.editForm.appName = '云Remote'
+              this.editForm.appName = '云上会面Remote'
               break
             case 'tv':
               this.editForm.appName = '云视听'
