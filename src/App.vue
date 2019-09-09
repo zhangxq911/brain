@@ -171,7 +171,7 @@ body {
   height: 32px;
   line-height: 32px;
   margin-left: -12px;
-  background: #D8E1EF;
+  background: #d8e1ef;
 }
 .tree-padding {
   height: 32px;
@@ -207,7 +207,32 @@ body {
   padding-top: 6px;
   color: #969696;
 }
-.pwd-tips>span {
+.pwd-tips > span {
   color: #ed4014;
 }
+.count .date-picker .ivu-input {
+  border-radius: 32px;
+  color: #999999;
+}
+/*
+  统计分析处理tab 固定，内容可滚动
+*/
+.count .content {
+  display: flex;
+  flex-direction: column;
+}
+.count .ivu-tabs {
+  flex: 1;
+  overflow: auto;
+}
+.count .ivu-tabs-bar {
+  position: fixed;
+  margin-top: -36px;
+  // padding-top: 20px;
+  background: #fff;
+  z-index: 99;
+}
+// .count .ivu-tabs-content {
+//   // margin-top: 46px;
+// }
 </style>

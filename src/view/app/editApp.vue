@@ -67,7 +67,7 @@
               v-model="addForm.url"
               placeholder="请输入应用地址"
             ></Input>
-            <Input v-if="file !== null" :rows="7" type="textarea" v-model="file.name"></Input>
+            <Input v-else :rows="7" type="textarea" v-model="file.name"></Input>
             <Upload
               :before-upload="handleUpload"
               action
@@ -121,7 +121,7 @@
               v-model="editForm.url"
               placeholder="请输入应用地址"
             ></Input>
-            <Input v-if="file !== null" :rows="7" type="textarea" v-model="file.name"></Input>
+            <Input v-else :rows="7" type="textarea" v-model="file.name"></Input>
             <Upload
               :before-upload="handleUpload"
               action
@@ -220,9 +220,24 @@ export default {
     }
   },
   methods: {
+    changeAppName(val) {
+      // 判断处理romote, 如何是remote 地址不能修改, （弃用）
+      if (val === 'remote') {
+        this.addForm.url =
+          'http://server.m.pp.cn/download/apk?appId=8061165&custom=0&ch_src=pp_dev&ch=default'
+      } else {
+        this.addForm.url = ''
+      }
+    },
     // 上传文件前处理
     handleUpload(file) {
       this.file = file
+      // if (this.addForm.appName !== 'remote') {
+      //   this.addForm.url = file.name
+      // }
+      // if(this.editForm.appName !== '云上会面Remote') {
+      //   this.editForm.url = file.name
+      // }
       this.addForm.url = file.name
       this.rulesValidate.url[0].required = false
       return false

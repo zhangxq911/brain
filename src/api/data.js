@@ -305,6 +305,65 @@ export const getCallInfo = params => {
 }
 
 /**
+ * 统计数据
+ */
+export const getStatsCount = params => {
+  return axios.request({
+    url: '/stats/getStatsCount',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getCallLengthChart = params => {
+  return axios.request({
+    url: '/stats/getCallLengthChart',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getCallLengthData = params => {
+  return axios.request({
+    url: '/stats/getCallLengthData',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getOnlineUserChart = params => {
+  return axios.request({
+    url: '/stats/getOnlineUserChart',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getOnlineUserData = params => {
+  return axios.request({
+    url: '/stats/getOnlineUserData',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getCallApexChart = params => {
+  return axios.request({
+    url: '/stats/getCallApexChart',
+    params: params,
+    method: 'get'
+  })
+}
+
+export const getCallApexData = params => {
+  return axios.request({
+    url: '/stats/getCallApexData',
+    params: params,
+    method: 'get'
+  })
+}
+
+/**
  * 应用列表
  */
 export const getAppList = () => {
