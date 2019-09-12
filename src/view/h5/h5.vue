@@ -57,7 +57,7 @@
                   <span @click="jump(child.url)">安卓下载</span>
                 </div>
                 <div class="qr-btn" v-if="child.type === 'ios'">
-                  <Icon type="logo-ios" class="h5-icon" />
+                  <Icon type="logo-apple" class="h5-icon" />
                   <span @click="jump(child.url)">苹果下载</span>
                 </div>
               </div>
