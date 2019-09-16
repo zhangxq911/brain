@@ -223,7 +223,7 @@ body {
 }
 .count .ivu-tabs {
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
 }
 .count .ivu-tabs-bar {
   position: fixed;

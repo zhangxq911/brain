@@ -98,7 +98,7 @@ import {
   getCallApexChart,
   getCallApexData
 } from '@/api/data'
-import { parseTime } from '@/libs/tools'
+import { getDateDiff } from '@/libs/tools'
 import callTime from './callTime'
 import { log } from 'util'
 
@@ -160,13 +160,13 @@ export default {
       apexList: [],
       apexColumns: [
         {
-          title: '通话总数',
-          key: 'callCount',
+          title: '通话时间',
+          key: 'time',
           align: 'center'
         },
         {
-          title: '通话时间',
-          key: 'time',
+          title: '通话总数',
+          key: 'callCount',
           align: 'center'
         }
       ],
@@ -225,13 +225,13 @@ export default {
       userList: [],
       userColumns: [
         {
-          title: '用户数量',
-          key: 'onlineCount',
+          title: '通话时间',
+          key: 'time',
           align: 'center'
         },
         {
-          title: '通话时间',
-          key: 'time',
+          title: '用户数量',
+          key: 'onlineCount',
           align: 'center'
         }
       ],
@@ -290,13 +290,13 @@ export default {
       callTimeList: [],
       callColumns: [
         {
-          title: '通话时长',
-          key: 'length',
+          title: '通话时间',
+          key: 'time',
           align: 'center'
         },
         {
-          title: '通话时间',
-          key: 'time',
+          title: '通话时长',
+          key: 'length',
           align: 'center'
         }
       ],
@@ -362,6 +362,55 @@ export default {
     }
   },
   methods: {
+    // 计算当前时间间隔
+    timeInterval() {
+      let startTime = new Date(getDateDiff(this.searchForm[0])).getTime()
+      let endTime = new Date(getDateDiff(this.searchForm[1])).getTime()
+      if (startTime === endTime) {
+        endTime += 86400000
+      }
+      let ms = (endTime - startTime) / 288
+      return ms
+    },
+    /**
+     * 处理图数据节点，判断首尾是否要添加节点
+     */
+    handleChartData(arr) {
+      if (!arr) return
+      let startArr = arr[0][0]
+      let startTimeMs = new Date(getDateDiff(this.searchForm[0])).getTime()
+      let endArr = arr[arr.length - 1][0]
+      let endTimeMs = new Date(getDateDiff(this.searchForm[1])).getTime()
+      // 如果时间是24小时的话(昨日)，则特殊处理
+      if (startTimeMs === endTimeMs) {
+        endTimeMs += 86400000
+      }
+      let intervalMs = this.timeInterval() // 时间查询间隔 ms
+
+      if (startArr - startTimeMs > intervalMs) {
+        // 两者相差时间多于时间间隔，则前面添加两个点
+        let firstDot = [startTimeMs, 0]
+        let secondDot = [startArr - intervalMs, 0]
+        arr.unshift(secondDot)
+        arr.unshift(firstDot)
+      } else if (startArr - startTimeMs > 0) {
+        // 添加一个点
+        let firstDot = [startTimeMs, 0]
+        arr.unshift(firstDot)
+      }
+
+      if (endTimeMs - endArr > intervalMs) {
+        // 两者相差时间多于时间间隔，则后面添加两个点
+        let lastDot = [endTimeMs, 0]
+        let lastSecondDot = [endArr + intervalMs, 0]
+        arr.push(lastSecondDot)
+        arr.push(lastDot)
+      } else if (endTimeMs - endArr > 0) {
+        let lastDot = [endTimeMs, 0]
+        arr.push(lastDot)
+      }
+      return arr
+    },
     changePage(curPage) {
       this.page = curPage
       this.updateData()
@@ -481,6 +530,7 @@ export default {
               arr.push(element.callCount)
               this.apexChart.push(arr)
             })
+            this.apexChart = this.handleChartData(this.apexChart)
             this.apexOption.series[0].data = this.apexChart
           } else {
             this.apexChart = []
@@ -531,6 +581,7 @@ export default {
               arr.push(element.onlineCount)
               this.userChart.push(arr)
             })
+            this.userChart = this.handleChartData(this.userChart)
             this.userOption.series[0].data = this.userChart
           } else {
             this.userChart = []
@@ -578,10 +629,12 @@ export default {
             this.callTimeChart = []
             res.data.data.forEach(element => {
               let arr = []
-              arr.push(new Date(element.time).getTime())
+              // 2019-01-01 转 2019/01/01 兼容safari
+              arr.push(new Date(getDateDiff(element.time)).getTime())
               arr.push(element.length)
               this.callTimeChart.push(arr)
             })
+            this.callTimeChart = this.handleChartData(this.callTimeChart)
             this.callTimeOption.series[0].data = this.callTimeChart
           } else {
             this.callTimeChart = []
