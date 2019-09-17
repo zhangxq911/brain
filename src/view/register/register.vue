@@ -16,7 +16,7 @@
         <FormItem prop="accountPsw">
           <Input type="password" v-model="formData.accountPsw" placeholder="设置你的登录密码"></Input>
           <div v-show="pwdTip" class="pwd-tips">
-            <span>弱: </span>
+            <span>弱:</span>
             试试字母、数字和标点混合
           </div>
         </FormItem>
@@ -69,9 +69,9 @@ export default {
           } else if (
             !reg.test(value) ||
             value.length < 2 ||
-            value.length > 16
+            value.length > 10
           ) {
-            callback(new Error('长度为 2~16 个英文或中文字符'))
+            callback(new Error('长度为 2~10 个英文或中文字符'))
           } else {
             callback()
           }

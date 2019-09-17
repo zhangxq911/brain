@@ -211,6 +211,16 @@ export default {
       }
     }
 
+    const validateName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入服务名称'))
+      } else if (value.length < 2 || value.length > 10) {
+        callback(new Error('请输入 2~10 位字符'))
+      } else {
+        callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
+      }
+    }
+
     return {
       disabledNew: false,
       remoteType: '',
@@ -227,7 +237,7 @@ export default {
       },
       rulesValidate: {
         serverName: [
-          { required: true, message: '请输入服务名称', trigger: 'blur' }
+          { required: true, validator: validateName, trigger: 'blur' }
         ],
         serverType: [
           { required: true, message: '请选择服务类型', trigger: 'change' }

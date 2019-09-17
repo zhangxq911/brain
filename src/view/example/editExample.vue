@@ -378,8 +378,8 @@ export default {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
       if (value === undefined || value === '') {
         callback(new Error('请输入实例名称'))
-      } else if (!reg.test(value) || value.length < 2 || value.length > 32) {
-        callback(new Error('长度为 2~32 个英文或中文字符'))
+      } else if (!reg.test(value) || value.length < 2 || value.length > 10) {
+        callback(new Error('长度为 2~10 个英文或中文字符'))
       } else {
         callback() // 不管结果如何都要返回一个值，不然就一直校验中，无法提交了。
       }
@@ -390,7 +390,7 @@ export default {
       if (value === '') {
         callback(new Error('这是必填字段'))
       } else if (!reg.test(value) || value.length < 6 || value.length > 16) {
-        callback(new Error('字母开头,长度在6-16之间的字符,数字和下划线'))
+        callback(new Error('字母开头,长度在 6~16 之间的字符,数字和下划线'))
       } else {
         callback()
       }
@@ -747,7 +747,7 @@ export default {
       },
       rulesValidate2: {
         instName: [
-          { required: true, message: '请输入实例名称', trigger: 'blur' }
+          { required: true, validator: validateName, trigger: 'blur' }
         ],
         instType: [
           { required: true, message: '请选择实例类型', trigger: 'change' }

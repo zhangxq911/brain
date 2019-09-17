@@ -395,9 +395,11 @@ export default {
       }
     }
 
-    const validateName = (rule, value, callback) => {
+    const validateUserName = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入人员名称'))
+      } else if (value.length < 2 || value > 10) {
+        callback(new Error('请输入 2~10 位字符'))
       } else {
         callback()
       }
@@ -409,6 +411,26 @@ export default {
         callback(new Error('请输入人员号码'))
       } else if (!reg.test(value)) {
         callback(new Error('人员号码必须为数字'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateOrgName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入部门名称'))
+      } else if (value.length < 2 || value > 10) {
+        callback(new Error('请输入 2~10 位字符'))
+      } else {
+        callback()
+      }
+    }
+
+    const validateWorkName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入工作组名称'))
+      } else if (value.length < 2 || value > 10) {
+        callback(new Error('请输入 2~10 位字符'))
       } else {
         callback()
       }
@@ -427,9 +449,9 @@ export default {
       editWorkForm: {},
       ruleWorkForm: {
         workName: [
-          { required: true, message: '请输入工作组名称', trigger: 'blur' }
+          { required: true, validator: validateWorkName, trigger: 'blur' }
         ],
-        name: [{ required: true, message: '请输入工作组名称', trigger: 'blur' }]
+        name: [{ required: true, validator: validateWorkName, trigger: 'blur' }]
       },
       orgTree3: [],
       orgTree2: [],
@@ -440,13 +462,24 @@ export default {
         tel: ''
       },
       userValidate: {
-        tel: [{ required: true, message: '号码最大为12位', max: 12, trigger: 'blur' }],
-        name: [{ required: true, validator: validateName, trigger: 'blur' }],
+        tel: [
+          {
+            required: true,
+            message: '号码最大为12位',
+            max: 12,
+            trigger: 'blur'
+          }
+        ],
+        name: [
+          { required: true, validator: validateUserName, trigger: 'blur' }
+        ],
         phone: [{ required: true, validator: validateMobile, trigger: 'blur' }]
       },
       userValidate2: {
         // tel: [{ required: true, validator: validateTel, trigger: 'blur' }],
-        name: [{ required: true, validator: validateName, trigger: 'blur' }],
+        name: [
+          { required: true, validator: validateUserName, trigger: 'blur' }
+        ],
         phone: [{ required: true, validator: validateMobile, trigger: 'blur' }]
       },
       orgEditForm: {
@@ -456,7 +489,7 @@ export default {
         top: 0
       },
       orgEditValidate: {
-        name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
+        name: [{ required: true, validator: validateOrgName, trigger: 'blur' }]
       },
       orgForm: {
         top: this.orgForm2.pid ? 0 : 1,
@@ -464,7 +497,7 @@ export default {
       },
       showTop: this.orgForm2.pid ? true : false,
       orgValidate: {
-        name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
+        name: [{ required: true, validator: validateOrgName, trigger: 'blur' }]
       },
       selectExmpArr: [], // 选中的服务
       selectExmpArr2: [], // 选中的账户
