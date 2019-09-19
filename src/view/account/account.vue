@@ -330,7 +330,7 @@ export default {
     changePage(curPage) {
       let search = { ...this.searchForm }
       search.page = curPage
-      this.getPage(searchForm)
+      this.getPage(search)
     },
     // 获取账户列表
     getPage(params = {}) {
