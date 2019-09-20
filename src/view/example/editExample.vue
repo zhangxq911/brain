@@ -1,5 +1,6 @@
 <template>
   <div class="card-box">
+    <a class="jumpToLink" :href="baseUrl" target="_blank"></a>
     <h3 class="detailTitle" v-show="curMode !== 'view'">基本信息</h3>
     <Row>
       <!-- 查看 -->
@@ -28,7 +29,10 @@
                   <FormItem label="实例">
                     <Input :rows="7" readonly type="textarea" :value="this.serverContent2"></Input>
                   </FormItem>
-                  <FormItem label="直播管理" v-if="editForm.instType === 'live' && defAccount !== 'super_admin'">
+                  <FormItem
+                    label="直播管理"
+                    v-if="editForm.instType === 'live' && defAccount !== 'super_admin'"
+                  >
                     <a
                       class="editBtn"
                       style="padding: 0px;"
@@ -383,13 +387,14 @@ import { defaultCoreCipherList } from 'constants'
 import MaskExample from './maskExample'
 import config from '@/config'
 
-
-
 export default {
   props: ['id', 'mode'],
   components: { MaskExample },
   data() {
-    const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.livedev : config.baseUrl.livepro
+    const baseUrl =
+      process.env.NODE_ENV === 'development'
+        ? config.baseUrl.livedev
+        : config.baseUrl.livepro
 
     const validateName = (rule, value, callback) => {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
@@ -808,12 +813,11 @@ export default {
     // 跳转到直播后台管理
     jumpToLive() {
       getImbLoginUrl().then(res => {
-        let realUrl = this.baseUrl
-        if(res.data.code === 200) {
+        if (res.data.code === 200) {
           // 跳转页面
-          realUrl += '?token=' + res.data.data
-          location.href = realUrl
-        }else {
+          this.baseUrl += '?token=' + res.data.data
+          document.querySelector('.jumpToLink').click()
+        } else {
           this.$Message.error(res.data.msg)
         }
       })
