@@ -127,7 +127,7 @@ export default {
                 {
                   style: {
                     color: '#2d8cf0',
-                    'overflow': 'hidden',
+                    overflow: 'hidden',
                     'text-overflow': 'ellipsis',
                     'white-space': 'nowrap'
                   },
@@ -193,13 +193,24 @@ export default {
           width: 100,
           render: (h, params) => {
             let curStatus = params.row.status
-            if (curStatus === 1) {
-              curStatus = '正常'
+            if (curStatus === 3) {
+              curStatus = '在线'
               return h(
                 'div',
                 {
                   style: {
                     color: '#19be6b'
+                  }
+                },
+                curStatus
+              )
+            } else if (curStatus === 2) {
+              curStatus = '离线'
+              return h(
+                'div',
+                {
+                  style: {
+                    color: '#999999'
                   }
                 },
                 curStatus

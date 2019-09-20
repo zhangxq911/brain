@@ -18,7 +18,7 @@ export default {
         for (let i = 0; i < newVal.length; i++) {
           if (oldVal[i] != newVal[i]) {
             // console.log('图表更新')
-            this.dom.setOption(this.option)
+            this.dom.setOption(this.option, true)
             return
           }
         }

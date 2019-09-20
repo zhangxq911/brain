@@ -18,11 +18,13 @@ export default {
    */
   baseUrl: {
     // dev: 'https://www.easy-mock.com/mock/5add9213ce4d0e69998a6f51/iview-admin/',
-    dev: 'http://192.168.1.69:8888/access/',
-    // dev: 'https://dev.imbcloud.cn/access/',
+    // dev: 'http://192.168.1.157:8888/access/',
+    dev: 'https://dev.imbcloud.cn/access/',
     // dev: 'http://192.168.1.28:8888/access/', 
     // dev: 'http://192.168.1.14:80/',
-    pro: '/access/'
+    pro: '/access/',
+    livedev: 'http://192.168.1.84:8081', // 直播跳转根地址
+    livepro: 'https://api.imbcloud.cn'
   },
   /**
    * @description 默认打开的首页的路由name值，默认为home

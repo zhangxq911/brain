@@ -163,7 +163,6 @@ router.beforeEach((to, from, next) => {
         if (res.data.code === 200) {
           // 返回成功，重新插入数据
           let data = res.data.data
-          console.log(data.token)
           store.commit('setToken', data.token)
           store.commit('setUserName', data.accountName)
           store.commit('setUserId', data.accountId)

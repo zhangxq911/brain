@@ -28,6 +28,17 @@
                   <FormItem label="实例">
                     <Input :rows="7" readonly type="textarea" :value="this.serverContent2"></Input>
                   </FormItem>
+                  <FormItem label="直播管理" v-if="editForm.instType === 'live' && defAccount !== 'super_admin'">
+                    <a
+                      class="editBtn"
+                      style="padding: 0px;"
+                      href="javascript:void(0)"
+                      @click="jumpToLive"
+                    >
+                      直播管理
+                      <Icon type="ios-link" />
+                    </a>
+                  </FormItem>
                   <Divider dashed />
                   <FormItem label="账户名称">{{editForm.accountName }}</FormItem>
                 </Form>
@@ -365,15 +376,21 @@ import {
   delUsers,
   delGroup,
   delUserGroup,
-  ayncData
+  ayncData,
+  getImbLoginUrl
 } from '@/api/data'
 import { defaultCoreCipherList } from 'constants'
 import MaskExample from './maskExample'
+import config from '@/config'
+
+
 
 export default {
   props: ['id', 'mode'],
   components: { MaskExample },
   data() {
+    const baseUrl = process.env.NODE_ENV === 'development' ? config.baseUrl.livedev : config.baseUrl.livepro
+
     const validateName = (rule, value, callback) => {
       const reg = /^[\u4e00-\u9fa5a-zA-Z]+$/
       if (value === undefined || value === '') {
@@ -445,6 +462,7 @@ export default {
     }
 
     return {
+      baseUrl: baseUrl,
       disabledNew: false,
       loadingSync: false,
       options: {
@@ -787,6 +805,19 @@ export default {
     }
   },
   methods: {
+    // 跳转到直播后台管理
+    jumpToLive() {
+      getImbLoginUrl().then(res => {
+        let realUrl = this.baseUrl
+        if(res.data.code === 200) {
+          // 跳转页面
+          realUrl += '?token=' + res.data.data
+          location.href = realUrl
+        }else {
+          this.$Message.error(res.data.msg)
+        }
+      })
+    },
     addUserMask() {
       // 判断是否选中部门
       if (this.searchForm.oid) {

@@ -20,6 +20,16 @@ export const savePerfectInfo = data => {
 }
 
 /**
+ * 免密token跳转到直播后台管理
+ */
+export const getImbLoginUrl = () => {
+  return axios.request({
+    url: '/account/getImbLoginUrl',
+    method: 'get'
+  })
+}
+
+/**
  * 验证码获取
  */
 export const getIdentityCode = data => {

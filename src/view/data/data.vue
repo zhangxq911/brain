@@ -98,13 +98,44 @@ import {
   getCallApexChart,
   getCallApexData
 } from '@/api/data'
-import { getDateDiff } from '@/libs/tools'
+import { getDateDiff, parseTime } from '@/libs/tools'
 import callTime from './callTime'
 import { log } from 'util'
 
 export default {
   data() {
     return {
+      endDate: '',
+      xAxis24: [
+        {
+          type: 'time',
+          splitNumber: 6, // 5分钟一个
+          splitLine: {
+            show: false
+          },
+          minInterval: 1000 * 3600 * 2,
+          maxInterval: 1000 * 2 * 3600,
+          interval: 1000 * 3600 * 2,
+          axisLabel: {
+            formatter: function(value, index) {
+              // 24点的时候特殊处理
+              if (index === 12) {
+                return '24:00'
+              }
+              return parseTime(new Date(value), '{h}:{i}')
+            }
+          }
+        }
+      ],
+      xAxis: [
+        {
+          type: 'time',
+          splitLine: {
+            show: false
+          },
+          boundaryGap: false
+        }
+      ],
       apexChart: [],
       apexOption: {
         tooltip: {
@@ -375,7 +406,7 @@ export default {
     /**
      * 处理图数据节点，判断首尾是否要添加节点
      */
-    handleChartData(arr) {
+    handleChartData(arr, type) {
       if (!arr) return
       let startArr = arr[0][0]
       let startTimeMs = new Date(getDateDiff(this.searchForm[0])).getTime()
@@ -383,7 +414,10 @@ export default {
       let endTimeMs = new Date(getDateDiff(this.searchForm[1])).getTime()
       // 如果时间是24小时的话(昨日)，则特殊处理
       if (startTimeMs === endTimeMs) {
+        this[type].xAxis = this.xAxis24
         endTimeMs += 86400000
+      } else {
+        this[type].xAxis = this.xAxis
       }
       let intervalMs = this.timeInterval() // 时间查询间隔 ms
 
@@ -526,11 +560,11 @@ export default {
             this.apexChart = []
             res.data.data.forEach(element => {
               let arr = []
-              arr.push(new Date(element.callTime).getTime())
+              arr.push(new Date(getDateDiff(element.time)).getTime())
               arr.push(element.callCount)
               this.apexChart.push(arr)
             })
-            this.apexChart = this.handleChartData(this.apexChart)
+            this.apexChart = this.handleChartData(this.apexChart, 'apexOption')
             this.apexOption.series[0].data = this.apexChart
           } else {
             this.apexChart = []
@@ -577,11 +611,11 @@ export default {
             this.userChart = []
             res.data.data.forEach(element => {
               let arr = []
-              arr.push(new Date(element.time).getTime())
+              arr.push(new Date(getDateDiff(element.time)).getTime())
               arr.push(element.onlineCount)
               this.userChart.push(arr)
             })
-            this.userChart = this.handleChartData(this.userChart)
+            this.userChart = this.handleChartData(this.userChart, 'userOption')
             this.userOption.series[0].data = this.userChart
           } else {
             this.userChart = []
@@ -634,7 +668,11 @@ export default {
               arr.push(element.length)
               this.callTimeChart.push(arr)
             })
-            this.callTimeChart = this.handleChartData(this.callTimeChart)
+            this.callTimeChart = this.handleChartData(
+              this.callTimeChart,
+              'callTimeOption'
+            )
+            // this.callTimeOption.xAxis = this.xAxis24
             this.callTimeOption.series[0].data = this.callTimeChart
           } else {
             this.callTimeChart = []

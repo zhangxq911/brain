@@ -1,86 +1,84 @@
 <template>
-  <div>
-    <div class="card-box">
-      <Row style>
-        <Button v-if="defAccount === 'super_admin'" type="primary" @click="add()">新增</Button>
-        <div style="float: right; margin-bottom: -10px;">
-          <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
-            <FormItem prop="status">
-              <Select
-                @on-change="search"
-                v-model="searchForm.status"
-                style="width: 100px;"
-                placeholder="实例状态"
-              >
-                <Option value>所有状态</Option>
-                <Option :value="0">停止</Option>
-                <Option :value="1">运行</Option>
-              </Select>
-            </FormItem>
-            <FormItem prop="instType">
-              <Select
-                @on-change="search"
-                v-model="searchForm.instType"
-                style="width: 100px; "
-                placeholder="实例类型"
-              >
-                <Option value>所有类型</Option>
-                <Option value="call">远程会议</Option>
-                <Option value="gis">应急一张图</Option>
-                <Option value="live">网络直播</Option>
-              </Select>
-            </FormItem>
-            <FormItem prop="filter">
-              <Select
-                @on-change="clearSearch"
-                v-model="searchForm.filter"
-                style="width: 100px; "
-                placeholder="其他条件"
-              >
-                <Option
-                  v-for="(item, index) in filterList"
-                  :value="item.value"
-                  :key="index"
-                >{{ item.name }}</Option>
-              </Select>
-            </FormItem>
-            <FormItem prop="content">
-              <Input
-                search
-                v-model="searchForm.content"
-                placeholder="请输入搜索内容"
-                style="width: 200px; "
-                @on-search="search"
-              ></Input>
-            </FormItem>
-            <!-- <FormItem>
+  <div class="card-box">
+    <Row style>
+      <Button v-if="defAccount === 'super_admin'" type="primary" @click="add()">新增</Button>
+      <div style="float: right; margin-bottom: -10px;">
+        <Form ref="searchForm" :model="searchForm" inline @keydown.native.enter.prevent="searchN">
+          <FormItem prop="status">
+            <Select
+              @on-change="search"
+              v-model="searchForm.status"
+              style="width: 100px;"
+              placeholder="实例状态"
+            >
+              <Option value>所有状态</Option>
+              <Option :value="0">停止</Option>
+              <Option :value="1">运行</Option>
+            </Select>
+          </FormItem>
+          <FormItem prop="instType">
+            <Select
+              @on-change="search"
+              v-model="searchForm.instType"
+              style="width: 100px; "
+              placeholder="实例类型"
+            >
+              <Option value>所有类型</Option>
+              <Option value="call">远程会议</Option>
+              <Option value="gis">应急一张图</Option>
+              <Option value="live">网络直播</Option>
+            </Select>
+          </FormItem>
+          <FormItem prop="filter">
+            <Select
+              @on-change="clearSearch"
+              v-model="searchForm.filter"
+              style="width: 100px; "
+              placeholder="其他条件"
+            >
+              <Option
+                v-for="(item, index) in filterList"
+                :value="item.value"
+                :key="index"
+              >{{ item.name }}</Option>
+            </Select>
+          </FormItem>
+          <FormItem prop="content">
+            <Input
+              search
+              v-model="searchForm.content"
+              placeholder="请输入搜索内容"
+              style="width: 200px; "
+              @on-search="search"
+            ></Input>
+          </FormItem>
+          <!-- <FormItem>
               <Button type="primary" @click="search">查询</Button>
-            </FormItem>-->
-            <FormItem>
-              <Button @click="refresh">刷新</Button>
-            </FormItem>
-            <!-- <FormItem></FormItem> -->
-          </Form>
-        </div>
-      </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="dataList.data"
-        @on-sort-change="sortChange"
-      ></Table>
-      <div class="footerPage">
-        <span
-          class="pageMsg"
-        >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count ? dataList.count : 0}} 条记录。</span>
-        <Page
-          :current="dataList.pageNumber"
-          :page-size="dataList.pageSize"
-          :total="dataList.count"
-          @on-change="changePage"
-        />
+          </FormItem>-->
+          <FormItem>
+            <Button @click="refresh">刷新</Button>
+          </FormItem>
+          <!-- <FormItem></FormItem> -->
+        </Form>
       </div>
+    </Row>
+    <Table
+      :loading="loading"
+      border
+      :columns="columns"
+      :data="dataList.data"
+      @on-sort-change="sortChange"
+    ></Table>
+    <div class="footerPage">
+      <span
+        class="pageMsg"
+      >当前 {{dataList.data ? dataList.data.length : 0}} 条记录，共 {{dataList.count ? dataList.count : 0}} 条记录。</span>
+      <Page
+        :current="dataList.pageNumber"
+        :page-size="dataList.pageSize"
+        :total="dataList.count"
+        @on-change="changePage"
+      />
     </div>
   </div>
 </template>
