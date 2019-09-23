@@ -1,6 +1,6 @@
 <template>
   <div class="card-box">
-    <a class="jumpToLink" :href="baseUrl" target="_blank"></a>
+    
     <h3 class="detailTitle" v-show="curMode !== 'view'">基本信息</h3>
     <Row>
       <!-- 查看 -->
@@ -36,10 +36,11 @@
                     <a
                       class="editBtn"
                       style="padding: 0px;"
-                      href="javascript:void(0)"
-                      @click="jumpToLive"
+                      :href="realUrl"
+                      target="_blank"
                     >
                       直播管理
+                      <!-- <a :href="realUrl" target="_blank">直播管理</a> -->
                       <Icon type="ios-link" />
                     </a>
                   </FormItem>
@@ -467,6 +468,7 @@ export default {
     }
 
     return {
+      realUrl: '',
       baseUrl: baseUrl,
       disabledNew: false,
       loadingSync: false,
@@ -811,12 +813,11 @@ export default {
   },
   methods: {
     // 跳转到直播后台管理
-    jumpToLive() {
+    getJumpToken() {
       getImbLoginUrl().then(res => {
         if (res.data.code === 200) {
           // 跳转页面
-          this.baseUrl += '?token=' + res.data.data
-          document.querySelector('.jumpToLink').click()
+          this.realUrl = this.baseUrl + '?token=' + res.data.data
         } else {
           this.$Message.error(res.data.msg)
         }
@@ -1627,6 +1628,7 @@ export default {
   },
   mounted() {
     this.getInfo()
+    this.getJumpToken()
   }
 }
 </script>
