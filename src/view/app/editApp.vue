@@ -70,6 +70,7 @@
             <Input v-else :rows="7" type="textarea" v-model="file.name"></Input>
             <Upload
               :before-upload="handleUpload"
+              :on-progress="handProgress"
               action
               v-show="addForm.type === 'android'"
               class="upload-icon"
@@ -124,6 +125,7 @@
             <Input v-else :rows="7" type="textarea" v-model="file.name"></Input>
             <Upload
               :before-upload="handleUpload"
+              :on-progress="handProgress"
               action
               v-show="editForm.type === 'android'"
               class="upload-icon"
@@ -143,7 +145,11 @@
     </Row>
     <div class="mask-loading" v-show="loading">
       <div class="loading-box">
-        <Icon class="loading-btn" type="ios-loading"></Icon>
+        <progress
+          style="padding-top: 20px; font-size: 16px; color: #fff;"
+          :value="percent"
+          max="100"
+        ></progress>
         <span style="padding-top: 20px; font-size: 16px; color: #fff;">应用上传中，请稍后...</span>
       </div>
     </div>
@@ -168,6 +174,7 @@ export default {
       }
     }
     return {
+      percent: 0,
       disabledNew: false,
       loading: false,
       file: null,
@@ -228,6 +235,9 @@ export default {
       } else {
         this.addForm.url = ''
       }
+    },
+    handProgress(event) {
+      this.percent = event.percent
     },
     // 上传文件前处理
     handleUpload(file) {
@@ -401,14 +411,14 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.loading-btn {
+/* .loading-btn {
   font-size: 50px;
   color: #fff;
 }
 .loading-btn {
   -webkit-animation: myRotate 1s linear infinite;
   animation: myRotate 1s linear infinite;
-}
+} */
 @-webkit-keyframes myRotate {
   0% {
     -webkit-transform: rotate(0deg);
