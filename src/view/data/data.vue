@@ -173,7 +173,7 @@ export default {
         ],
         series: [
           {
-            name: '通话时长',
+            name: '通话总数',
             type: 'line',
             // stack: '总量',
             areaStyle: {
@@ -238,7 +238,7 @@ export default {
         ],
         series: [
           {
-            name: '通话时长',
+            name: '用户数量',
             type: 'line',
             // stack: '总量',
             areaStyle: {
