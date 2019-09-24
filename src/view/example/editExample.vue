@@ -1,6 +1,5 @@
 <template>
   <div class="card-box">
-    
     <h3 class="detailTitle" v-show="curMode !== 'view'">基本信息</h3>
     <Row>
       <!-- 查看 -->
@@ -33,12 +32,7 @@
                     label="直播管理"
                     v-if="editForm.instType === 'live' && defAccount !== 'super_admin'"
                   >
-                    <a
-                      class="editBtn"
-                      style="padding: 0px;"
-                      :href="realUrl"
-                      target="_blank"
-                    >
+                    <a class="editBtn" style="padding: 0px;" :href="realUrl" target="_blank">
                       直播管理
                       <!-- <a :href="realUrl" target="_blank">直播管理</a> -->
                       <Icon type="ios-link" />
@@ -1628,7 +1622,10 @@ export default {
   },
   mounted() {
     this.getInfo()
-    this.getJumpToken()
+    // 超级管理员角色无需获取token
+    if (this.defAccount !== 'super_admin') {
+      this.getJumpToken()
+    }
   }
 }
 </script>
