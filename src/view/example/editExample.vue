@@ -1024,7 +1024,7 @@ export default {
           h(
             'span',
             {
-              props: {
+              attrs: {
                 title: data.title
               },
               style: {
@@ -1075,6 +1075,9 @@ export default {
               h('Icon', {
                 props: {
                   type: 'ios-more'
+                },
+                attrs: {
+                  title: '更多'
                 },
                 class: 'show-more'
               }),
@@ -1160,7 +1163,7 @@ export default {
             h(
               'span',
               {
-                props: {
+                attrs: {
                   title: data.title + '(' + data.vgcsTel + ')'
                 },
                 style: {
@@ -1180,6 +1183,9 @@ export default {
             {
               props: {
                 trigger: 'click'
+              },
+              attrs: {
+                title: '更多'
               },
               style: {
                 display: 'inline-block',
