@@ -174,6 +174,16 @@ export default {
       }
     }
     return {
+      appNameObj: {
+        center: '云上会面pad版',
+        call: '远程会议',
+        gis: '应急一张图',
+        live: '网络直播',
+        meeting: '云上会面手机版',
+        remote: '云上会面Remote',
+        tv: '云视听',
+        livepush: '直播推流'
+      },
       percent: 0,
       disabledNew: false,
       loading: false,
@@ -324,33 +334,10 @@ export default {
           this.editForm = res.data.data
           let appName = res.data.data.appName
           let status = res.data.data.status
-          switch (appName) {
-            case 'center':
-              this.editForm.appName = '云上会面pad版'
-              break
-            case 'call':
-              this.editForm.appName = '远程会议'
-              break
-            case 'gis':
-              this.editForm.appName = '应急一张图'
-              break
-            case 'live':
-              this.editForm.appName = '网络直播'
-              break
-            case 'meeting':
-              this.editForm.appName = '云上会面手机版'
-              break
-            case 'remote':
-              this.editForm.appName = '云上会面Remote'
-              break
-            case 'tv':
-              this.editForm.appName = '云视听'
-              break
-            case 'livepush':
-              this.editForm.appName = '直播推流'
-              break
-            default:
-              break
+          if (this.appNameObj[appName]) {
+            this.editForm.appName = this.appNameObj[appName]
+          } else {
+            this.editForm.appName = ''
           }
 
           switch (status) {

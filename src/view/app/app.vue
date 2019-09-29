@@ -27,6 +27,16 @@ import { stat } from 'fs'
 export default {
   data() {
     return {
+      appNameObj: {
+        center: '云上会面pad版',
+        call: '远程会议',
+        gis: '应急一张图',
+        live: '网络直播',
+        meeting: '云上会面手机版',
+        remote: '云上会面Remote',
+        tv: '云视听',
+        livepush: '直播推流'
+      },
       loading: false,
       dataList: [],
       columns: [
@@ -35,34 +45,12 @@ export default {
           align: 'center',
           render: (h, params) => {
             let appName = params.row.appName
-            switch (appName) {
-              case 'center':
-                appName = '云上会面pad版'
-                break
-              case 'call':
-                appName = '远程会议'
-                break
-              case 'gis':
-                appName = '应急一张图'
-                break
-              case 'live':
-                appName = '网络直播'
-                break
-              case 'meeting':
-                appName = '云上会面手机版'
-                break
-              case 'remote':
-                appName = '云上会面Remote'
-                break
-              case 'tv':
-                appName = '云视听'
-                break
-              case 'livepush':
-                appName = '直播推流'
-                break
-              default:
-                break
+            if (this.appNameObj[appName]) {
+              appName = this.appNameObj[appName]
+            } else {
+              appName = ''
             }
+
             return h('div', [
               h(
                 'div',
