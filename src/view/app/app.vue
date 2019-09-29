@@ -57,6 +57,9 @@ export default {
               case 'tv':
                 appName = '云视听'
                 break
+              case 'livepush':
+                appName = '直播推流'
+                break
               default:
                 break
             }

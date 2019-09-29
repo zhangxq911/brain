@@ -346,6 +346,9 @@ export default {
             case 'tv':
               this.editForm.appName = '云视听'
               break
+            case 'livepush':
+              this.editForm.appName = '直播推流'
+              break
             default:
               break
           }
