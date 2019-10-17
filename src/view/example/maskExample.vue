@@ -1070,7 +1070,7 @@ export default {
         tel: this.editUserFrom.tel,
         uid: this.editUserFrom.uid,
         position: this.editUserFrom.position,
-        regPwd: this.editUserFrom.regPwd ? this.editUserFrom.regPwd : null,
+        // regPwd: this.editUserFrom.regPwd ? this.editUserFrom.regPwd : null,
         name: this.editUserFrom.name,
         phone: this.editUserFrom.phone
       }
