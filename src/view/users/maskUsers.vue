@@ -97,7 +97,11 @@
           </div>
           <div style="padding: 20px 60px;" v-show="selectExmpArr.length === 0">当前未选中任何实例</div>
           <div style="display: flex; justify-content: center;">
-            <Button :disabled="selectExmpArr.length === 0" type="primary" @click="saveExample">确定</Button>
+            <Button
+              :disabled="selectExmpArr.length === 0 || isDisabledSave"
+              type="primary"
+              @click="saveExample"
+            >确定</Button>
           </div>
         </div>
       </div>
@@ -117,6 +121,7 @@ export default {
       isDisabled2: false,
       selectExmpArr: [], // 实例
       isDisabled: false,
+      isDisabledSave: false,
       searchForm: {},
       loading: false,
       dataExampleList: [],
@@ -338,8 +343,10 @@ export default {
   },
   methods: {
     saveExample() {
+      this.isDisabledSave = true
       if (!this.selectExmpArr.length) {
         this.$Message.error('请选择实例后提交')
+        this.isDisabledSave = false
       } else {
         let data = {
           userId: this.editForm.id,
@@ -355,6 +362,7 @@ export default {
           } else {
             this.$Message.error(res.data.msg)
           }
+          this.isDisabledSave = false
         })
       }
     },
