@@ -66,6 +66,7 @@ class HttpRequest {
       if (store.state.user.token) {
         config.headers.token = store.state.user.token
       }
+      config.headers.source = 'PC'
       if (config.method === 'post' && !config.upload) {
         // 处理post 数据类型转为 formdata
         const formData = new FormData()

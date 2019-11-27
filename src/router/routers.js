@@ -207,39 +207,41 @@ export default [
     ]
   },
   {
-    path: '/app',
-    name: 'app',
+    path: '/meeting',
+    name: 'meeting',
+    divider: true,
     component: Main,
     meta: {
-      access: ['super_admin'],
       hideInBread: true
     },
     children: [
       {
-        path: 'app_page',
-        name: 'app_page',
+        path: 'meeting_page',
+        name: 'meeting_page',
         meta: {
-          icon: 'ios-apps',
-          title: '应用管理'
+          icon: 'md-calendar',
+          title: '会议预约'
         },
-        component: () => import('@/view/app/app')
+        component: () => import('@/view/meeting/meeting')
       },
       {
-        path: 'app',
-        name: 'edit_app',
+        path: 'info',
+        name: 'edit_meeting',
         props: true,
         meta: {
-          title: '新增应用',
+          icon: 'ios-paper',
+          title: '新增会议',
           hideInMenu: true,
-          to: 'app_page'
+          to: 'meeting_page'
         },
-        component: () => import('@/view/app/editApp')
+        component: () => import('@/view/meeting/editMeeting')
       }
     ]
   },
   {
     path: '/analyze',
     name: 'analyze',
+    divider: true,
     component: Main,
     meta: {
       hideInBread: true,
@@ -276,6 +278,39 @@ export default [
     ]
   },
   {
+    path: '/app',
+    name: 'app',
+    divider: true,
+    component: Main,
+    meta: {
+      access: ['super_admin'],
+      hideInBread: true
+    },
+    children: [
+      {
+        path: 'app_page',
+        name: 'app_page',
+        meta: {
+          icon: 'ios-apps',
+          title: '应用管理'
+        },
+        component: () => import('@/view/app/app')
+      },
+      {
+        path: 'app',
+        name: 'edit_app',
+        props: true,
+        meta: {
+          title: '新增应用',
+          hideInMenu: true,
+          to: 'app_page'
+        },
+        component: () => import('@/view/app/editApp')
+      }
+    ]
+  },
+
+  {
     path: '/log',
     name: 'log',
     component: Main,
@@ -287,7 +322,7 @@ export default [
         path: 'log_page',
         name: 'log_page',
         meta: {
-          icon: 'md-calendar',
+          icon: 'ios-calendar',
           title: '操作日志'
         },
         component: () => import('@/view/log/log')

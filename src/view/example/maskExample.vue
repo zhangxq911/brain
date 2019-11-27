@@ -1079,7 +1079,7 @@ export default {
         if (res.data.code === 200) {
           this.$refs['editUserFrom'].resetFields()
           this.closeMask()
-          this.$emit('refreshUser', true)
+
           this.$Message.success('编辑成功')
         } else {
           this.$Message.error(result.REASON)
@@ -1165,7 +1165,6 @@ export default {
               this.$refs['userForm'].resetFields()
               this.closeMask()
               this.$Message.success('添加成功')
-              this.$emit('refreshUser', true)
             } else {
               this.$Message.error(result.REASON)
             }
@@ -1318,6 +1317,7 @@ export default {
       this.delSelect3()
       this.basicInfo.type = 'normal'
       this.$emit('sendModal', this.basicInfo.type)
+      this.$emit('refreshUser', true)
     },
     getServicePage(params) {
       params ? params : (params = this.searchForm)

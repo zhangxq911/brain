@@ -175,9 +175,7 @@
               </div>
             </Row>
             <div style="display: flex; height: 100%;">
-              <div
-                style="width: 200px; background: #F1F3F6; padding: 0 10px; height: 100%; overflow: auto;"
-              >
+              <div class="left-content">
                 <!-- 左侧组织树 -->
                 <Tree :data="groupList" :render="renderContent2"></Tree>
               </div>
@@ -1032,8 +1030,8 @@ export default {
                 'text-overflow': 'ellipsis',
                 'white-space': 'nowrap',
                 display: 'inline-block',
-                'vertical-align': 'top',
-                width: '126px'
+                'vertical-align': 'top'
+                // width: '126px'
               }
             },
             data.title
@@ -1057,7 +1055,7 @@ export default {
                     this.$Modal.confirm({
                       title: '信息',
                       content:
-                        '<p>删除该部门会同时删除底下关联的部门结构，确定删除吗？</p>',
+                        '<p>确定删除该部门？（如果该部门有子部门和人员，则下属部门和人员都会删除）？</p>',
                       onOk: () => {
                         let params = {
                           ip: this.orgForm2.ip,
@@ -1171,8 +1169,8 @@ export default {
                   'text-overflow': 'ellipsis',
                   'white-space': 'nowrap',
                   display: 'inline-block',
-                  'vertical-align': 'top',
-                  width: '126px'
+                  'vertical-align': 'top'
+                  // width: '126px'
                 }
               },
               data.title + '(' + data.vgcsTel + ')'
@@ -1602,6 +1600,13 @@ export default {
             default:
               break
           }
+          // 超级管理员角色无需获取token，且要是直播
+          if (
+            this.defAccount !== 'super_admin' &&
+            this.editForm.instType === 'live'
+          ) {
+            this.getJumpToken()
+          }
           switch (this.editForm.status) {
             case 0:
               this.remoteStatus = '已停止'
@@ -1628,10 +1633,6 @@ export default {
   },
   mounted() {
     this.getInfo()
-    // 超级管理员角色无需获取token
-    if (this.defAccount !== 'super_admin') {
-      this.getJumpToken()
-    }
   }
 }
 </script>
@@ -1656,7 +1657,7 @@ export default {
   color: #fff;
 }
 .left-content {
-  width: 200px;
+  width: 260px;
   background: #f1f3f6;
   padding: 0 10px;
   /* max-height: 460px; */

@@ -39,6 +39,11 @@ body {
   margin: 0;
   padding: 0;
 }
+ul li {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+}
 #app {
   .size;
 }

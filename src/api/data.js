@@ -465,6 +465,40 @@ export const delMsg = data => {
 }
 
 /**
+ * 会议预约
+ */
+export const getMeetPage = params => {
+  return axios.request({
+    url: '/meeting/getMeetingPage',
+    params: params,
+    method: 'get',
+  })
+}
+
+export const addMeeting = data => {
+  return axios.request({
+    url: '/meeting/addMeeting',
+    data: data,
+    method: 'post'
+  })
+}
+
+export const getMeetInfo = params => {
+  return axios.request({
+    url: `/meeting/getMeetingInfo/${params}`,
+    method: 'get'
+  })
+}
+
+export const delMeet = data => {
+  return axios.request({
+    url: `/meeting/delMeeting/${data}`,
+    method: 'delete'
+  })
+}
+
+
+/**
  * poc接口
  */
 

@@ -385,8 +385,8 @@ export default {
     // 清空
     reset() {
       this.$refs['searchForm'].resetFields()
-      this.loading = true
-      this.getPage(this.searchForm)
+      this.searchForm.page = 1
+      this.getPage()
     },
     // 搜索
     search() {
@@ -399,8 +399,7 @@ export default {
         return
       } else {
         this.searchForm[this.searchForm.filter] = this.searchForm.content
-        this.loading = true
-        this.getPage(this.searchForm)
+        this.getPage()
       }
     },
     // 刷新
@@ -433,23 +432,20 @@ export default {
     // 排序
     sortChange(res) {
       // let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
-      let search = { ...this.searchForm }
-      search.sort = res.key + ',' + res.order
-      res.order === 'normal' ? (search.sort = '') : ''
-      this.loading = true
-      this.getPage(search)
+      this.searchForm.sort = res.key + ',' + res.order
+      res.order === 'normal' ? (this.searchForm.sort = '') : ''
+      this.searchForm.page = 1
+      this.getPage()
     },
     // 分页查询
     changePage(curPage) {
-      let search = { ...this.searchForm }
-      search.page = curPage
-      this.loading = true
-      this.getPage(search)
+      this.searchForm.page = curPage
+      this.getPage()
     },
     // 获取列表
-    getPage(params = {}) {
-      params ? params : (params = this.searchForm)
-      getUserList(params).then(res => {
+    getPage() {
+      this.loading = true
+      getUserList(this.searchForm).then(res => {
         if (res.status === 200 && res.data) {
           if (!res.data.data.data) {
             this.dataList = res.data.data
