@@ -25,7 +25,7 @@
                 <div
                   v-else
                   class="avatar"
-                  :style="{backgroundImg: `url(${editForm.hostDisplayPhoto})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}"
+                  :style="{backgroundImage: `url(http://oss.imbcloud.cn/image/${editForm.hostDisplayPhoto})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}"
                 ></div>
                 <div class="name">{{editForm.hostName}}</div>
                 <div class="org">{{editForm.hostOrganizationName}}</div>
@@ -35,7 +35,7 @@
                 <div
                   v-else
                   class="avatar"
-                  :style="{backgroundImg: `url(${item.displayPhoto})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}"
+                  :style="{backgroundImage: `url(http://oss.imbcloud.cn/image/${item.displayPhoto})`, backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat'}"
                 ></div>
                 <div class="name">{{item.name}}</div>
                 <div class="org">{{item.organizationName}}</div>
@@ -146,7 +146,7 @@ export default {
         if (res.data.code === 200) {
           this.editForm = res.data.data
           // 分享链接
-          this.shareUri = location.host + '/h5/share/' + res.data.data.accountId
+          this.shareUri = location.origin + '/h5/#/share/' + res.data.data.id
           // 处理会议时间
           let startTime = this.editForm.startTime
           let endTime = this.editForm.endTime

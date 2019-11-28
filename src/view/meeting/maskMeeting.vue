@@ -551,7 +551,7 @@ export default {
             addMeeting(data).then(res => {
               if (res.data.code === 200) {
                 this.basicInfo.type = 'success'
-                this.shareUri = location.host + '/h5/share/' + res.data.data
+                this.shareUri = location.origin + '/h5/#/share/' + res.data.data
               } else {
                 this.$Message.error(res.data.msg)
               }
