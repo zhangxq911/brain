@@ -110,7 +110,7 @@ export default [
         component: () => import('@/view/service/service')
       },
       {
-        path: 'service',
+        path: 'service/:id',
         name: 'edit_service',
         props: true,
         meta: {
@@ -142,7 +142,7 @@ export default [
         component: () => import('@/view/account/account')
       },
       {
-        path: 'info',
+        path: 'info/:id',
         name: 'edit_account',
         props: true,
         meta: {
@@ -175,7 +175,7 @@ export default [
         component: () => import('@/view/example/example')
       },
       {
-        path: 'example',
+        path: 'example/:id',
         name: 'edit_example',
         props: true,
         meta: {
@@ -225,7 +225,7 @@ export default [
         component: () => import('@/view/meeting/meeting')
       },
       {
-        path: 'info',
+        path: 'info/:id',
         name: 'edit_meeting',
         props: true,
         meta: {

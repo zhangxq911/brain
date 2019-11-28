@@ -27,6 +27,7 @@
                 <FormItem prop="startTime" label="会议时间">
                   <DatePicker
                     @on-change="changeTime"
+                    v-model="date"
                     type="datetimerange"
                     format="yyyy-MM-dd HH:mm"
                     :options="options"
@@ -55,13 +56,21 @@
           <div class="select-box">
             <div class="host">
               <div class="title">主持人</div>
-              <div class="host-content" v-if="host.id">
+              <div class="host-content" v-if="host.uid">
                 <div class="content-item">
                   <Icon @click="change2attendee()" class="del-btn" type="ios-remove-circle" />
-                  <div class="avatar" :style="avatarSelect"></div>
+                  <!-- <div class="avatar" :style="avatarSelect"></div> -->
+                  <div
+                    v-if="host.displayPhoto"
+                    class="avatar"
+                    :style="{
+                      backgroundImage: `url(http://oss.imbcloud.cn/image/${host.displayPhoto})`
+                    }"
+                  ></div>
+                  <div v-else class="avatar" :style="avatarSelect"></div>
                   <div style="padding: 0 6px;">
                     <div class="name">{{host.name}}</div>
-                    <div class="org">{{host.org}}</div>
+                    <div class="org">{{host.organizationName}}</div>
                   </div>
                 </div>
               </div>
@@ -71,23 +80,31 @@
               </div>
             </div>
             <div class="attendee">
-              <div class="title">会议成员({{participantsInfo.length ? participantsInfo.length : 0}})</div>
+              <div class="title">会议成员({{users.length ? users.length : 0}})</div>
               <div style="flex: 1; overflow: auto;">
-                <div class="host-content flex-host" v-for="item in participantsInfo" :key="item.id">
+                <div class="host-content flex-host" v-for="item in users" :key="item.uid">
                   <div class="content-item">
                     <Icon
-                      @click="removeAttendee(item.id)"
+                      @click="removeAttendee(item.uid)"
                       class="del-btn"
                       type="ios-remove-circle"
                       title="删除"
                     />
-                    <div class="avatar" :style="avatarSelect"></div>
+                    <div
+                      v-if="item.displayPhoto"
+                      class="avatar"
+                      :style="{
+                      backgroundImage: `url(http://oss.imbcloud.cn/image/${item.displayPhoto})`
+                    }"
+                    ></div>
+                    <div v-else class="avatar" :style="avatarSelect"></div>
+                    <!-- <div class="avatar" :style="avatarSelect"></div> -->
                     <div style="padding: 0 6px;">
                       <div class="name">{{item.name}}</div>
-                      <div class="org">{{item.org}}</div>
+                      <div class="org">{{item.organizationName}}</div>
                     </div>
                   </div>
-                  <div @click="change2host(item.id)" class="host-btn">申请主持人</div>
+                  <div @click="change2host(item.uid)" class="host-btn">申请主持人</div>
                 </div>
               </div>
             </div>
@@ -96,80 +113,24 @@
           <div class="select-box">
             <Input search placeholder="搜索成员名称" />
             <!-- 菜单导航 -->
-            <div class="bread">
-              <ul>
-                <li v-for="(item, index) in breadList">
-                  <Icon v-if="index" style="color: #999999;" type="ios-arrow-forward" />
-                  <a
-                    v-if="index !== breadList.length -1"
-                    href="#"
-                    @click="expendList(item.id, 1, '')"
-                  >{{item.name}}</a>
-                  <a
-                    v-if="index === breadList.length -1"
-                    style="color: #999999;"
-                    href="#"
-                  >{{item.name}}</a>
-                </li>
-              </ul>
-            </div>
-            <div style="flex: 1; overflow: auto; margin: 0 -20px;">
-              <div style="padding: 0 20px;" v-if="orgList.length > 0">
-                <ul style="margin: 0 -20px;">
-                  <li v-for="item in showList" :key="item.id">
-                    <!-- 部门类型 -->
-                    <div
-                      class="host-content"
-                      style="height: 50px;display: flex;justify-content: space-between;"
-                      @click="expendList(item.id, 0, item.name)"
-                      v-if="item.type === 0"
-                    >
-                      <div style="display: flex; align-items: center;">
-                        <div class="org-basic" :style="orgBasic" v-if="item.pid === 0"></div>
-                        <div v-else>
-                          <Icon
-                            @click.stop="selectOrg(item.id)"
-                            class="icon-select"
-                            type="ios-radio-button-off"
-                          />
-                          <!-- <Icon
-                          class="icon-select"
-                          style="color: #5B8CFF;"
-                          type="ios-checkmark-circle"
-                          />-->
-                        </div>
-                        <div class="name-content">{{item.name}}</div>
-                      </div>
-                      <Icon type="ios-arrow-forward" />
-                    </div>
-                    <!-- 人员类型 -->
-                    <div class="host-content" v-else>
-                      <Icon
-                        v-if="!isActiveItem(item.id)"
-                        @click.stop="selectItem(item.id)"
-                        class="icon-select"
-                        style="margin-right: 6px;"
-                        type="ios-radio-button-off"
-                      />
-                      <Icon
-                        v-else
-                        @click.stop="removeItem(item.id)"
-                        class="icon-select"
-                        style="margin-right: 6px;color: #5B8CFF;"
-                        type="ios-checkmark-circle"
-                      />
-                      <div class="avatar" :style="avatarSelect"></div>
-                      <div class="name-content">{{item.name}}</div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div v-else>暂无数据</div>
+            <bread @searchOid="getOidSearch" :data="breadList"></bread>
+            <!-- 部门及用户选择 -->
+            <div class="wrapper" ref="wrapper">
+              <treeList
+                @searchOid="getOidSearch"
+                @setUser="getUser"
+                @refreshSelect="findUserNum"
+                type="edit"
+                :orgData="curOrg"
+                :userData="curUser"
+                :selectData="selectData"
+                :userNum="userNum"
+              ></treeList>
             </div>
           </div>
         </div>
         <div class="footer">
-          <Button type="primary" @click="addMeet">保存</Button>
+          <Button type="primary" @click="save">保存</Button>
         </div>
       </div>
     </div>
@@ -187,7 +148,12 @@
         <div class="success-info">
           <div>
             <div class="qrcode">
-              <VueQrcode tag="img" style="padding: 26px;" :options="{ size: 126 }"></VueQrcode>
+              <VueQrcode
+                tag="img"
+                :value="shareUri"
+                style="padding: 26px;"
+                :options="{ size: 126 }"
+              ></VueQrcode>
             </div>
             <div class="qrcode-discription">手机扫码分享</div>
           </div>
@@ -202,10 +168,10 @@
           </div>
         </div>
         <div class="link">
-          <Input style="padding-right: 20px;">
+          <Input style="padding-right: 20px;" v-model="shareUri">
             <span style="padding: 0 10px; color: #999999;" slot="prepend">链接</span>
           </Input>
-          <Button type="primary">复制链接</Button>
+          <Button type="primary" v-clipboard="clipOptions">复制链接</Button>
         </div>
       </div>
     </div>
@@ -213,26 +179,36 @@
 </template>
 
 <script>
-import { getOrgList, getAllPocUser, addMeeting, getMeetInfo } from '@/api/data'
+import {
+  getOrgList,
+  getUsers,
+  addMeeting,
+  getMeetInfo,
+  updateMeeting
+} from '@/api/data'
 import { getDateDiff } from '@/libs/tools'
 import VueQrcode from '@xkeshi/vue-qrcode'
+import treeList from '_c/tree-list.vue'
+import bread from '_c/bread.vue'
+import { log } from 'util'
+import Bscroll from 'better-scroll'
 
 export default {
-  components: { VueQrcode },
+  components: { VueQrcode, treeList, bread },
   props: ['basicInfo'],
   data() {
     return {
-      default: false,
-      breadList: [{ id: 0, name: '通讯录' }], // 面包屑导航
-      showList: [], // 展示处理过后的组织和人员list
-      orgList: [], // 默认查询出来的所有组织数据
-      orgPage: {
-        count: 0,
-        pageNumber: 1,
-        pageSize: 20,
-        totalPage: 0
+      defAccount: '',
+      date: [], // 展示用显示时间
+      search: {
+        oid: '',
+        userName: '',
+        page: 1
       },
+      breadList: [], // 面包屑导航
+      orgList: [], // 默认查询出来的所有组织数据
       host: {},
+      users: [],
       avatarBasic: {
         backgroundImage:
           'url(' + require('@/assets/images/avatar-basic.png') + ')',
@@ -245,21 +221,6 @@ export default {
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 100%'
       },
-      orgBasic: {
-        backgroundImage:
-          'url(' + require('@/assets/images/org-basic.png') + ')',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '100% 100%'
-      },
-      participantsInfo: [
-        // {
-        //   id: 3,
-        //   name: '盖伦',
-        //   org: '德玛西亚',
-        //   displayPhoto: '',
-        //   type: ''
-        // }
-      ], // 已选参会人员
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000
@@ -270,7 +231,7 @@ export default {
         endTime: '',
         meetingSubject: '',
         meetingType: 0,
-        hostId: '',
+        hostTel: '',
         participantsIds: '',
         remark: ''
       },
@@ -283,7 +244,15 @@ export default {
           { required: true, message: '请选择会议时间', trigger: 'change' }
         ],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
-      }
+      },
+      curOrg: [],
+      curUser: [],
+      orgList: [], // 获取所有
+      userList: [],
+      selectData: [],
+      userNum: {},
+      shareUri: '',
+      pageSize: 20
     }
   },
   watch: {
@@ -298,48 +267,224 @@ export default {
       return val ? '语音会议' : '视频会议'
     }
   },
+  computed: {
+    clipOptions() {
+      return {
+        value: this.shareUri,
+        success: e => {
+          this.$Message.success('复制成功')
+        },
+        error: () => {
+          this.$Message.error('复制失败')
+        }
+      }
+    }
+  },
+  created() {
+    // 控制权限
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
+    }
+  },
   methods: {
-    getInfo(id) {
-      if (id === '') {
+    getInfo() {
+      if (!this.basicInfo.id) {
         return
       }
-      getMeetInfo(id).then(res => {
+      getMeetInfo(this.basicInfo.id).then(res => {
         if (res.data.code === 200) {
           this.editForm = res.data.data
+          // 时间区间处理
+          let startDate = new Date(getDateDiff(this.editForm.startTime))
+          let endDate = new Date(getDateDiff(this.editForm.endTime))
+          this.date = []
+          this.date.push(startDate)
+          this.date.push(endDate)
           this.host = {
-            id: this.editForm.hostId,
-            name: this.editForm.hostName,
-            org: this.editForm.hostOrganizationName
+            tel: res.data.data.hostTel,
+            name: res.data.data.hostName,
+            organizationName: res.data.data.hostOrganizationName,
+            uid: res.data.data.hostId,
+            displayPhoto: res.data.data.hostDisplayPhoto
           }
-          this.participantsInfo = this.editForm.participantInfoDOS
-          this.participantsInfo.forEach(item => {
-            item.id = item.uid
-            item.org = item.organizationName
-            delete item.uid
-          })
-          console.log('getMeetInfo', this.editForm)
-          // 处理会议时间
-          // let startTime = this.editForm.startTime
-          // let endTime = this.editForm.endTime
-          // let week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-          // let startDate = new Date(getDateDiff(startTime))
-          // let endDate = new Date(getDateDiff(endTime))
-          // this.meetingTime =
-          //   getDateDiff(startTime.slice(0, 10)) +
-          //   '(' +
-          //   week[startDate.getDay()] +
-          //   ')' +
-          //   startTime.substring(10, startTime.length - 3) +
-          //   ' - ' +
-          //   getDateDiff(endTime.slice(0, 10)) +
-          //   '(' +
-          //   week[endDate.getDay()] +
-          //   ')' +
-          //   endTime.substring(10, endTime.length - 3)
+          if (res.data.data.participantInfoDOS) {
+            this.users = res.data.data.participantInfoDOS
+          }
+          let tempArr = JSON.parse(JSON.stringify(this.users))
+          tempArr.push(this.host)
+          this.selectData = tempArr
         } else {
           this.$Message.error(res.data.msg)
         }
       })
+    },
+    // 获取默认组织机构（全部）
+    getOrgList() {
+      getOrgList(this.search).then(res => {
+        if (res.data.code === 200) {
+          this.orgList = this.orgList.concat(res.data.data)
+          if (res.data.data.length === 20) {
+            this.search.page++
+            this.getOrgList()
+          } else {
+            this.search.page = 1
+            this.getOrgUser()
+          }
+          res.data.data.forEach(item => {
+            if (item.parentOid === 0) {
+              this.curOrg.push(item)
+              let obj = {
+                page: 1,
+                oid: item.oid,
+                select: 0
+              }
+              this.findUserNum(obj)
+            }
+          })
+        } else {
+          this.orgList = []
+        }
+      })
+    },
+    // 获取默认人员（全部）
+    getOrgUser() {
+      getUsers(this.search).then(res => {
+        if (res.data.code === 200) {
+          // 暂时获取数据
+          if (res.data.data) {
+            this.userList = this.userList.concat(res.data.data)
+            if (res.data.data && res.data.data.length === this.pageSize) {
+              // this.userList = this.userList.concat(res.data.data);
+              this.search.page++
+              this.getOrgUser()
+            }
+          } else {
+            this.userList = []
+          }
+        } else {
+          this.userList = []
+        }
+      })
+    },
+    // 组织机构点击查询处理
+    getOidSearch(val) {
+      this.search.oid = val.oid
+      this.curOrg = []
+      this.curUser = []
+      this.userNum = {}
+      this.orgList.forEach(item => {
+        if (item.parentOid === val.oid) {
+          // 计算全部和选中的人 oid, page, select
+          let obj = {
+            page: 1,
+            oid: item.oid,
+            select: 0
+          }
+          this.findUserNum(obj)
+          this.curOrg.push(item)
+        }
+        if (item.oid === val.oid && val.type === 'join') {
+          this.breadList.push(item)
+        }
+      })
+      if (val.oid === 0) {
+        this.breadList = []
+      }
+      this.breadList.forEach((item, index) => {
+        if (item.oid === val.oid && val.type === 'back') {
+          this.breadList = this.breadList.slice(0, index + 1)
+        }
+      })
+      // 过滤用户信息
+      this.userList.forEach(item => {
+        if (item.oid === val.oid) {
+          this.curUser.push(item)
+        }
+      })
+    },
+    // 计算该部门下全部和选中的人
+    findUserNum(obj) {
+      // oid, page, select
+      let search = {
+        page: obj.page,
+        oid: obj.oid,
+        userName: ''
+      }
+      let num = obj.select
+      getUsers(search).then(res => {
+        if (res.data.code === 200) {
+          if (res.data.data) {
+            if (res.data.data.length === this.pageSize) {
+              search.page++
+              res.data.data.forEach(item => {
+                this.selectData.forEach(element => {
+                  if (item.uid === element.uid) {
+                    num++
+                  }
+                })
+              })
+              let obj = {
+                page: search.page,
+                oid: search.oid,
+                select: num
+              }
+              this.findUserNum(obj)
+            } else {
+              res.data.data.forEach(item => {
+                this.selectData.forEach(element => {
+                  if (item.uid === element.uid) {
+                    num++
+                  }
+                })
+              })
+              let temp = {
+                select: num,
+                all: res.data.data.length + (search.page - 1) * 20
+              }
+              this.$set(this.userNum, obj.oid, temp)
+            }
+          } else {
+            let temp = {
+              select: 0,
+              all: 0
+            }
+            this.$set(this.userNum, obj.oid, temp)
+          }
+        } else {
+          let temp = {
+            select: 0,
+            all: 0
+          }
+          this.$set(this.userNum, obj.oid, temp)
+        }
+      })
+    },
+    // 人员点击处理
+    getUser(obj) {
+      let hasUid = false
+      let that = this
+      this.selectData.forEach((item, index) => {
+        if (item.uid === obj.uid) {
+          this.selectData.splice(index, 1)
+          // 判断移除host 还是 users
+          that.users.forEach((item2, index) => {
+            if (item2.uid === obj.uid) {
+              that.users.splice(index2, 1)
+            }
+          })
+          if (that.host.uid === obj.uid) {
+            that.host = {}
+          }
+          hasUid = true
+        }
+      })
+      if (!hasUid) {
+        this.selectData.push(obj)
+        this.users.push(obj)
+      }
     },
     changeTime(val) {
       this.editForm.startTime = val[0]
@@ -366,13 +511,13 @@ export default {
         this.meetingTime = ''
       }
     },
-    addMeet() {
+    save() {
       this.$refs['editForm'].validate(valid => {
         if (valid) {
           // FIXME 主持人和参会人员选择状态校验
           let participantsInfoStr = ''
-          this.participantsInfo.forEach(item => {
-            participantsInfoStr += item.id + ','
+          this.users.forEach(item => {
+            participantsInfoStr += item.tel + ','
           })
           if (participantsInfoStr.length > 0) {
             participantsInfoStr = participantsInfoStr.substring(
@@ -381,183 +526,101 @@ export default {
             )
           }
           let data = JSON.parse(JSON.stringify(this.editForm))
-          data.participantsIds = participantsInfoStr
-          data.hostId = this.host.id ? this.host.id : ''
-          data.startTime = new Date(this.editForm.startTime)
-          data.endTime = new Date(this.editForm.endTime)
-          addMeeting(data).then(res => {
-            if (res.data.code === 200) {
-              this.basicInfo.type = 'success'
-            } else {
-              this.$Message.error(res.data.msg)
-            }
-          })
+          data.participantsTels = participantsInfoStr
+          data.hostTel = this.host.tel ? this.host.tel : ''
+          data.startTime = new Date(getDateDiff(this.editForm.startTime))
+          data.endTime = new Date(getDateDiff(this.editForm.endTime))
+          // 判断 主持人和参会人员是否为空
+          if (!data.hostTel || !data.participantsTels.length) {
+            this.$Message.error('请填写完整信息！')
+            return false
+          }
+          if (this.basicInfo.type === 'editMeeting') {
+            // 修改
+            data.meetingId = data.id
+            updateMeeting(data).then(res => {
+              if (res.data.code === 200) {
+                this.$Message.success(res.data.msg)
+                this.closeMask()
+              } else {
+                this.$Message.error(res.data.msg)
+              }
+            })
+          } else {
+            // 新增
+            addMeeting(data).then(res => {
+              if (res.data.code === 200) {
+                this.basicInfo.type = 'success'
+                this.shareUri = location.host + '/h5/share/' + res.data.data
+              } else {
+                this.$Message.error(res.data.msg)
+              }
+            })
+          }
         }
       })
     },
-    isActiveItem(id) {
-      if (this.host.id === id) {
-        return true
-      }
-      for (let i = 0; i < this.participantsInfo.length; i++) {
-        if (this.participantsInfo[i].id === id) {
-          return true
+    removeAttendee(uid) {
+      this.selectData.forEach((item, index) => {
+        if (item.uid === uid) {
+          this.selectData.splice(index, 1)
         }
-      }
-      return false
-    },
-    removeAttendee(id) {
-      this.participantsInfo.forEach((item, index) => {
-        if (item.id === id) {
-          this.participantsInfo.splice(index, 1)
+      })
+      this.users.forEach((item, index) => {
+        if (item.uid === uid) {
+          this.users.splice(index, 1)
         }
       })
     },
-    change2host(id) {
+    change2host(uid) {
       // 判断是否有主持人
-      if (this.host.id) {
+      if (this.host.uid) {
         this.$Message.warning('当前已存在主持人')
         return
       }
-      this.participantsInfo.forEach((item, index) => {
-        if (item.id === id) {
+      this.selectData.forEach((item, index) => {
+        if (item.uid === uid) {
           this.host = item
-          this.participantsInfo.splice(index, 1)
+          this.users.splice(index, 1)
         }
       })
     },
     change2attendee() {
-      this.participantsInfo.push(this.host)
+      this.users.push(this.host)
       this.host = {}
-    },
-    selectOrg(id) {
-      console.log('当前选择的部门id', id)
-      // 通过这个id 查找所有user
-    },
-    selectItem(id) {
-      // 选择参会人员
-      this.showList.forEach(item => {
-        if (item.id === id) {
-          this.participantsInfo.push(item)
-        }
-      })
-    },
-    removeItem(id) {
-      //移除参会人员
-      this.participantsInfo.forEach((item, index) => {
-        if (item.id === id) {
-          this.participantsInfo.splice(index, 1)
-        }
-      })
-    },
-    // 展开次级菜单
-    expendList(id, type, name) {
-      // type 0 菜单中部门选择 type 1 面包屑选择
-      if (type !== 0 && type !== 1) {
-        this.$Message.error('expendList方法未获取正确的type')
-        return
-      }
-
-      // 处理面包屑
-      if (!type) {
-        this.breadList.push({ id: id, name: name })
-      } else {
-        let realIndex = -1
-        this.breadList.forEach((item, index) => {
-          if (item.id === id) {
-            realIndex = index
-          }
-        })
-        this.breadList.length = realIndex + 1
-      }
-
-      this.showList = []
-
-      // 面包屑导航id传值为0时，处理菜单为默认列表
-      if (id === 0) {
-        this.defalutOrgList(this.orgList)
-        return
-      }
-      // 其他情况时处理
-      this.orgList.forEach(item => {
-        if (item.parentOid === id) {
-          let tempObj = {
-            id: item.oid,
-            pid: item.parentOid,
-            name: item.name,
-            type: 0
-          }
-          this.showList.push(tempObj)
-        }
-      })
-      this.getUser(id)
-    },
-    // 点击部门查询人员
-    getUser(id) {
-      this.orgPage.oid = id
-      getAllPocUser(this.orgPage).then(res => {
-        if (!res.data.data.data) {
-          return
-        }
-        res.data.data.data.forEach(item => {
-          let tempObj = {
-            id: item.uid,
-            name: item.name,
-            type: 1,
-            displayPhoto: item.displayPhoto,
-            org: this.breadList[this.breadList.length - 1].name
-          }
-          this.showList.push(tempObj)
-        })
-      })
     },
     closeMask() {
       // 清空表单
       this.$refs['editForm'].resetFields()
-      this.expendList(0, 1, '')
       this.editForm.meetingType = 0
       this.host = {}
-      this.participantsInfo = []
-      // this.participantsIds
-      // this.defalutOrgList(this.orgList)
+      this.users = []
+      this.selectData = []
       this.basicInfo.type = 'normal'
       this.$emit('resetPage', true)
       this.$emit('sendModal', this.basicInfo.type)
-    },
-    // 组织菜单数据
-    getOrgLists() {
-      getOrgList().then(res => {
-        if (res.data.code === 200) {
-          if (!res.data.data) {
-            return
-          }
-          this.orgList = res.data.data
-          // 处理默认展现的组织结构数据
-          this.defalutOrgList(this.orgList)
-        }
-      })
-    },
-    defalutOrgList(data) {
-      data.forEach(item => {
-        if (item.parentOid === 0) {
-          let tempObj = {
-            id: item.oid,
-            pid: item.parentOid,
-            name: item.name,
-            type: 0 // 0 为组织， 1为人员
-          }
-          this.showList.push(tempObj)
-        }
-      })
     }
   },
   mounted() {
-    this.getOrgLists()
+    this.$nextTick(() => {
+      this.scroll = new Bscroll(this.$refs.wrapper, {
+        click: false,
+        mouseWheel: true
+      })
+    })
+    if (this.defAccount === 'unit') {
+      this.getOrgList()
+    }
   }
 }
 </script>
 
 <style scoped>
+.wrapper {
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
 .mask-content {
   display: flex;
   flex-direction: column;
@@ -605,6 +668,8 @@ export default {
 .select-box .avatar {
   width: 38px;
   height: 38px;
+  border-radius: 100%;
+  background-size: 100%;
 }
 .select-box .host-content {
   display: flex;

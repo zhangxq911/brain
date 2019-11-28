@@ -483,6 +483,14 @@ export const addMeeting = data => {
   })
 }
 
+export const updateMeeting = data => {
+  return axios.request({
+    url: `/meeting/updateMeeting/${data.id}`,
+    data: data,
+    method: 'put'
+  })
+}
+
 export const getMeetInfo = params => {
   return axios.request({
     url: `/meeting/getMeetingInfo/${params}`,
@@ -497,6 +505,13 @@ export const delMeet = data => {
   })
 }
 
+export const getUsers = params => {
+  return axios.request({
+    url: "/pocuser/getPocUserPageInfo",
+    params: params,
+    method: "get"
+  });
+};
 
 /**
  * poc接口

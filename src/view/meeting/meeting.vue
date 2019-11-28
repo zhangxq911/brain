@@ -1,7 +1,7 @@
 <template>
   <div class="card-box">
     <Row>
-      <Button type="primary" @click="showMask('addMeeting', 50)">会议预约</Button>
+      <Button v-if="defAccount === 'unit'" type="primary" @click="showMask('addMeeting', 50)">会议预约</Button>
       <div style="float: right; margin-bottom: -10px;">
         <Form ref="searchForm" :model="searchForm" inline>
           <FormItem>
@@ -99,6 +99,7 @@ export default {
   components: { MaskMeeting },
   data() {
     return {
+      defAccount: '',
       loading: false,
       searchForm: {
         page: 1,
@@ -115,11 +116,11 @@ export default {
         {
           name: '会议主题',
           value: 'meetingSubject'
-        },
-        {
-          name: '主持人',
-          value: 'hostName'
         }
+        // {
+        //   name: '主持人',
+        //   value: 'hostName'
+        // }
       ],
       dataList: {},
       columns: [
@@ -270,54 +271,94 @@ export default {
           align: 'center',
           width: 140,
           render: (h, params) => {
-            return h('div', [
-              h(
-                'Button',
-                {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    margin: '4px'
-                  },
-                  on: {
-                    click: () => {
-                      this.showMask('editMeeting', 50, params.row.id)
+            if (this.defAccount === 'super_admin') {
+              return h('div', [
+                h(
+                  'Button',
+                  {
+                    props: {
+                      type: 'error',
+                      size: 'small'
+                    },
+                    style: {
+                      margin: '4px'
+                    },
+                    on: {
+                      click: () => {
+                        this.$Modal.confirm({
+                          title: '信息',
+                          content: `<p>确认删除 ${params.row.meetingSubject} 吗？</p>`,
+                          onOk: () => {
+                            this.delete(params.row.id)
+                          }
+                        })
+                      }
                     }
-                  }
-                },
-                '编辑'
-              ),
-              h(
-                'Button',
-                {
-                  props: {
-                    type: 'error',
-                    size: 'small'
                   },
-                  style: {
-                    margin: '4px'
-                  },
-                  on: {
-                    click: () => {
-                      this.$Modal.confirm({
-                        title: '信息',
-                        content: `<p>确认删除 ${params.row.meetingSubject} 吗？</p>`,
-                        onOk: () => {
-                          this.delete(params.row.id)
-                        }
-                      })
+                  '删除'
+                )
+              ])
+            } else if (this.defAccount === 'unit') {
+              return h('div', [
+                h(
+                  'Button',
+                  {
+                    props: {
+                      type: 'primary',
+                      size: 'small'
+                    },
+                    style: {
+                      margin: '4px'
+                    },
+                    on: {
+                      click: () => {
+                        this.showMask('editMeeting', 50, params.row.id)
+                      }
                     }
-                  }
-                },
-                '删除'
-              )
-            ])
+                  },
+                  '编辑'
+                ),
+                h(
+                  'Button',
+                  {
+                    props: {
+                      type: 'error',
+                      size: 'small'
+                    },
+                    style: {
+                      margin: '4px'
+                    },
+                    on: {
+                      click: () => {
+                        this.$Modal.confirm({
+                          title: '信息',
+                          content: `<p>确认删除 ${params.row.meetingSubject} 吗？</p>`,
+                          onOk: () => {
+                            this.delete(params.row.id)
+                          }
+                        })
+                      }
+                    }
+                  },
+                  '删除'
+                )
+              ])
+            } else {
+              return {}
+            }
           }
         }
       ],
       basicInfo: {}
+    }
+  },
+  created() {
+    // 控制权限
+    let access = this.$store.state.user.access
+    if (access.includes('super_admin')) {
+      this.defAccount = 'super_admin'
+    } else if (access.includes('company') || access.includes('personal')) {
+      this.defAccount = 'unit'
     }
   },
   methods: {
@@ -350,7 +391,6 @@ export default {
       } else {
         this.searchForm[this.searchForm.filter] = this.searchForm.content
         this.loading = true
-        console.log('search', this.searchForm)
         this.getPage(this.searchForm)
       }
     },
@@ -400,7 +440,6 @@ export default {
       this.getPage(search)
     },
     showMask(type, width, id) {
-      console.log('showmask', type, id)
       // 新增要填写基本信息后才能选择，否则选择页面相关字段为空值
       this.basicInfo = {
         type: type,

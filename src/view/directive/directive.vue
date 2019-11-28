@@ -6,7 +6,7 @@
           <Row>
             <i-col span="8">
               <Button type="primary" @click="showModal">显示可拖动弹窗</Button>
-              <br/>
+              <br />
               <Button v-draggable="buttonOptions" class="draggable-btn">这个按钮也是可以拖动的</Button>
             </i-col>
             <i-col span="16">
@@ -23,9 +23,7 @@
           </Row>
         </Card>
       </i-col>
-      <Modal v-draggable="options" v-model="modalVisible">
-        拖动这里即可拖动整个弹窗
-      </Modal>
+      <Modal v-draggable="options" v-model="modalVisible">拖动这里即可拖动整个弹窗</Modal>
     </Row>
     <Row style="margin-top: 10px;">
       <i-col>
@@ -39,10 +37,8 @@
             <i-col span="16">
               <div class="intro-con">
                 &lt;Input style="width: 60%" v-model="inputValue"&gt;
-                  <br/>
-                  &nbsp;&nbsp;&nbsp;&lt;Button slot="append" v-clipboard="clipOptions"&gt;copy&lt;/Button&gt;
-                  <br/>
-                &lt;/Input&gt;
+                <br />&nbsp;&nbsp;&nbsp;&lt;Button slot="append" v-clipboard="clipOptions"&gt;copy&lt;/Button&gt;
+                <br />&lt;/Input&gt;
                 <pre class="code-con">
     clipOptions: {
       value: this.inputValue,
@@ -59,9 +55,7 @@
           </Row>
         </Card>
       </i-col>
-      <Modal v-draggable="options" v-model="modalVisible">
-        拖动这里即可拖动整个弹窗
-      </Modal>
+      <Modal v-draggable="options" v-model="modalVisible">拖动这里即可拖动整个弹窗</Modal>
     </Row>
   </div>
 </template>
@@ -69,7 +63,7 @@
 <script>
 export default {
   name: 'directive_page',
-  data () {
+  data() {
     return {
       modalVisible: false,
       options: {
@@ -86,10 +80,10 @@ export default {
     }
   },
   computed: {
-    clipOptions () {
+    clipOptions() {
       return {
         value: this.inputValue,
-        success: (e) => {
+        success: e => {
           this.$Message.success('复制成功')
         },
         error: () => {
@@ -99,7 +93,7 @@ export default {
     }
   },
   methods: {
-    showModal () {
+    showModal() {
       this.modalVisible = true
     }
   }
@@ -107,15 +101,15 @@ export default {
 </script>
 
 <style>
-.intro-con{
+.intro-con {
   min-height: 140px;
 }
-.draggable-btn{
+.draggable-btn {
   margin-top: 20px;
 }
-.code-con{
+.code-con {
   width: 400px;
-  background: #F9F9F9;
+  background: #f9f9f9;
   padding-top: 10px;
 }
 </style>
