@@ -111,11 +111,11 @@
           </div>
           <!-- 右侧组织树 -->
           <div class="select-box">
-            <Input search placeholder="搜索成员名称" />
+            <Input search v-model="searchName" placeholder="搜索成员名称" />
             <!-- 菜单导航 -->
-            <bread @searchOid="getOidSearch" :data="breadList"></bread>
+            <bread v-show="isOrg" @searchOid="getOidSearch" :data="breadList"></bread>
             <!-- 部门及用户选择 -->
-            <div class="wrapper" ref="wrapper">
+            <div v-show="isOrg" class="wrapper" ref="wrapper">
               <treeList
                 @searchOid="getOidSearch"
                 @setUser="getUser"
@@ -127,6 +127,34 @@
                 :userNum="userNum"
               ></treeList>
             </div>
+            <div v-show="!isOrg && !tempUser.length" class="miss">
+              找不到关于
+              <span>“{{ searchName }}”</span>
+              的联系人
+            </div>
+            <div class="card clearborder wrapper" v-show="!isOrg" ref="wrapper2">
+              <treeList
+                @searchOid="getOidSearch"
+                @setUser="getUser"
+                type="view"
+                :orgData="[]"
+                :userData="tempUser"
+                :selectData="selectData"
+              ></treeList>
+            </div>
+            <!-- </div>
+            <div v-if="!isOrg" class="wrapper" ref="wrapper2">
+              <treeList
+                @searchOid="getOidSearch"
+                @setUser="getUser"
+                @refreshSelect="findUserNum"
+                type="edit"
+                :orgData="[]"
+                :userData="curUser"
+                :selectData="selectData"
+                :userNum="userNum"
+              ></treeList>
+            </div>-->
           </div>
         </div>
         <div class="footer">
@@ -198,6 +226,8 @@ export default {
   props: ['basicInfo'],
   data() {
     return {
+      timeout: null,
+      searchName: '',
       defAccount: '',
       date: [], // 展示用显示时间
       search: {
@@ -252,7 +282,9 @@ export default {
       selectData: [],
       userNum: {},
       shareUri: '',
-      pageSize: 20
+      pageSize: 20,
+      isOrg: true,
+      tempUser: [] // 存放名称搜索
     }
   },
   watch: {
@@ -260,6 +292,30 @@ export default {
       if (this.basicInfo.type === 'editMeeting') {
         this.getInfo(this.basicInfo.id)
       }
+    },
+    searchName: {
+      handler(curVal) {
+        clearTimeout(this.timeout)
+        // 设置延时300ms查询
+        this.timeout = setTimeout(() => {
+          // 判断是否为空
+          if (curVal) {
+            this.isOrg = false
+            this.search = {
+              page: 1,
+              userName: curVal,
+              oid: ''
+            }
+            this.tempUser = []
+            this.searchUser()
+          } else {
+            this.isOrg = true
+            this.tempUser = []
+          }
+          // curVal ? (this.isOrg = false) : (this.isOrg = true);
+        }, 300)
+      },
+      deep: true
     }
   },
   filters: {
@@ -290,6 +346,23 @@ export default {
     }
   },
   methods: {
+    searchUser() {
+      getUsers(this.search).then(res => {
+        if (res.data.code === 200) {
+          if (res.data.data) {
+            this.tempUser = this.tempUser.concat(res.data.data)
+          } else if (res.data.data && res.data.data.length === 20) {
+            this.tempUser = this.tempUser.concat(res.data.data)
+            this.search.page++
+            this.searchUser()
+          } else {
+            this.tempUser = []
+          }
+        } else {
+          this.tempUser = []
+        }
+      })
+    },
     getInfo() {
       if (!this.basicInfo.id) {
         return
@@ -470,7 +543,7 @@ export default {
         if (item.uid === obj.uid) {
           this.selectData.splice(index, 1)
           // 判断移除host 还是 users
-          that.users.forEach((item2, index) => {
+          that.users.forEach((item2, index2) => {
             if (item2.uid === obj.uid) {
               that.users.splice(index2, 1)
             }
@@ -607,6 +680,10 @@ export default {
         click: false,
         mouseWheel: true
       })
+      this.scroll2 = new Bscroll(this.$refs.wrapper2, {
+        click: false,
+        mouseWheel: true
+      })
     })
     if (this.defAccount === 'unit') {
       this.getOrgList()
@@ -615,7 +692,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .wrapper {
   flex: 1;
   overflow: hidden;
@@ -800,5 +877,13 @@ export default {
   display: flex;
   justify-content: center;
   padding: 60px 80px;
+}
+.miss {
+  color: #999;
+  text-align: center;
+  padding: 20px 0;
+  span {
+    color: #333;
+  }
 }
 </style>
