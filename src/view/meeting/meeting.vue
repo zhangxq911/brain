@@ -166,7 +166,7 @@ export default {
         {
           title: '会议时间',
           align: 'center',
-          width: 190,
+          // width: 190,
           // sortable: 'custom',
           key: 'startTime',
           render: (h, params) => {
@@ -195,6 +195,7 @@ export default {
           align: 'center',
           sortable: 'custom',
           key: 'meetingType',
+          width: 120,
           render: (h, params) => {
             let val = params.row.meetingType
             switch (val) {
@@ -215,6 +216,7 @@ export default {
           align: 'center',
           sortable: 'custom',
           key: 'meetingState',
+          width: 120,
           render: (h, params) => {
             let val = params.row.meetingState
             switch (val) {
