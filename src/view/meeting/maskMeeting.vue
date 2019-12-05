@@ -621,6 +621,12 @@ export default {
             })
           } else {
             // 新增
+            // 开始时间为当前时间后五分钟
+            let now = new Date().getTime()
+            if (data.startTime.getTime() < now + 30000) {
+              this.$Message.error('会议开始时间最早为5分钟后')
+              return false
+            }
             addMeeting(data).then(res => {
               if (res.data.code === 200) {
                 this.basicInfo.type = 'success'
