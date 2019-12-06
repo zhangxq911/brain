@@ -223,10 +223,10 @@ export default {
               case 0:
                 val = '预约中'
                 break
-              case 'gis':
+              case 1:
                 val = '进行中'
                 break
-              case 'live':
+              case 2:
                 val = '已结束'
                 break
               default:
