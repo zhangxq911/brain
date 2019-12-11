@@ -672,6 +672,7 @@ export default {
       // 清空表单
       this.$refs['editForm'].resetFields()
       this.editForm.meetingType = 0
+      this.date = []
       this.host = {}
       this.users = []
       this.selectData = []
