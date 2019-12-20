@@ -214,11 +214,10 @@ import {
   getMeetInfo,
   updateMeeting
 } from '@/api/data'
-import { getDateDiff } from '@/libs/tools'
+import { getDateDiff, parseTime } from '@/libs/tools'
 import VueQrcode from '@xkeshi/vue-qrcode'
 import treeList from '_c/tree-list.vue'
 import bread from '_c/bread.vue'
-import { log } from 'util'
 import Bscroll from 'better-scroll'
 
 export default {
@@ -343,6 +342,14 @@ export default {
       this.defAccount = 'super_admin'
     } else if (access.includes('company') || access.includes('personal')) {
       this.defAccount = 'unit'
+    }
+    // 创建会议预约时，设置默认时间为当前时间
+    if (!this.basicInfo.id) {
+      let now = new Date().getTime() + 300000
+      now = parseTime(now, '{y}-{m}-{d} {h}:{i}')
+      this.editForm.startTime = now
+      this.editForm.endTime = now
+      this.date = [now, now]
     }
   },
   methods: {
