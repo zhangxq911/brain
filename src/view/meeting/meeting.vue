@@ -160,7 +160,6 @@ export default {
         {
           title: '主持人',
           align: 'center',
-          sortable: 'custom',
           key: 'hostName'
         },
         {
@@ -427,7 +426,6 @@ export default {
         .catch(err => this.$Message.error(err))
     },
     sortChange(res) {
-      // FIXME： 后端未支持
       let key = res.key.replace(/([A-Z])/g, '_$1').toLowerCase()
       let search = { ...this.searchForm }
       search.sort = key + ',' + res.order
