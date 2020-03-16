@@ -19,6 +19,12 @@
               />
               <img
                 style="width: 100%; height: 100%;"
+                src="../../assets/images/logo-meetinghd.png"
+                v-if="item.app === 'centerhd'"
+                alt="图标"
+              />
+              <img
+                style="width: 100%; height: 100%;"
                 src="../../assets/images/logo-remote.png"
                 v-if="item.app === 'remote'"
                 alt="图标"
@@ -85,6 +91,14 @@ export default {
           description: '随时随地进行高清视频通话、视频会议、多人聊天。',
           icon: '../../assets/images/logo-call.png',
           device: 1, // 1 两个 2 android 3 ios
+          child: []
+        },
+        {
+          app: 'centerhd',
+          name: '云上会面HD',
+          description: '随时随地进行高清视频通话、视频会议、多人聊天。',
+          icon: '../../assets/images/logo-call.png',
+          device: 2, // 1 两个 2 android 3 ios
           child: []
         },
         {

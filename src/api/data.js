@@ -1,5 +1,5 @@
 import axios from '@/libs/api.request'
-// import store from '@/store'
+import store from '@/store'
 
 export const getCard = () => {
   return axios.request({
@@ -388,7 +388,14 @@ export const addApp = data => {
     url: '/app/versions',
     data: data,
     method: 'post',
-    upload: true
+    upload: true,
+    onUploadProgress: (progressEvent) => {
+      // 使用本地 progress 事件
+      if (progressEvent.lengthComputable) {
+        let num = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+        store.commit('setUploadProgress', num)
+      }
+    }
   })
 }
 

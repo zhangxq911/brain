@@ -34,6 +34,7 @@
           <FormItem prop="appName" label="应用名称">
             <Select v-model="addForm.appName">
               <Option value="center">云上会面pad版</Option>
+              <Option value="centerhd">云上会面HD</Option>
               <Option value="call">远程会议</Option>
               <Option value="gis">应急一张图</Option>
               <Option value="live">网络直播</Option>
@@ -147,9 +148,11 @@
       <div class="loading-box">
         <progress
           style="padding-top: 20px; font-size: 16px; color: #fff;"
-          :value="percent"
+          :value="getProgress"
           max="100"
         ></progress>
+        <!-- <Progress :percent="uploadProgress" :stroke-width="20" status="active" /> -->
+
         <span style="padding-top: 20px; font-size: 16px; color: #fff;">应用上传中，请稍后...</span>
       </div>
     </div>
@@ -159,6 +162,7 @@
 <script>
 import { addApp, getAppInfo, putApp } from '@/api/data'
 import { stat } from 'fs'
+import { log } from 'util'
 
 export default {
   props: ['id', 'mode'],
@@ -176,6 +180,7 @@ export default {
     return {
       appNameObj: {
         center: '云上会面pad版',
+        centerhd: '云上会面HD',
         call: '远程会议',
         gis: '应急一张图',
         live: '网络直播',
@@ -236,9 +241,15 @@ export default {
       }
     }
   },
+  computed: {
+    // 提交后显示进度
+    getProgress() {
+      return this.$store.state.app.uploadProgress
+    }
+  },
   methods: {
+    // 判断处理romote, 如何是remote 地址不能修改, （弃用）
     changeAppName(val) {
-      // 判断处理romote, 如何是remote 地址不能修改, （弃用）
       if (val === 'remote') {
         this.addForm.url =
           'http://server.m.pp.cn/download/apk?appId=8061165&custom=0&ch_src=pp_dev&ch=default'
@@ -247,19 +258,14 @@ export default {
       }
     },
     handProgress(event) {
+      this.loading = true
+      debugger
       this.percent = event.percent
     },
     // 上传文件前处理
     handleUpload(file) {
       this.file = file
-      // if (this.addForm.appName !== 'remote') {
-      //   this.addForm.url = file.name
-      // }
-      // if(this.editForm.appName !== '云上会面Remote') {
-      //   this.editForm.url = file.name
-      // }
       this.addForm.url = file.name
-      this.rulesValidate.url[0].required = false
       return false
     },
     // 更新
@@ -361,6 +367,9 @@ export default {
   },
   mounted() {
     this.getInfo()
+    // 每次加载组件时重置上传进度
+    this.$store.commit('setUploadProgress', 0)
+    this.percent = this.$store.state.app.uploadProgress
   }
 }
 </script>

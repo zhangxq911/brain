@@ -29,6 +29,7 @@ export default {
     return {
       appNameObj: {
         center: '云上会面pad版',
+        centerhd: '云上会面HD',
         call: '远程会议',
         gis: '应急一张图',
         live: '网络直播',
